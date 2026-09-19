@@ -1,0 +1,253 @@
+# Scenario Run Results
+# Generated: 2026-09-18 19:59:05 AEST
+# Command:   uv run plant-poc run-batch --scenario all
+# Models:    qwen2.5:latest + nomic-embed-text (Ollama)
+#
+
+################################################################################
+  RUNNING ALL SCENARIOS IN SEQUENCE
+################################################################################
+
+================================================================================
+  SCENARIO: health_status_change (health_status_change.json)
+  Health status flips from healthy to possibly_unhealthy (expected: CARE_ADVICE_REQUIRED)
+================================================================================
+
+  [Day 1] Timestamp: 2026-09-01 10:00:00Z
+  • Observation: status=healthy (conf=0.95) | no symptoms
+  • Trigger:     [NO_ACTION] — Baseline observation recorded as healthy with no symptoms.
+  • Notice:      No action needed. Plant is steady or improving.
+
+  [Day 2] Timestamp: 2026-09-02 10:00:00Z
+  • Observation: status=possibly_unhealthy (conf=0.89) | no symptoms
+  • Trigger:     [CARE_ADVICE_REQUIRED] — Health status worsened from healthy to possibly_unhealthy.
+  • Care Plan:   Assessment: "The possible unhealthy state of Monty could be due to a temporary environmental factor or minor adjustment needed in care practices. Given the recent transition, it is likely related to soil moisture and drainage issues." (conf=0.85)
+    Actions:
+      [1] Check if the soil has been too wet recently and ensure that drainage holes are not blocked.
+      [2] Verify that Monty is receiving adequate bright indirect light, as insufficient light can also cause yellowing leaves over time.
+
+  • Companion Output:
+    Hey there! Here's an update on Monty:
+    The possible unhealthy state of Monty could be due to a temporary environmental factor or minor adjustment needed in care practices. Given the recent transition, it is likely related to soil moisture and drainage issues.
+    
+    Here is what we should do next to help Monty thrive:
+      • Check if the soil has been too wet recently and ensure that drainage holes are not blocked.
+      • Verify that Monty is receiving adequate bright indirect light, as insufficient light can also cause yellowing leaves over time.
+    
+    You've got this! Let's keep a close eye on the progress.
+
+--------------------------------------------------------------------------------
+  Completed scenario: health_status_change (2 days processed)
+--------------------------------------------------------------------------------
+
+================================================================================
+  SCENARIO: improvement (improvement.json)
+  A known symptom's severity decreases / resolves, nothing new appears (expected: NO_ACTION)
+================================================================================
+
+  [Day 1] Timestamp: 2026-09-01 10:00:00Z
+  • Observation: status=unhealthy (conf=0.92) | leaf_yellowing:severe
+  • Trigger:     [CARE_ADVICE_REQUIRED] — Initial observation detected symptoms or non-healthy status.
+  • Care Plan:   Assessment: "The Monstera deliciosa is likely experiencing severe overwatering, causing the lower leaves to turn pale yellow and limp. The soil remains wet or soggy for days." (conf=0.92)
+    Actions:
+      [1] Stop watering immediately and check if the top 2 inches of soil are dry.
+      [2] Ensure drainage holes are unblocked and allow the soil to dry out thoroughly before resuming watering.
+
+  • Companion Output:
+    Hey there! Here's an update on Monty:
+    The Monstera deliciosa is likely experiencing severe overwatering, causing the lower leaves to turn pale yellow and limp. The soil remains wet or soggy for days.
+    
+    Here is what we should do next to help Monty thrive:
+      • Stop watering immediately and check if the top 2 inches of soil are dry.
+      • Ensure drainage holes are unblocked and allow the soil to dry out thoroughly before resuming watering.
+    
+    You've got this! Let's keep a close eye on the progress.
+
+  [Day 2] Timestamp: 2026-09-02 10:00:00Z
+  • Observation: status=possibly_unhealthy (conf=0.91) | leaf_yellowing:mild
+  • Trigger:     [NO_ACTION] — Health status improved from unhealthy to possibly_unhealthy.
+  • Notice:      No action needed. Plant is steady or improving.
+
+--------------------------------------------------------------------------------
+  Completed scenario: improvement (2 days processed)
+--------------------------------------------------------------------------------
+
+================================================================================
+  SCENARIO: low_confidence (low_confidence.json)
+  Confidence drops below the threshold (expected: REQUEST_MORE_INFORMATION)
+================================================================================
+
+  [Day 1] Timestamp: 2026-09-01 10:00:00Z
+  • Observation: status=healthy (conf=0.90) | no symptoms
+  • Trigger:     [NO_ACTION] — Baseline observation recorded as healthy with no symptoms.
+  • Notice:      No action needed. Plant is steady or improving.
+
+  [Day 2] Timestamp: 2026-09-02 10:00:00Z
+  • Observation: status=unhealthy (conf=0.35) | leaf_yellowing:severe
+  • Trigger:     [REQUEST_MORE_INFORMATION] — Overall confidence 0.35 is below threshold 0.50.
+  • Notice:      Image observation confidence too low. No care plan generated.
+
+--------------------------------------------------------------------------------
+  Completed scenario: low_confidence (2 days processed)
+--------------------------------------------------------------------------------
+
+================================================================================
+  SCENARIO: mixed_multiday (mixed_multiday.json)
+  5-day sequence exercising no change, new symptom, severity increase, improvement, and low confidence (expected: mixed per day)
+================================================================================
+
+  [Day 1] Timestamp: 2026-09-01 10:00:00Z
+  • Observation: status=healthy (conf=0.95) | no symptoms
+  • Trigger:     [NO_ACTION] — Baseline observation recorded as healthy with no symptoms.
+  • Notice:      No action needed. Plant is steady or improving.
+
+  [Day 2] Timestamp: 2026-09-02 10:00:00Z
+  • Observation: status=possibly_unhealthy (conf=0.90) | leaf_yellowing:mild
+  • Trigger:     [CARE_ADVICE_REQUIRED] — Health status worsened from healthy to possibly_unhealthy.
+  • Care Plan:   Assessment: "The leaf yellowing observed in Monstera deliciosa (Monty) is likely due to overwatering or poor drainage. The plant's soil should be allowed to dry out thoroughly, and any blockages in the drainage holes must be addressed." (conf=0.90)
+    Actions:
+      [1] Stop watering immediately.
+      [2] Check soil moisture 2 inches down and ensure drainage holes are unblocked.
+
+  • Companion Output:
+    Hey there! Here's an update on Monty:
+    The leaf yellowing observed in Monstera deliciosa (Monty) is likely due to overwatering or poor drainage. The plant's soil should be allowed to dry out thoroughly, and any blockages in the drainage holes must be addressed.
+    
+    Here is what we should do next to help Monty thrive:
+      • Stop watering immediately.
+      • Check soil moisture 2 inches down and ensure drainage holes are unblocked.
+    
+    You've got this! Let's keep a close eye on the progress.
+
+  [Day 3] Timestamp: 2026-09-03 10:00:00Z
+  • Observation: status=unhealthy (conf=0.92) | leaf_yellowing:severe
+  • Trigger:     [CARE_ADVICE_REQUIRED] — Health status worsened from possibly_unhealthy to unhealthy.
+  • Care Plan:   Assessment: "Severe leaf yellowing on Monstera deliciosa is most likely due to overwatering or underwatering. The current watering regimen needs adjustment." (conf=0.92)
+    Actions:
+      [1] Stop watering immediately and check soil moisture.
+      [2] Ensure drainage holes are unblocked and resume consistent watering when top 2 inches dry.
+
+  • Companion Output:
+    Hey there! Here's an update on Monty:
+    Severe leaf yellowing on Monstera deliciosa is most likely due to overwatering or underwatering. The current watering regimen needs adjustment.
+    
+    Here is what we should do next to help Monty thrive:
+      • Stop watering immediately and check soil moisture.
+      • Ensure drainage holes are unblocked and resume consistent watering when top 2 inches dry.
+    
+    You've got this! Let's keep a close eye on the progress.
+
+  [Day 4] Timestamp: 2026-09-04 10:00:00Z
+  • Observation: status=possibly_unhealthy (conf=0.89) | leaf_yellowing:mild
+  • Trigger:     [NO_ACTION] — Health status improved from unhealthy to possibly_unhealthy.
+  • Notice:      No action needed. Plant is steady or improving.
+
+  [Day 5] Timestamp: 2026-09-05 10:00:00Z
+  • Observation: status=possibly_unhealthy (conf=0.40) | leaf_yellowing:mild
+  • Trigger:     [REQUEST_MORE_INFORMATION] — Overall confidence 0.40 is below threshold 0.50.
+  • Notice:      Image observation confidence too low. No care plan generated.
+
+--------------------------------------------------------------------------------
+  Completed scenario: mixed_multiday (5 days processed)
+--------------------------------------------------------------------------------
+
+================================================================================
+  SCENARIO: new_symptom (new_symptom.json)
+  A symptom type appears that wasn't in previous observation (expected: CARE_ADVICE_REQUIRED)
+================================================================================
+
+  [Day 1] Timestamp: 2026-09-01 10:00:00Z
+  • Observation: status=healthy (conf=0.92) | no symptoms
+  • Trigger:     [NO_ACTION] — Baseline observation recorded as healthy with no symptoms.
+  • Notice:      No action needed. Plant is steady or improving.
+
+  [Day 2] Timestamp: 2026-09-02 10:00:00Z
+  • Observation: status=possibly_unhealthy (conf=0.90) | leaf_yellowing:mild
+  • Trigger:     [CARE_ADVICE_REQUIRED] — Health status worsened from healthy to possibly_unhealthy.
+  • Care Plan:   Assessment: "The likely root cause for the mild leaf yellowing observed on Monty is overwatering or poor drainage (most common). The soil may be too wet, leading to potential root suffocation and root rot." (conf=0.90)
+    Actions:
+      [1] Stop watering immediately
+      [2] Allow soil to dry out thoroughly
+
+  • Companion Output:
+    Hey there! Here's an update on Monty:
+    The likely root cause for the mild leaf yellowing observed on Monty is overwatering or poor drainage (most common). The soil may be too wet, leading to potential root suffocation and root rot.
+    
+    Here is what we should do next to help Monty thrive:
+      • Stop watering immediately
+      • Allow soil to dry out thoroughly
+    
+    You've got this! Let's keep a close eye on the progress.
+
+--------------------------------------------------------------------------------
+  Completed scenario: new_symptom (2 days processed)
+--------------------------------------------------------------------------------
+
+================================================================================
+  SCENARIO: no_change (no_change.json)
+  Same health status, same symptoms, day after day (expected: NO_ACTION)
+================================================================================
+
+  [Day 1] Timestamp: 2026-09-01 10:00:00Z
+  • Observation: status=healthy (conf=0.95) | no symptoms
+  • Trigger:     [NO_ACTION] — Baseline observation recorded as healthy with no symptoms.
+  • Notice:      No action needed. Plant is steady or improving.
+
+  [Day 2] Timestamp: 2026-09-02 10:00:00Z
+  • Observation: status=healthy (conf=0.94) | no symptoms
+  • Trigger:     [NO_ACTION] — No new symptoms, no severity increase, and health status is stable.
+  • Notice:      No action needed. Plant is steady or improving.
+
+--------------------------------------------------------------------------------
+  Completed scenario: no_change (2 days processed)
+--------------------------------------------------------------------------------
+
+================================================================================
+  SCENARIO: severity_increase (severity_increase.json)
+  Same symptom type, severity escalates from mild to severe (expected: CARE_ADVICE_REQUIRED)
+================================================================================
+
+  [Day 1] Timestamp: 2026-09-01 10:00:00Z
+  • Observation: status=possibly_unhealthy (conf=0.88) | leaf_yellowing:mild
+  • Trigger:     [CARE_ADVICE_REQUIRED] — Initial observation detected symptoms or non-healthy status.
+  • Care Plan:   Assessment: "The symptoms observed (mild leaf yellowing) suggest overwatering or poor drainage. The plant's soil may be remaining wet for extended periods, leading to root distress and subsequent leaf yellowing." (conf=0.85)
+    Actions:
+      [1] Stop watering immediately.
+      [2] Check soil moisture 2 inches down and ensure drainage holes are unblocked.
+
+  • Companion Output:
+    Hey there! Here's an update on Monty:
+    The symptoms observed (mild leaf yellowing) suggest overwatering or poor drainage. The plant's soil may be remaining wet for extended periods, leading to root distress and subsequent leaf yellowing.
+    
+    Here is what we should do next to help Monty thrive:
+      • Stop watering immediately.
+      • Check soil moisture 2 inches down and ensure drainage holes are unblocked.
+    
+    You've got this! Let's keep a close eye on the progress.
+
+  [Day 2] Timestamp: 2026-09-02 10:00:00Z
+  • Observation: status=unhealthy (conf=0.91) | leaf_yellowing:severe
+  • Trigger:     [CARE_ADVICE_REQUIRED] — Health status worsened from possibly_unhealthy to unhealthy.
+  • Care Plan:   Assessment: "The most likely root cause is overwatering or poor drainage, leading to severe leaf yellowing (symptom: `leaf_yellowing`)." (conf=0.90)
+    Actions:
+      [1] Stop watering immediately and check soil moisture.
+      [2] Ensure proper drainage by checking if the drainage holes are unblocked.
+
+  • Companion Output:
+    Hey there! Here's an update on Monty:
+    The most likely root cause is overwatering or poor drainage, leading to severe leaf yellowing (symptom: `leaf_yellowing`).
+    
+    Here is what we should do next to help Monty thrive:
+      • Stop watering immediately and check soil moisture.
+      • Ensure proper drainage by checking if the drainage holes are unblocked.
+    
+    You've got this! Let's keep a close eye on the progress.
+
+--------------------------------------------------------------------------------
+  Completed scenario: severity_increase (2 days processed)
+--------------------------------------------------------------------------------
+
+================================================================================
+  BATCH SUMMARY: 7/7 scenarios completed successfully.
+================================================================================
+

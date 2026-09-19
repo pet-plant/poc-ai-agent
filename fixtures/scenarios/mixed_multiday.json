@@ -1,0 +1,70 @@
+{
+  "scenario": "mixed_multiday",
+  "description": "5-day sequence exercising no change, new symptom, severity increase, improvement, and low confidence (expected: mixed per day)",
+  "observations": [
+    {
+      "plant_id": "plant-monstera-1",
+      "species": "Monstera deliciosa",
+      "timestamp": "2026-09-01T10:00:00Z",
+      "health_status": "healthy",
+      "confidence": 0.95,
+      "observations": []
+    },
+    {
+      "plant_id": "plant-monstera-1",
+      "species": "Monstera deliciosa",
+      "timestamp": "2026-09-02T10:00:00Z",
+      "health_status": "possibly_unhealthy",
+      "confidence": 0.9,
+      "observations": [
+        {
+          "type": "leaf_yellowing",
+          "severity": "mild",
+          "confidence": 0.88
+        }
+      ]
+    },
+    {
+      "plant_id": "plant-monstera-1",
+      "species": "Monstera deliciosa",
+      "timestamp": "2026-09-03T10:00:00Z",
+      "health_status": "unhealthy",
+      "confidence": 0.92,
+      "observations": [
+        {
+          "type": "leaf_yellowing",
+          "severity": "severe",
+          "confidence": 0.91
+        }
+      ]
+    },
+    {
+      "plant_id": "plant-monstera-1",
+      "species": "Monstera deliciosa",
+      "timestamp": "2026-09-04T10:00:00Z",
+      "health_status": "possibly_unhealthy",
+      "confidence": 0.89,
+      "observations": [
+        {
+          "type": "leaf_yellowing",
+          "severity": "mild",
+          "confidence": 0.86
+        }
+      ]
+    },
+    {
+      "plant_id": "plant-monstera-1",
+      "species": "Monstera deliciosa",
+      "timestamp": "2026-09-05T10:00:00Z",
+      "health_status": "possibly_unhealthy",
+      "confidence": 0.4,
+      "observations": [
+        {
+          "type": "leaf_yellowing",
+          "severity": "mild",
+          "confidence": 0.35
+        }
+      ]
+    }
+  ]
+}

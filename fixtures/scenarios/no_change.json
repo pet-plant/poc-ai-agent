@@ -1,0 +1,22 @@
+{
+  "scenario": "no_change",
+  "description": "Same health status, same symptoms, day after day (expected: NO_ACTION)",
+  "observations": [
+    {
+      "plant_id": "plant-monstera-1",
+      "species": "Monstera deliciosa",
+      "timestamp": "2026-09-01T10:00:00Z",
+      "health_status": "healthy",
+      "confidence": 0.95,
+      "observations": []
+    },
+    {
+      "plant_id": "plant-monstera-1",
+      "species": "Monstera deliciosa",
+      "timestamp": "2026-09-02T10:00:00Z",
+      "health_status": "healthy",
+      "confidence": 0.94,
+      "observations": []
+    }
+  ]
+}

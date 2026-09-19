@@ -1,0 +1,18 @@
+# Migrated by oma migration 008 — model_preset single-file config
+mcp:
+  devtools_browsers:
+    - aside
+vendors:
+  - claude
+  - codex
+  - copilot
+  - cursor
+  - grok
+  - antigravity
+  - qwen
+  - zcode
+providers:
+  web: native
+  code_intelligence: serena
+  semantic_memory: agentmemory
+model_preset: antigravity

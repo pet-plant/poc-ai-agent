@@ -1,0 +1,36 @@
+# oh-my-agent runtime (local artifacts — do not commit)
+.agents/oma-config.local.cue
+.agents/oma-config.local.yaml
+.antigravitycli/
+.agents/results/
+.agents/state/
+.agents/backup/
+docs/plans/
+.migration-backup/
+
+# IDE / LLM tool directories (machine-local, not project source)
+.claude/
+.codex/
+.cursor/
+.grok/
+.mcp.json
+.qwen/
+.serena/
+.zcode/
+
+# Python / uv
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+.uv/
+dist/
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+htmlcov/
+.coverage
+
+# Environment
+.env
+.env.local

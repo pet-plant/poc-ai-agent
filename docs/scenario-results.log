@@ -1,8 +1,3 @@
-# Scenario Run Results
-# Generated: 2026-09-18 19:59:05 AEST
-# Command:   uv run plant-poc run-batch --scenario all
-# Models:    qwen2.5:latest + nomic-embed-text (Ollama)
-#
 
 ################################################################################
   RUNNING ALL SCENARIOS IN SEQUENCE
@@ -21,20 +16,13 @@
   [Day 2] Timestamp: 2026-09-02 10:00:00Z
   • Observation: status=possibly_unhealthy (conf=0.89) | no symptoms
   • Trigger:     [CARE_ADVICE_REQUIRED] — Health status worsened from healthy to possibly_unhealthy.
-  • Care Plan:   Assessment: "The possible unhealthy state of Monty could be due to a temporary environmental factor or minor adjustment needed in care practices. Given the recent transition, it is likely related to soil moisture and drainage issues." (conf=0.85)
+  • Care Plan:   Assessment: "The transition from healthy to possibly unhealthy status suggests a potential issue such as overwatering or underwatering. Given the lack of specific symptoms, it's important to check soil moisture and adjust watering accordingly." (conf=0.90)
     Actions:
-      [1] Check if the soil has been too wet recently and ensure that drainage holes are not blocked.
-      [2] Verify that Monty is receiving adequate bright indirect light, as insufficient light can also cause yellowing leaves over time.
+      [1] Check if the top 2 inches of soil are dry.
+      [2] Water thoroughly but ensure proper drainage to avoid root rot.
 
   • Companion Output:
-    Hey there! Here's an update on Monty:
-    The possible unhealthy state of Monty could be due to a temporary environmental factor or minor adjustment needed in care practices. Given the recent transition, it is likely related to soil moisture and drainage issues.
-    
-    Here is what we should do next to help Monty thrive:
-      • Check if the soil has been too wet recently and ensure that drainage holes are not blocked.
-      • Verify that Monty is receiving adequate bright indirect light, as insufficient light can also cause yellowing leaves over time.
-    
-    You've got this! Let's keep a close eye on the progress.
+    I'm feeling a bit tired, my dear. I think I might need some attention. Could you check if the top 2 inches of my soil are dry? If they are, could you give me a good, thorough watering but make sure there's proper drainage so I don't get too soggy underground? It would mean a lot to me!
 
 --------------------------------------------------------------------------------
   Completed scenario: health_status_change (2 days processed)
@@ -48,20 +36,13 @@
   [Day 1] Timestamp: 2026-09-01 10:00:00Z
   • Observation: status=unhealthy (conf=0.92) | leaf_yellowing:severe
   • Trigger:     [CARE_ADVICE_REQUIRED] — Initial observation detected symptoms or non-healthy status.
-  • Care Plan:   Assessment: "The Monstera deliciosa is likely experiencing severe overwatering, causing the lower leaves to turn pale yellow and limp. The soil remains wet or soggy for days." (conf=0.92)
+  • Care Plan:   Assessment: "The Monstera deliciosa 'Monty' is experiencing severe leaf yellowing, which is most likely due to overwatering or poor drainage. The recent observations confirm this pattern, with a high confidence level of 0.89." (conf=0.92)
     Actions:
-      [1] Stop watering immediately and check if the top 2 inches of soil are dry.
-      [2] Ensure drainage holes are unblocked and allow the soil to dry out thoroughly before resuming watering.
+      [1] Stop watering immediately and check the soil moisture 2 inches down.
+      [2] Ensure that drainage holes are unblocked to prevent water from pooling in the pot.
 
   • Companion Output:
-    Hey there! Here's an update on Monty:
-    The Monstera deliciosa is likely experiencing severe overwatering, causing the lower leaves to turn pale yellow and limp. The soil remains wet or soggy for days.
-    
-    Here is what we should do next to help Monty thrive:
-      • Stop watering immediately and check if the top 2 inches of soil are dry.
-      • Ensure drainage holes are unblocked and allow the soil to dry out thoroughly before resuming watering.
-    
-    You've got this! Let's keep a close eye on the progress.
+    Oh, dear owner, I feel so tired lately. My leaves are turning yellow, and it's making me really sad. Could you please stop watering for now? Just check how dry my soil is 2 inches down before you water me again. And could you make sure those drainage holes aren't blocked? They're trying their best to keep me healthy but need a bit of help from you!
 
   [Day 2] Timestamp: 2026-09-02 10:00:00Z
   • Observation: status=possibly_unhealthy (conf=0.91) | leaf_yellowing:mild
@@ -104,38 +85,24 @@
   [Day 2] Timestamp: 2026-09-02 10:00:00Z
   • Observation: status=possibly_unhealthy (conf=0.90) | leaf_yellowing:mild
   • Trigger:     [CARE_ADVICE_REQUIRED] — Health status worsened from healthy to possibly_unhealthy.
-  • Care Plan:   Assessment: "The leaf yellowing observed in Monstera deliciosa (Monty) is likely due to overwatering or poor drainage. The plant's soil should be allowed to dry out thoroughly, and any blockages in the drainage holes must be addressed." (conf=0.90)
+  • Care Plan:   Assessment: "The Monstera deliciosa is likely experiencing leaf yellowing due to overwatering or poor drainage. This conclusion is supported by the recent observations showing mild leaf yellowing and high confidence in this diagnosis." (conf=0.90)
     Actions:
       [1] Stop watering immediately.
       [2] Check soil moisture 2 inches down and ensure drainage holes are unblocked.
 
   • Companion Output:
-    Hey there! Here's an update on Monty:
-    The leaf yellowing observed in Monstera deliciosa (Monty) is likely due to overwatering or poor drainage. The plant's soil should be allowed to dry out thoroughly, and any blockages in the drainage holes must be addressed.
-    
-    Here is what we should do next to help Monty thrive:
-      • Stop watering immediately.
-      • Check soil moisture 2 inches down and ensure drainage holes are unblocked.
-    
-    You've got this! Let's keep a close eye on the progress.
+    Hello there! I've been feeling a bit off lately, and I think it's because you've been watering me a bit too much. My leaves have started to turn a little yellow, which is not good for me at all. Could you please stop watering me immediately? And while you're checking on me, make sure the soil isn't too wet by testing 2 inches down. Also, give my drainage holes a quick look to ensure they're clear of any blockages. Thank you so much! I really appreciate your care and attention.
 
   [Day 3] Timestamp: 2026-09-03 10:00:00Z
   • Observation: status=unhealthy (conf=0.92) | leaf_yellowing:severe
   • Trigger:     [CARE_ADVICE_REQUIRED] — Health status worsened from possibly_unhealthy to unhealthy.
-  • Care Plan:   Assessment: "Severe leaf yellowing on Monstera deliciosa is most likely due to overwatering or underwatering. The current watering regimen needs adjustment." (conf=0.92)
+  • Care Plan:   Assessment: "The Monstera deliciosa named Monty is experiencing severe leaf yellowing due to overwatering and poor drainage, leading to root suffocation and root rot." (conf=0.92)
     Actions:
-      [1] Stop watering immediately and check soil moisture.
-      [2] Ensure drainage holes are unblocked and resume consistent watering when top 2 inches dry.
+      [1] Stop watering immediately. Check the soil moisture 2 inches down. Allow the soil to dry out thoroughly. Ensure that the drainage holes are unblocked.
+      [2] Monitor the plant's recovery and adjust watering frequency based on soil moisture levels. Resume consistent watering when the top 2 inches of soil are dry.
 
   • Companion Output:
-    Hey there! Here's an update on Monty:
-    Severe leaf yellowing on Monstera deliciosa is most likely due to overwatering or underwatering. The current watering regimen needs adjustment.
-    
-    Here is what we should do next to help Monty thrive:
-      • Stop watering immediately and check soil moisture.
-      • Ensure drainage holes are unblocked and resume consistent watering when top 2 inches dry.
-    
-    You've got this! Let's keep a close eye on the progress.
+    Oh dear, I'm feeling pretty limp these days... It's all because of that overwatering you've been doing. Please, stop right now and let me breathe a bit. Check how moist the soil is about two inches down—wait until it dries out completely before watering again. And make sure those drainage holes are clear too; I need to be able to get some air under my roots! Once I start looking better, we can figure out just right when to water me. Thank you so much for helping me recover.
 
   [Day 4] Timestamp: 2026-09-04 10:00:00Z
   • Observation: status=possibly_unhealthy (conf=0.89) | leaf_yellowing:mild
@@ -164,20 +131,13 @@
   [Day 2] Timestamp: 2026-09-02 10:00:00Z
   • Observation: status=possibly_unhealthy (conf=0.90) | leaf_yellowing:mild
   • Trigger:     [CARE_ADVICE_REQUIRED] — Health status worsened from healthy to possibly_unhealthy.
-  • Care Plan:   Assessment: "The likely root cause for the mild leaf yellowing observed on Monty is overwatering or poor drainage (most common). The soil may be too wet, leading to potential root suffocation and root rot." (conf=0.90)
+  • Care Plan:   Assessment: "The likely root cause of the observed leaf yellowing is overwatering, as indicated by the pale yellow and limp lower leaves. The plant should be allowed to dry out thoroughly, and drainage issues should be addressed." (conf=0.90)
     Actions:
-      [1] Stop watering immediately
-      [2] Allow soil to dry out thoroughly
+      [1] Stop watering immediately and check soil moisture 2 inches down. Allow the soil to dry out thoroughly.
+      [2] Ensure drainage holes are unblocked and consider repotting if necessary into a pot with better drainage.
 
   • Companion Output:
-    Hey there! Here's an update on Monty:
-    The likely root cause for the mild leaf yellowing observed on Monty is overwatering or poor drainage (most common). The soil may be too wet, leading to potential root suffocation and root rot.
-    
-    Here is what we should do next to help Monty thrive:
-      • Stop watering immediately
-      • Allow soil to dry out thoroughly
-    
-    You've got this! Let's keep a close eye on the progress.
+    I'm feeling a bit tired, my dear friend, and I think it's because of too much water. The lower leaves look so limp and yellow now. Can you please stop watering for now and check how dry the soil is 2 inches down? It needs time to breathe and get back to normal. Also, could you make sure those drainage holes are clear and maybe give me a new home with better drainage if needed? I promise we'll both feel much better once I'm taken care of properly.
 
 --------------------------------------------------------------------------------
   Completed scenario: new_symptom (2 days processed)
@@ -210,38 +170,24 @@
   [Day 1] Timestamp: 2026-09-01 10:00:00Z
   • Observation: status=possibly_unhealthy (conf=0.88) | leaf_yellowing:mild
   • Trigger:     [CARE_ADVICE_REQUIRED] — Initial observation detected symptoms or non-healthy status.
-  • Care Plan:   Assessment: "The symptoms observed (mild leaf yellowing) suggest overwatering or poor drainage. The plant's soil may be remaining wet for extended periods, leading to root distress and subsequent leaf yellowing." (conf=0.85)
+  • Care Plan:   Assessment: "The leaf yellowing is likely due to overwatering or poor drainage, which can lead to root issues such as root rot. The soil may be remaining wet for extended periods." (conf=0.63)
     Actions:
-      [1] Stop watering immediately.
-      [2] Check soil moisture 2 inches down and ensure drainage holes are unblocked.
+      [1] Stop watering immediately and check the soil moisture 2 inches down.
+      [2] Ensure that drainage holes are unblocked to prevent water from pooling at the bottom of the pot.
 
   • Companion Output:
-    Hey there! Here's an update on Monty:
-    The symptoms observed (mild leaf yellowing) suggest overwatering or poor drainage. The plant's soil may be remaining wet for extended periods, leading to root distress and subsequent leaf yellowing.
-    
-    Here is what we should do next to help Monty thrive:
-      • Stop watering immediately.
-      • Check soil moisture 2 inches down and ensure drainage holes are unblocked.
-    
-    You've got this! Let's keep a close eye on the progress.
+    Oh no, my leaves are turning yellow and I feel a bit under the weather. I think it might be because I've been getting too much water lately. Could you please stop watering me for now and check if the soil is still moist 2 inches down? And while you're checking, make sure those drainage holes aren't blocked so that any excess water can flow out freely. I really need to dry out a bit to feel better!
 
   [Day 2] Timestamp: 2026-09-02 10:00:00Z
   • Observation: status=unhealthy (conf=0.91) | leaf_yellowing:severe
   • Trigger:     [CARE_ADVICE_REQUIRED] — Health status worsened from possibly_unhealthy to unhealthy.
-  • Care Plan:   Assessment: "The most likely root cause is overwatering or poor drainage, leading to severe leaf yellowing (symptom: `leaf_yellowing`)." (conf=0.90)
+  • Care Plan:   Assessment: "The Monstera deliciosa 'Monty' is experiencing severe leaf yellowing (chlorosis), which is most likely due to overwatering or poor drainage. The symptoms are consistent with the primary cause of overwatering, where lower leaves turn pale and limp while soil remains wet." (conf=0.91)
     Actions:
-      [1] Stop watering immediately and check soil moisture.
-      [2] Ensure proper drainage by checking if the drainage holes are unblocked.
+      [1] Stop watering immediately and check if the top 2 inches of soil is dry.
+      [2] Ensure drainage holes are unblocked to prevent water from pooling in the pot.
 
   • Companion Output:
-    Hey there! Here's an update on Monty:
-    The most likely root cause is overwatering or poor drainage, leading to severe leaf yellowing (symptom: `leaf_yellowing`).
-    
-    Here is what we should do next to help Monty thrive:
-      • Stop watering immediately and check soil moisture.
-      • Ensure proper drainage by checking if the drainage holes are unblocked.
-    
-    You've got this! Let's keep a close eye on the progress.
+    Oh, sweetie, I'm so tired right now. My leaves are turning pale, and they feel all limp. It seems like my roots aren't getting enough air because you've been watering me too much lately. Could you please stop for a bit? Just check if the top 2 inches of soil is dry before giving me any more water. And could you also make sure those drainage holes are clear so no water pools up in my pot and keeps my roots wet? I promise to perk up once I get some fresh air!
 
 --------------------------------------------------------------------------------
   Completed scenario: severity_increase (2 days processed)

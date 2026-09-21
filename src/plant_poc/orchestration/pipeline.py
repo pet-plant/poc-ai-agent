@@ -92,7 +92,7 @@ class PlantPipeline:
         if trigger_res.decision == TriggerDecision.CARE_ADVICE_REQUIRED:
             care_plan = self.care_advisor.advise(obs, trigger_res)
             profile = self.registry.get_plant_profile(obs.plant_id)
-            companion_msg = self.companion.generate_message(care_plan, profile)
+            companion_msg = self.companion.generate_message(care_plan, profile, health_status=obs.health_status)
 
         return PipelineStepResult(
             day_index=day_index,

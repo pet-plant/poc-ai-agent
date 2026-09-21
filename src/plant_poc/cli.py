@@ -3,13 +3,32 @@
 import argparse
 import json
 import sys
+from io import TextIOWrapper
 from pathlib import Path
 from typing import Optional
 
-from plant_poc.config import SCENARIOS_DIR
+from plant_poc.config import SCENARIOS_DIR, BASE_DIR
 from plant_poc.llm import OllamaClient, MockLLMClient
 from plant_poc.orchestration import PlantPipeline, PipelineStepResult
 from plant_poc.schemas import VLMObservation, TriggerDecision
+
+# Default log output path
+LOG_PATH = BASE_DIR / "docs" / "scenario-results.log"
+
+
+class _Tee:
+    """Writes to both stdout and an optional log file simultaneously."""
+
+    def __init__(self, log_file: Optional[TextIOWrapper] = None):
+        self._log = log_file
+
+    def print(self, *args, **kwargs) -> None:  # noqa: A003
+        print(*args, **kwargs)
+        if self._log:
+            # Replicate print() to the log file
+            sep = kwargs.get("sep", " ")
+            end = kwargs.get("end", "\n")
+            self._log.write(sep.join(str(a) for a in args) + end)
 
 
 def load_scenario_file(file_path: Path) -> tuple[str, str, list[VLMObservation]]:
@@ -56,8 +75,8 @@ def cmd_list_scenarios() -> None:
     print()
 
 
-def print_step_result(res: PipelineStepResult) -> None:
-    """Pretty print pipeline result for a single day."""
+def print_step_result(res: PipelineStepResult, tee: "_Tee") -> None:
+    """Pretty print pipeline result for a single day (to terminal + optional log)."""
     obs = res.observation
     symptoms_summary = (
         ", ".join(f"{s.type}:{s.severity}" for s in obs.observations)
@@ -65,38 +84,41 @@ def print_step_result(res: PipelineStepResult) -> None:
         else "no symptoms"
     )
 
-    print(f"\n  [Day {res.day_index}] Timestamp: {obs.timestamp.strftime('%Y-%m-%d %H:%M:%SZ')}")
-    print(f"  • Observation: status={obs.health_status.value} (conf={obs.confidence:.2f}) | {symptoms_summary}")
-    print(f"  • Trigger:     [{res.trigger_result.decision.value}] — {res.trigger_result.reason}")
+    tee.print(f"\n  [Day {res.day_index}] Timestamp: {obs.timestamp.strftime('%Y-%m-%d %H:%M:%SZ')}")
+    tee.print(f"  • Observation: status={obs.health_status.value} (conf={obs.confidence:.2f}) | {symptoms_summary}")
+    tee.print(f"  • Trigger:     [{res.trigger_result.decision.value}] — {res.trigger_result.reason}")
 
     if res.trigger_result.decision == TriggerDecision.CARE_ADVICE_REQUIRED and res.care_plan:
         plan = res.care_plan
-        print(f"  • Care Plan:   Assessment: \"{plan.assessment}\" (conf={plan.confidence:.2f})")
-        print("    Actions:")
+        tee.print(f"  • Care Plan:   Assessment: \"{plan.assessment}\" (conf={plan.confidence:.2f})")
+        tee.print("    Actions:")
         for action in sorted(plan.actions, key=lambda a: a.priority):
-            print(f"      [{action.priority}] {action.action}")
+            tee.print(f"      [{action.priority}] {action.action}")
 
         if res.companion_message:
-            print("\n  • Companion Output:")
+            tee.print("\n  • Companion Output:")
             for line in res.companion_message.splitlines():
-                print(f"    {line}")
+                tee.print(f"    {line}")
     elif res.trigger_result.decision == TriggerDecision.REQUEST_MORE_INFORMATION:
-        print("  • Notice:      Image observation confidence too low. No care plan generated.")
+        tee.print("  • Notice:      Image observation confidence too low. No care plan generated.")
     else:
-        print("  • Notice:      No action needed. Plant is steady or improving.")
+        tee.print("  • Notice:      No action needed. Plant is steady or improving.")
 
 
 def run_single_scenario(
     path: Path,
     use_mock: bool = False,
     use_companion_llm: bool = False,
+    tee: Optional["_Tee"] = None,
 ) -> bool:
     """Execute a single scenario from file through an isolated pipeline."""
+    if tee is None:
+        tee = _Tee()
     name, desc, observations = load_scenario_file(path)
-    print("\n" + "=" * 80)
-    print(f"  SCENARIO: {name} ({path.name})")
-    print(f"  {desc}")
-    print("=" * 80)
+    tee.print("\n" + "=" * 80)
+    tee.print(f"  SCENARIO: {name} ({path.name})")
+    tee.print(f"  {desc}")
+    tee.print("=" * 80)
 
     llm_client = MockLLMClient() if use_mock else OllamaClient()
     pipeline = PlantPipeline.create_default(
@@ -106,11 +128,11 @@ def run_single_scenario(
 
     results = pipeline.run_scenario(observations)
     for res in results:
-        print_step_result(res)
+        print_step_result(res, tee)
 
-    print("\n" + "-" * 80)
-    print(f"  Completed scenario: {name} ({len(results)} days processed)")
-    print("-" * 80)
+    tee.print("\n" + "-" * 80)
+    tee.print(f"  Completed scenario: {name} ({len(results)} days processed)")
+    tee.print("-" * 80)
     return True
 
 
@@ -118,6 +140,7 @@ def cmd_run_batch(
     scenario_arg: Optional[str] = None,
     use_mock: bool = False,
     use_companion_llm: bool = False,
+    write_log: bool = False,
 ) -> None:
     """Handle run-batch command."""
     scenarios = get_available_scenarios()
@@ -144,48 +167,67 @@ def cmd_run_batch(
             except ValueError:
                 print("Invalid input. Please enter a valid number or 'all'.")
 
-    # 2. Run all scenarios
-    if scenario_arg.lower() == "all":
-        print("\n" + "#" * 80)
-        print("  RUNNING ALL SCENARIOS IN SEQUENCE")
-        print("#" * 80)
-        success_count = 0
-        for name, path, desc in scenarios:
-            try:
-                run_single_scenario(path, use_mock=use_mock, use_companion_llm=use_companion_llm)
-                success_count += 1
-            except Exception as e:
-                print(f"\n[ERROR] Scenario {name} failed with error: {e}")
+    # --scenario all always writes the log; single scenario writes only with --log
+    should_log = write_log or scenario_arg.lower() == "all"
 
-        print("\n" + "=" * 80)
-        print(f"  BATCH SUMMARY: {success_count}/{len(scenarios)} scenarios completed successfully.")
-        print("=" * 80 + "\n")
-        return
+    log_file = None
+    if should_log:
+        LOG_PATH.parent.mkdir(parents=True, exist_ok=True)
+        log_file = open(LOG_PATH, "w", encoding="utf-8")  # replaces existing log
+        print(f"📝 Logging output to: {LOG_PATH}")
 
-    # 3. Run single named scenario
-    # Resolve by exact filename, filename without extension, or scenario name
-    target_path = None
-    for name, path, _ in scenarios:
-        if scenario_arg in (name, path.name, path.stem):
-            target_path = path
-            break
+    try:
+        tee = _Tee(log_file)
 
-    if not target_path:
-        # Check if direct path was provided
-        direct_path = Path(scenario_arg)
-        if direct_path.exists():
-            target_path = direct_path
-        elif (SCENARIOS_DIR / scenario_arg).exists():
-            target_path = SCENARIOS_DIR / scenario_arg
-        elif (SCENARIOS_DIR / f"{scenario_arg}.json").exists():
-            target_path = SCENARIOS_DIR / f"{scenario_arg}.json"
+        # 2. Run all scenarios
+        if scenario_arg.lower() == "all":
+            tee.print("\n" + "#" * 80)
+            tee.print("  RUNNING ALL SCENARIOS IN SEQUENCE")
+            tee.print("#" * 80)
+            success_count = 0
+            for name, path, desc in scenarios:
+                try:
+                    run_single_scenario(path, use_mock=use_mock, use_companion_llm=use_companion_llm, tee=tee)
+                    success_count += 1
+                except Exception as e:
+                    tee.print(f"\n[ERROR] Scenario {name} failed with error: {e}")
 
-    if not target_path or not target_path.exists():
-        print(f"[ERROR] Scenario '{scenario_arg}' not found.")
-        print("Run 'plant-poc list-scenarios' to see available options.")
-        sys.exit(1)
+            tee.print("\n" + "=" * 80)
+            tee.print(f"  BATCH SUMMARY: {success_count}/{len(scenarios)} scenarios completed successfully.")
+            tee.print("=" * 80 + "\n")
+            if should_log:
+                print(f"✅ Results saved to: {LOG_PATH}")
+            return
 
-    run_single_scenario(target_path, use_mock=use_mock, use_companion_llm=use_companion_llm)
+        # 3. Run single named scenario
+        # Resolve by exact filename, filename without extension, or scenario name
+        target_path = None
+        for name, path, _ in scenarios:
+            if scenario_arg in (name, path.name, path.stem):
+                target_path = path
+                break
+
+        if not target_path:
+            # Check if direct path was provided
+            direct_path = Path(scenario_arg)
+            if direct_path.exists():
+                target_path = direct_path
+            elif (SCENARIOS_DIR / scenario_arg).exists():
+                target_path = SCENARIOS_DIR / scenario_arg
+            elif (SCENARIOS_DIR / f"{scenario_arg}.json").exists():
+                target_path = SCENARIOS_DIR / f"{scenario_arg}.json"
+
+        if not target_path or not target_path.exists():
+            tee.print(f"[ERROR] Scenario '{scenario_arg}' not found.")
+            tee.print("Run 'plant-poc list-scenarios' to see available options.")
+            sys.exit(1)
+
+        run_single_scenario(target_path, use_mock=use_mock, use_companion_llm=use_companion_llm, tee=tee)
+        if should_log:
+            print(f"✅ Results saved to: {LOG_PATH}")
+    finally:
+        if log_file:
+            log_file.close()
 
 
 def main() -> None:
@@ -214,8 +256,14 @@ def main() -> None:
     )
     run_parser.add_argument(
         "--companion-llm",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+        help="Use LLM for companion layer (default: True). Use --no-companion-llm for template mode.",
+    )
+    run_parser.add_argument(
+        "--log",
         action="store_true",
-        help="Use LLM for companion layer instead of template mode.",
+        help=f"Write output to {LOG_PATH} (replaces existing). Always on for --scenario all.",
     )
 
     args = parser.parse_args()
@@ -223,10 +271,12 @@ def main() -> None:
     if args.command == "list-scenarios":
         cmd_list_scenarios()
     elif args.command == "run-batch":
+        use_companion_llm = args.companion_llm and not args.mock
         cmd_run_batch(
             scenario_arg=args.scenario,
             use_mock=args.mock,
-            use_companion_llm=args.companion_llm,
+            use_companion_llm=use_companion_llm,
+            write_log=args.log,
         )
     else:
         parser.print_help()

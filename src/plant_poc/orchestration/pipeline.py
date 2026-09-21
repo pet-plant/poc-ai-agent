@@ -74,13 +74,18 @@ class PlantPipeline:
         self,
         obs: VLMObservation,
         day_index: int = 1,
+        require_consensus: bool = False,
     ) -> PipelineStepResult:
         """Process a single day's observation through the pipeline."""
         # 1. Fetch previous observation from registry
         previous_obs = self.registry.get_previous_observation(obs.plant_id)
 
         # 2. Evaluate deterministic Event Engine rules
-        trigger_res = evaluate(new=obs, previous=previous_obs)
+        trigger_res = evaluate(
+            new=obs,
+            previous=previous_obs,
+            require_consensus=require_consensus,
+        )
 
         # 3. Save new observation to registry for future days
         self.registry.save_observation(obs)
@@ -101,6 +106,20 @@ class PlantPipeline:
             care_plan=care_plan,
             companion_message=companion_msg,
         )
+
+    def process_vlm_probe_result(
+        self,
+        probe_data: dict,
+        plant_id: str,
+        species: Optional[str] = None,
+        day_index: int = 1,
+        require_consensus: bool = True,
+    ) -> PipelineStepResult:
+        """Process an aggregated VLM PROBE RESULT dictionary through the pipeline."""
+        from plant_poc.vlm_adapter import parse_vlm_probe_result
+
+        obs = parse_vlm_probe_result(data=probe_data, plant_id=plant_id, species=species)
+        return self.process_observation(obs, day_index=day_index, require_consensus=require_consensus)
 
     def run_scenario(self, observations: list[VLMObservation]) -> list[PipelineStepResult]:
         """Execute a sequence of multi-day observations in isolation."""

@@ -48,6 +48,9 @@ class CareAdvisorAgent:
             confidence=observation.confidence,
             observations_summary=symptoms_str,
             trigger_reason=trigger_result.reason,
+            leaf_posture=observation.leaf_posture,
+            leaf_color_detail=observation.leaf_color_detail,
+            consensus_agreement=observation.consensus.agreement if observation.consensus else None,
         )
 
         plan = run_tool_agent(

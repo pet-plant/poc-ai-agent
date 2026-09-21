@@ -3,6 +3,7 @@
 from plant_poc.schemas.observation import (
     HealthStatus,
     Observation,
+    VLMConsensus,
     VLMObservation,
     PlantProfile,
 )
@@ -20,6 +21,7 @@ from plant_poc.schemas.knowledge import (
 __all__ = [
     "HealthStatus",
     "Observation",
+    "VLMConsensus",
     "VLMObservation",
     "PlantProfile",
     "TriggerDecision",

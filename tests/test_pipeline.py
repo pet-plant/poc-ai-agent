@@ -64,3 +64,56 @@ def test_pipeline_runs_new_symptom_scenario():
     assert results[1].companion_message is not None
     assert "Check soil moisture before watering." in results[1].companion_message
     assert len(mock_client.call_history) == 1
+
+
+def test_pipeline_process_vlm_probe_result():
+    mock_client = MockLLMClient(
+        canned_responses=[
+            LLMResponse(
+                content="""{
+                    "plant_id": "plant-monstera-probe",
+                    "assessment": "Underwatering causing leaf drooping and brown tips.",
+                    "confidence": 0.95,
+                    "actions": [
+                        {"action": "Deep soak watering immediately.", "priority": 1}
+                    ]
+                }"""
+            )
+        ]
+    )
+    pipeline = PlantPipeline.create_default(llm_client=mock_client)
+
+    probe_payload = {
+        "timestamp": "2026-09-21T14:00:00",
+        "confidence": {
+            "agreement": 1.0,
+            "runs": 5,
+            "model_stated_average": 0.95,
+        },
+        "severity": 2,
+        "verdict": "worse",
+        "observation": {
+            "leaf_posture": "drooping downwards",
+            "leaf_color": "dark green with crisp margins",
+            "visible_damage": "dry tips and brown edges on foliage",
+            "visible_stress_level": "moderate",
+        },
+    }
+
+    result = pipeline.process_vlm_probe_result(
+        probe_data=probe_payload,
+        plant_id="plant-monstera-probe",
+        species="Monstera deliciosa",
+    )
+
+    assert result.trigger_result.decision == TriggerDecision.CARE_ADVICE_REQUIRED
+    assert result.care_plan is not None
+    assert result.care_plan.assessment == "Underwatering causing leaf drooping and brown tips."
+    assert result.companion_message is not None
+
+    # Verify saved to database and retrieved
+    prev_obs = pipeline.registry.get_previous_observation("plant-monstera-probe")
+    assert prev_obs is not None
+    assert prev_obs.consensus is not None
+    assert prev_obs.consensus.agreement == 1.0
+    assert prev_obs.leaf_posture == "drooping downwards"

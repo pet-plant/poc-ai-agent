@@ -7,6 +7,7 @@ from typing import Optional
 
 from plant_poc.schemas import (
     VLMObservation,
+    VLMConsensus,
     PlantProfile,
     CarePlan,
     CareAction,
@@ -76,11 +77,15 @@ class PlantRegistry:
             kwargs["species"] = obs.species
         self.ensure_default_profile(**kwargs)
         obs_dicts = [o.model_dump() for o in obs.observations]
+        consensus_json = obs.consensus.model_dump_json() if obs.consensus else None
+        image_refs_json = json.dumps(obs.image_refs) if obs.image_refs else None
         with self.conn:
             self.conn.execute(
                 """
-                INSERT INTO observations (plant_id, timestamp, health_status, confidence, observations_json)
-                VALUES (?, ?, ?, ?, ?)
+                INSERT INTO observations
+                (plant_id, timestamp, health_status, confidence, observations_json,
+                 consensus_json, leaf_posture, leaf_color_detail, image_refs_json)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """,
                 (
                     obs.plant_id,
@@ -88,6 +93,10 @@ class PlantRegistry:
                     obs.health_status.value,
                     obs.confidence,
                     json.dumps(obs_dicts),
+                    consensus_json,
+                    obs.leaf_posture,
+                    obs.leaf_color_detail,
+                    image_refs_json,
                 ),
             )
 
@@ -96,7 +105,8 @@ class PlantRegistry:
         cursor = self.conn.cursor()
         cursor.execute(
             """
-            SELECT plant_id, timestamp, health_status, confidence, observations_json
+            SELECT plant_id, timestamp, health_status, confidence, observations_json,
+                   consensus_json, leaf_posture, leaf_color_detail, image_refs_json
             FROM observations
             WHERE plant_id = ?
             ORDER BY id DESC
@@ -114,7 +124,8 @@ class PlantRegistry:
         cursor = self.conn.cursor()
         cursor.execute(
             """
-            SELECT plant_id, timestamp, health_status, confidence, observations_json
+            SELECT plant_id, timestamp, health_status, confidence, observations_json,
+                   consensus_json, leaf_posture, leaf_color_detail, image_refs_json
             FROM observations
             WHERE plant_id = ?
             ORDER BY id DESC
@@ -175,10 +186,26 @@ class PlantRegistry:
     def _row_to_vlm_observation(self, row: sqlite3.Row) -> VLMObservation:
         obs_raw = json.loads(row["observations_json"])
         observations = [Observation.model_validate(o) for o in obs_raw]
+
+        consensus = None
+        if "consensus_json" in row.keys() and row["consensus_json"]:
+            consensus = VLMConsensus.model_validate_json(row["consensus_json"])
+
+        leaf_posture = row["leaf_posture"] if "leaf_posture" in row.keys() else None
+        leaf_color_detail = row["leaf_color_detail"] if "leaf_color_detail" in row.keys() else None
+
+        image_refs: list[str] = []
+        if "image_refs_json" in row.keys() and row["image_refs_json"]:
+            image_refs = json.loads(row["image_refs_json"])
+
         return VLMObservation(
             plant_id=row["plant_id"],
             timestamp=datetime.fromisoformat(row["timestamp"]),
             health_status=HealthStatus(row["health_status"]),
             confidence=row["confidence"],
             observations=observations,
+            consensus=consensus,
+            leaf_posture=leaf_posture,
+            leaf_color_detail=leaf_color_detail,
+            image_refs=image_refs,
         )

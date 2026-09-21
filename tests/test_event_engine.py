@@ -81,3 +81,53 @@ def test_scenario_mixed_multiday():
     # Day 5: low confidence
     res5 = evaluate(obs_list[4], obs_list[3])
     assert res5.decision == TriggerDecision.REQUEST_MORE_INFORMATION
+
+
+def test_consensus_agreement_below_threshold():
+    from datetime import datetime
+    from plant_poc.schemas import HealthStatus, VLMObservation, VLMConsensus
+
+    obs = VLMObservation(
+        plant_id="plant-1",
+        timestamp=datetime.now(),
+        health_status=HealthStatus.HEALTHY,
+        confidence=0.95,
+        consensus=VLMConsensus(agreement=0.6, runs=5, model_stated_average=0.95),
+    )
+
+    result = evaluate(obs, None, confidence_threshold=0.7)
+    assert result.decision == TriggerDecision.REQUEST_MORE_INFORMATION
+    assert "VLM agreement 0.60 is below threshold 0.70" in result.reason
+
+
+def test_consensus_agreement_above_threshold_healthy():
+    from datetime import datetime
+    from plant_poc.schemas import HealthStatus, VLMObservation, VLMConsensus
+
+    obs = VLMObservation(
+        plant_id="plant-1",
+        timestamp=datetime.now(),
+        health_status=HealthStatus.HEALTHY,
+        confidence=0.95,
+        consensus=VLMConsensus(agreement=1.0, runs=5, model_stated_average=0.95),
+    )
+
+    result = evaluate(obs, None, confidence_threshold=0.7)
+    assert result.decision == TriggerDecision.NO_ACTION
+
+
+def test_missing_consensus_with_require_consensus():
+    from datetime import datetime
+    from plant_poc.schemas import HealthStatus, VLMObservation
+
+    obs = VLMObservation(
+        plant_id="plant-1",
+        timestamp=datetime.now(),
+        health_status=HealthStatus.HEALTHY,
+        confidence=0.95,
+        consensus=None,
+    )
+
+    result = evaluate(obs, None, require_consensus=True)
+    assert result.decision == TriggerDecision.REQUEST_MORE_INFORMATION
+    assert "VLM is not available for the moment." in result.reason

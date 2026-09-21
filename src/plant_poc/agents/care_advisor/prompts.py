@@ -26,17 +26,33 @@ PROCESS GUIDELINES:
 Do NOT include markdown wrapping or extraneous commentary in your final JSON output.
 """
 
+from typing import Optional
+
+
 def format_advisor_user_prompt(
     plant_id: str,
     health_status: str,
     confidence: float,
     observations_summary: str,
     trigger_reason: str,
+    leaf_posture: Optional[str] = None,
+    leaf_color_detail: Optional[str] = None,
+    consensus_agreement: Optional[float] = None,
 ) -> str:
-    return f"""Plant ID: {plant_id}
-Latest Health Status: {health_status} (Confidence: {confidence:.2f})
-Observed Symptoms: {observations_summary}
-Trigger Reason: {trigger_reason}
-
-Please consult the plant profile and plant knowledge tools to evaluate this plant and produce a structured CarePlan.
-"""
+    lines = [
+        f"Plant ID: {plant_id}",
+        f"Latest Health Status: {health_status} (Confidence: {confidence:.2f})",
+    ]
+    if consensus_agreement is not None:
+        lines.append(f"VLM Consensus Agreement: {consensus_agreement:.2f}")
+    if leaf_posture:
+        lines.append(f"Leaf Posture: {leaf_posture}")
+    if leaf_color_detail:
+        lines.append(f"Leaf Color Details: {leaf_color_detail}")
+    lines.extend([
+        f"Observed Symptoms: {observations_summary}",
+        f"Trigger Reason: {trigger_reason}",
+        "",
+        "Please consult the plant profile and plant knowledge tools to evaluate this plant and produce a structured CarePlan.",
+    ])
+    return "\n".join(lines) + "\n"

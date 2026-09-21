@@ -26,11 +26,12 @@ def evaluate(
     new: VLMObservation,
     previous: Optional[VLMObservation] = None,
     confidence_threshold: float = CONFIDENCE_THRESHOLD,
+    require_consensus: bool = False,
 ) -> TriggerResult:
     """Evaluate whether an observation requires care advice, more info, or no action.
 
     Deterministic logic per PRD §4.2:
-    1. Overall observation confidence < threshold -> REQUEST_MORE_INFORMATION
+    1. Overall observation confidence or consensus agreement < threshold -> REQUEST_MORE_INFORMATION
     2. If first observation (no previous):
        - If healthy with no symptoms -> NO_ACTION
        - Else -> CARE_ADVICE_REQUIRED
@@ -40,8 +41,20 @@ def evaluate(
     6. If severity of a matching symptom type increased -> CARE_ADVICE_REQUIRED
     7. Otherwise (improvement, steady state, or minor variations) -> NO_ACTION
     """
-    # 1. Low confidence check on overall observation
-    if new.confidence < confidence_threshold:
+    # 1. Overall confidence / consensus agreement check
+    if require_consensus and new.consensus is None:
+        return TriggerResult(
+            decision=TriggerDecision.REQUEST_MORE_INFORMATION,
+            reason="VLM is not available for the moment.",
+        )
+
+    if new.consensus is not None:
+        if new.consensus.agreement < confidence_threshold:
+            return TriggerResult(
+                decision=TriggerDecision.REQUEST_MORE_INFORMATION,
+                reason=f"VLM agreement {new.consensus.agreement:.2f} is below threshold {confidence_threshold:.2f}.",
+            )
+    elif new.confidence < confidence_threshold:
         return TriggerResult(
             decision=TriggerDecision.REQUEST_MORE_INFORMATION,
             reason=f"Overall confidence {new.confidence:.2f} is below threshold {confidence_threshold:.2f}.",

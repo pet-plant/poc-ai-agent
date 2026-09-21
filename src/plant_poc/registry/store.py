@@ -26,6 +26,10 @@ def init_db(db_path: str = ":memory:") -> sqlite3.Connection:
                 health_status TEXT NOT NULL,
                 confidence REAL NOT NULL,
                 observations_json TEXT NOT NULL,
+                consensus_json TEXT,
+                leaf_posture TEXT,
+                leaf_color_detail TEXT,
+                image_refs_json TEXT,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 FOREIGN KEY (plant_id) REFERENCES plants(plant_id)
             );
@@ -56,4 +60,22 @@ def init_db(db_path: str = ":memory:") -> sqlite3.Connection:
             );
             """
         )
+        _migrate_observations_table(conn)
     return conn
+
+
+def _migrate_observations_table(conn: sqlite3.Connection) -> None:
+    """Ensure newly added nullable columns exist in observations table for backward compatibility."""
+    cursor = conn.cursor()
+    cursor.execute("PRAGMA table_info(observations)")
+    existing_cols = {row["name"] for row in cursor.fetchall()}
+
+    new_cols = [
+        ("consensus_json", "TEXT"),
+        ("leaf_posture", "TEXT"),
+        ("leaf_color_detail", "TEXT"),
+        ("image_refs_json", "TEXT"),
+    ]
+    for col_name, col_type in new_cols:
+        if col_name not in existing_cols:
+            conn.execute(f"ALTER TABLE observations ADD COLUMN {col_name} {col_type}")

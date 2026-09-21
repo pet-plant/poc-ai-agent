@@ -57,3 +57,35 @@ def test_registry_plant_profile_and_care_plan():
     assert len(plans) == 1
     assert plans[0].assessment == "Soil is waterlogged."
     assert plans[0].actions[0].action == "Hold watering for 5 days."
+
+
+def test_registry_migration_adds_missing_columns():
+    import sqlite3
+    # Create an old schema database without the new columns
+    conn = sqlite3.connect(":memory:")
+    conn.row_factory = sqlite3.Row
+    conn.execute(
+        """
+        CREATE TABLE observations (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            plant_id TEXT NOT NULL,
+            timestamp TEXT NOT NULL,
+            health_status TEXT NOT NULL,
+            confidence REAL NOT NULL,
+            observations_json TEXT NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
+        """
+    )
+
+    from plant_poc.registry.store import _migrate_observations_table
+    _migrate_observations_table(conn)
+
+    cursor = conn.cursor()
+    cursor.execute("PRAGMA table_info(observations)")
+    cols = {row["name"] for row in cursor.fetchall()}
+    assert "consensus_json" in cols
+    assert "leaf_posture" in cols
+    assert "leaf_color_detail" in cols
+    assert "image_refs_json" in cols
+

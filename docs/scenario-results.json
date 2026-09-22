@@ -1,0 +1,448 @@
+[
+  {
+    "scenario": "health_status_change",
+    "scenario_file": "health_status_change.json",
+    "description": "Health status flips from healthy to possibly_unhealthy (expected: CARE_ADVICE_REQUIRED)",
+    "days_processed": 2,
+    "steps": [
+      {
+        "day": 1,
+        "plant_id": "plant-monstera-1",
+        "timestamp": "2026-09-01T10:00:00+00:00",
+        "health_status": "healthy",
+        "decision": "NO_ACTION",
+        "companion_message": "I'm feeling great and thriving today! Leaves are happy and soaking up the room. Thanks for checking in on me!",
+        "milestones_triggered": [],
+        "care_plan": null
+      },
+      {
+        "day": 2,
+        "plant_id": "plant-monstera-1",
+        "timestamp": "2026-09-02T10:00:00+00:00",
+        "health_status": "possibly_unhealthy",
+        "decision": "CARE_ADVICE_REQUIRED",
+        "companion_message": "[Template mode \u2014 showing care summary]\nUpdate on Monty:\nSymptoms indicate moisture imbalance.\n\nRecommended actions:\n  \u2022 Check soil moisture.",
+        "milestones_triggered": [
+          {
+            "event_type": "first_symptom",
+            "description": "First health symptoms detected: declining health.",
+            "timestamp": "2026-09-02T10:00:00+00:00"
+          }
+        ],
+        "care_plan": {
+          "assessment": "Symptoms indicate moisture imbalance.",
+          "confidence": 0.85,
+          "actions": [
+            {
+              "priority": 1,
+              "action": "Check soil moisture."
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "scenario": "improvement",
+    "scenario_file": "improvement.json",
+    "description": "A known symptom's severity decreases / resolves, nothing new appears (expected: NO_ACTION)",
+    "days_processed": 2,
+    "steps": [
+      {
+        "day": 1,
+        "plant_id": "plant-monstera-1",
+        "timestamp": "2026-09-01T10:00:00+00:00",
+        "health_status": "unhealthy",
+        "decision": "CARE_ADVICE_REQUIRED",
+        "companion_message": "[Template mode \u2014 showing care summary]\nUpdate on Monty:\nSymptoms indicate moisture imbalance.\n\nRecommended actions:\n  \u2022 Check soil moisture.",
+        "milestones_triggered": [
+          {
+            "event_type": "first_symptom",
+            "description": "First health symptoms detected: leaf_yellowing.",
+            "timestamp": "2026-09-01T10:00:00+00:00"
+          },
+          {
+            "event_type": "health_crisis",
+            "description": "Entered critical unhealthy state at 2026-09-01.",
+            "timestamp": "2026-09-01T10:00:00+00:00"
+          }
+        ],
+        "care_plan": {
+          "assessment": "Symptoms indicate moisture imbalance.",
+          "confidence": 0.85,
+          "actions": [
+            {
+              "priority": 1,
+              "action": "Check soil moisture."
+            }
+          ]
+        }
+      },
+      {
+        "day": 2,
+        "plant_id": "plant-monstera-1",
+        "timestamp": "2026-09-02T10:00:00+00:00",
+        "health_status": "possibly_unhealthy",
+        "decision": "NO_ACTION",
+        "companion_message": "I'm feeling much better today and bouncing back! Thanks for taking good care of me.",
+        "milestones_triggered": [],
+        "care_plan": null
+      }
+    ]
+  },
+  {
+    "scenario": "low_confidence",
+    "scenario_file": "low_confidence.json",
+    "description": "Confidence and VLM consensus drop below threshold (expected: REQUEST_MORE_INFORMATION)",
+    "days_processed": 2,
+    "steps": [
+      {
+        "day": 1,
+        "plant_id": "plant-monstera-1",
+        "timestamp": "2026-09-01T10:00:00+00:00",
+        "health_status": "healthy",
+        "decision": "NO_ACTION",
+        "companion_message": "I'm feeling great and thriving today! Leaves are happy and soaking up the room. Thanks for checking in on me!",
+        "milestones_triggered": [],
+        "care_plan": null
+      },
+      {
+        "day": 2,
+        "plant_id": "plant-monstera-1",
+        "timestamp": "2026-09-02T10:00:00+00:00",
+        "health_status": "unhealthy",
+        "decision": "REQUEST_MORE_INFORMATION",
+        "companion_message": "Hmm, I couldn't get a clear look at my leaves in that photo \u2014 it might be a bit too blurry or dark. Could you snap another clear photo for me?",
+        "milestones_triggered": [],
+        "care_plan": null
+      }
+    ]
+  },
+  {
+    "scenario": "milestone_lifecycle",
+    "scenario_file": "milestone_lifecycle.json",
+    "description": "Multi-day lifecycle demonstrating first_symptom, health_crisis, severe_episode, and full_recovery milestones.",
+    "days_processed": 6,
+    "steps": [
+      {
+        "day": 1,
+        "plant_id": "plant-monstera-lifecycle",
+        "timestamp": "2026-09-01T10:00:00+00:00",
+        "health_status": "healthy",
+        "decision": "NO_ACTION",
+        "companion_message": "I'm feeling great and thriving today! Leaves are happy and soaking up the room. Thanks for checking in on me!",
+        "milestones_triggered": [],
+        "care_plan": null
+      },
+      {
+        "day": 2,
+        "plant_id": "plant-monstera-lifecycle",
+        "timestamp": "2026-09-02T10:00:00+00:00",
+        "health_status": "possibly_unhealthy",
+        "decision": "CARE_ADVICE_REQUIRED",
+        "companion_message": "[Template mode \u2014 showing care summary]\nUpdate on Monty:\nSymptoms indicate moisture imbalance.\n\nRecommended actions:\n  \u2022 Check soil moisture.",
+        "milestones_triggered": [
+          {
+            "event_type": "first_symptom",
+            "description": "First health symptoms detected: leaf_yellowing.",
+            "timestamp": "2026-09-02T10:00:00+00:00"
+          }
+        ],
+        "care_plan": {
+          "assessment": "Symptoms indicate moisture imbalance.",
+          "confidence": 0.85,
+          "actions": [
+            {
+              "priority": 1,
+              "action": "Check soil moisture."
+            }
+          ]
+        }
+      },
+      {
+        "day": 3,
+        "plant_id": "plant-monstera-lifecycle",
+        "timestamp": "2026-09-03T10:00:00+00:00",
+        "health_status": "unhealthy",
+        "decision": "CARE_ADVICE_REQUIRED",
+        "companion_message": "[Template mode \u2014 showing care summary]\nUpdate on Monty:\nSymptoms indicate moisture imbalance.\n\nRecommended actions:\n  \u2022 Check soil moisture.",
+        "milestones_triggered": [
+          {
+            "event_type": "health_crisis",
+            "description": "Entered critical unhealthy state at 2026-09-03.",
+            "timestamp": "2026-09-03T10:00:00+00:00"
+          }
+        ],
+        "care_plan": {
+          "assessment": "Symptoms indicate moisture imbalance.",
+          "confidence": 0.85,
+          "actions": [
+            {
+              "priority": 1,
+              "action": "Check soil moisture."
+            }
+          ]
+        }
+      },
+      {
+        "day": 4,
+        "plant_id": "plant-monstera-lifecycle",
+        "timestamp": "2026-09-04T10:00:00+00:00",
+        "health_status": "unhealthy",
+        "decision": "NO_ACTION",
+        "companion_message": "I'm feeling great and thriving today! Leaves are happy and soaking up the room. Thanks for checking in on me!",
+        "milestones_triggered": [],
+        "care_plan": null
+      },
+      {
+        "day": 5,
+        "plant_id": "plant-monstera-lifecycle",
+        "timestamp": "2026-09-05T10:00:00+00:00",
+        "health_status": "unhealthy",
+        "decision": "NO_ACTION",
+        "companion_message": "I'm feeling great and thriving today! Leaves are happy and soaking up the room. Thanks for checking in on me!",
+        "milestones_triggered": [
+          {
+            "event_type": "severe_episode",
+            "description": "Persistent severe health crisis for 3 consecutive days.",
+            "timestamp": "2026-09-05T10:00:00+00:00"
+          }
+        ],
+        "care_plan": null
+      },
+      {
+        "day": 6,
+        "plant_id": "plant-monstera-lifecycle",
+        "timestamp": "2026-09-06T10:00:00+00:00",
+        "health_status": "healthy",
+        "decision": "NO_ACTION",
+        "companion_message": "I'm feeling much better today and bouncing back! Thanks for taking good care of me.",
+        "milestones_triggered": [
+          {
+            "event_type": "full_recovery",
+            "description": "Full recovery back to healthy status on 2026-09-06.",
+            "timestamp": "2026-09-06T10:00:00+00:00"
+          }
+        ],
+        "care_plan": null
+      }
+    ]
+  },
+  {
+    "scenario": "mixed_multiday",
+    "scenario_file": "mixed_multiday.json",
+    "description": "5-day sequence exercising no change, new symptom, severity increase, improvement, and low confidence (expected: mixed per day)",
+    "days_processed": 5,
+    "steps": [
+      {
+        "day": 1,
+        "plant_id": "plant-monstera-1",
+        "timestamp": "2026-09-01T10:00:00+00:00",
+        "health_status": "healthy",
+        "decision": "NO_ACTION",
+        "companion_message": "I'm feeling great and thriving today! Leaves are happy and soaking up the room. Thanks for checking in on me!",
+        "milestones_triggered": [],
+        "care_plan": null
+      },
+      {
+        "day": 2,
+        "plant_id": "plant-monstera-1",
+        "timestamp": "2026-09-02T10:00:00+00:00",
+        "health_status": "possibly_unhealthy",
+        "decision": "CARE_ADVICE_REQUIRED",
+        "companion_message": "[Template mode \u2014 showing care summary]\nUpdate on Monty:\nSymptoms indicate moisture imbalance.\n\nRecommended actions:\n  \u2022 Check soil moisture.",
+        "milestones_triggered": [
+          {
+            "event_type": "first_symptom",
+            "description": "First health symptoms detected: leaf_yellowing.",
+            "timestamp": "2026-09-02T10:00:00+00:00"
+          }
+        ],
+        "care_plan": {
+          "assessment": "Symptoms indicate moisture imbalance.",
+          "confidence": 0.85,
+          "actions": [
+            {
+              "priority": 1,
+              "action": "Check soil moisture."
+            }
+          ]
+        }
+      },
+      {
+        "day": 3,
+        "plant_id": "plant-monstera-1",
+        "timestamp": "2026-09-03T10:00:00+00:00",
+        "health_status": "unhealthy",
+        "decision": "CARE_ADVICE_REQUIRED",
+        "companion_message": "[Template mode \u2014 showing care summary]\nUpdate on Monty:\nSymptoms indicate moisture imbalance.\n\nRecommended actions:\n  \u2022 Check soil moisture.",
+        "milestones_triggered": [
+          {
+            "event_type": "health_crisis",
+            "description": "Entered critical unhealthy state at 2026-09-03.",
+            "timestamp": "2026-09-03T10:00:00+00:00"
+          }
+        ],
+        "care_plan": {
+          "assessment": "Symptoms indicate moisture imbalance.",
+          "confidence": 0.85,
+          "actions": [
+            {
+              "priority": 1,
+              "action": "Check soil moisture."
+            }
+          ]
+        }
+      },
+      {
+        "day": 4,
+        "plant_id": "plant-monstera-1",
+        "timestamp": "2026-09-04T10:00:00+00:00",
+        "health_status": "possibly_unhealthy",
+        "decision": "NO_ACTION",
+        "companion_message": "I'm feeling much better today and bouncing back! Thanks for taking good care of me.",
+        "milestones_triggered": [],
+        "care_plan": null
+      },
+      {
+        "day": 5,
+        "plant_id": "plant-monstera-1",
+        "timestamp": "2026-09-05T10:00:00+00:00",
+        "health_status": "possibly_unhealthy",
+        "decision": "REQUEST_MORE_INFORMATION",
+        "companion_message": "Hmm, I couldn't get a clear look at my leaves in that photo \u2014 it might be a bit too blurry or dark. Could you snap another clear photo for me?",
+        "milestones_triggered": [],
+        "care_plan": null
+      }
+    ]
+  },
+  {
+    "scenario": "new_symptom",
+    "scenario_file": "new_symptom.json",
+    "description": "A symptom type appears that wasn't in previous observation (expected: CARE_ADVICE_REQUIRED)",
+    "days_processed": 2,
+    "steps": [
+      {
+        "day": 1,
+        "plant_id": "plant-monstera-1",
+        "timestamp": "2026-09-01T10:00:00+00:00",
+        "health_status": "healthy",
+        "decision": "NO_ACTION",
+        "companion_message": "I'm feeling great and thriving today! Leaves are happy and soaking up the room. Thanks for checking in on me!",
+        "milestones_triggered": [],
+        "care_plan": null
+      },
+      {
+        "day": 2,
+        "plant_id": "plant-monstera-1",
+        "timestamp": "2026-09-02T10:00:00+00:00",
+        "health_status": "possibly_unhealthy",
+        "decision": "CARE_ADVICE_REQUIRED",
+        "companion_message": "[Template mode \u2014 showing care summary]\nUpdate on Monty:\nSymptoms indicate moisture imbalance.\n\nRecommended actions:\n  \u2022 Check soil moisture.",
+        "milestones_triggered": [
+          {
+            "event_type": "first_symptom",
+            "description": "First health symptoms detected: leaf_yellowing.",
+            "timestamp": "2026-09-02T10:00:00+00:00"
+          }
+        ],
+        "care_plan": {
+          "assessment": "Symptoms indicate moisture imbalance.",
+          "confidence": 0.85,
+          "actions": [
+            {
+              "priority": 1,
+              "action": "Check soil moisture."
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "scenario": "no_change",
+    "scenario_file": "no_change.json",
+    "description": "Same health status, same symptoms, day after day (expected: NO_ACTION)",
+    "days_processed": 2,
+    "steps": [
+      {
+        "day": 1,
+        "plant_id": "plant-monstera-1",
+        "timestamp": "2026-09-01T10:00:00+00:00",
+        "health_status": "healthy",
+        "decision": "NO_ACTION",
+        "companion_message": "I'm feeling great and thriving today! Leaves are happy and soaking up the room. Thanks for checking in on me!",
+        "milestones_triggered": [],
+        "care_plan": null
+      },
+      {
+        "day": 2,
+        "plant_id": "plant-monstera-1",
+        "timestamp": "2026-09-02T10:00:00+00:00",
+        "health_status": "healthy",
+        "decision": "NO_ACTION",
+        "companion_message": "I'm feeling great and thriving today! Leaves are happy and soaking up the room. Thanks for checking in on me!",
+        "milestones_triggered": [],
+        "care_plan": null
+      }
+    ]
+  },
+  {
+    "scenario": "severity_increase",
+    "scenario_file": "severity_increase.json",
+    "description": "Same symptom type, severity escalates from mild to severe (expected: CARE_ADVICE_REQUIRED)",
+    "days_processed": 2,
+    "steps": [
+      {
+        "day": 1,
+        "plant_id": "plant-monstera-1",
+        "timestamp": "2026-09-01T10:00:00+00:00",
+        "health_status": "possibly_unhealthy",
+        "decision": "CARE_ADVICE_REQUIRED",
+        "companion_message": "[Template mode \u2014 showing care summary]\nUpdate on Monty:\nSymptoms indicate moisture imbalance.\n\nRecommended actions:\n  \u2022 Check soil moisture.",
+        "milestones_triggered": [
+          {
+            "event_type": "first_symptom",
+            "description": "First health symptoms detected: leaf_yellowing.",
+            "timestamp": "2026-09-01T10:00:00+00:00"
+          }
+        ],
+        "care_plan": {
+          "assessment": "Symptoms indicate moisture imbalance.",
+          "confidence": 0.85,
+          "actions": [
+            {
+              "priority": 1,
+              "action": "Check soil moisture."
+            }
+          ]
+        }
+      },
+      {
+        "day": 2,
+        "plant_id": "plant-monstera-1",
+        "timestamp": "2026-09-02T10:00:00+00:00",
+        "health_status": "unhealthy",
+        "decision": "CARE_ADVICE_REQUIRED",
+        "companion_message": "[Template mode \u2014 showing care summary]\nUpdate on Monty:\nSymptoms indicate moisture imbalance.\n\nRecommended actions:\n  \u2022 Check soil moisture.",
+        "milestones_triggered": [
+          {
+            "event_type": "health_crisis",
+            "description": "Entered critical unhealthy state at 2026-09-02.",
+            "timestamp": "2026-09-02T10:00:00+00:00"
+          }
+        ],
+        "care_plan": {
+          "assessment": "Symptoms indicate moisture imbalance.",
+          "confidence": 0.85,
+          "actions": [
+            {
+              "priority": 1,
+              "action": "Check soil moisture."
+            }
+          ]
+        }
+      }
+    ]
+  }
+]

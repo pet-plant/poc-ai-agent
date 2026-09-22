@@ -1,0 +1,198 @@
+
+################################################################################
+  RUNNING ALL SCENARIOS IN SEQUENCE
+################################################################################
+
+================================================================================
+  SCENARIO: health_status_change (health_status_change.json)
+  Health status flips from healthy to possibly_unhealthy (expected: CARE_ADVICE_REQUIRED)
+================================================================================
+
+  [Day 1] Timestamp: 2026-09-01 10:00:00Z
+  • Observation: status=healthy (conf=0.95) | no symptoms
+  • Trigger:     [NO_ACTION] — Baseline observation recorded as healthy with no symptoms.
+  • Notice:      No action needed. Plant is steady or improving.
+
+  [Day 2] Timestamp: 2026-09-02 10:00:00Z
+  • Observation: status=possibly_unhealthy (conf=0.89) | no symptoms
+  • Trigger:     [CARE_ADVICE_REQUIRED] — Health status worsened from healthy to possibly_unhealthy.
+  • Care Plan:   Assessment: "The transition from healthy to possibly unhealthy status suggests a potential issue such as overwatering or underwatering. Given the lack of specific symptoms, it's important to check soil moisture and adjust watering accordingly." (conf=0.90)
+    Actions:
+      [1] Check if the top 2 inches of soil are dry.
+      [2] Water thoroughly but ensure proper drainage to avoid root rot.
+
+  • Companion Output:
+    I'm feeling a bit tired, my dear. I think I might need some attention. Could you check if the top 2 inches of my soil are dry? If they are, could you give me a good, thorough watering but make sure there's proper drainage so I don't get too soggy underground? It would mean a lot to me!
+
+--------------------------------------------------------------------------------
+  Completed scenario: health_status_change (2 days processed)
+--------------------------------------------------------------------------------
+
+================================================================================
+  SCENARIO: improvement (improvement.json)
+  A known symptom's severity decreases / resolves, nothing new appears (expected: NO_ACTION)
+================================================================================
+
+  [Day 1] Timestamp: 2026-09-01 10:00:00Z
+  • Observation: status=unhealthy (conf=0.92) | leaf_yellowing:severe
+  • Trigger:     [CARE_ADVICE_REQUIRED] — Initial observation detected symptoms or non-healthy status.
+  • Care Plan:   Assessment: "The Monstera deliciosa 'Monty' is experiencing severe leaf yellowing, which is most likely due to overwatering or poor drainage. The recent observations confirm this pattern, with a high confidence level of 0.89." (conf=0.92)
+    Actions:
+      [1] Stop watering immediately and check the soil moisture 2 inches down.
+      [2] Ensure that drainage holes are unblocked to prevent water from pooling in the pot.
+
+  • Companion Output:
+    Oh, dear owner, I feel so tired lately. My leaves are turning yellow, and it's making me really sad. Could you please stop watering for now? Just check how dry my soil is 2 inches down before you water me again. And could you make sure those drainage holes aren't blocked? They're trying their best to keep me healthy but need a bit of help from you!
+
+  [Day 2] Timestamp: 2026-09-02 10:00:00Z
+  • Observation: status=possibly_unhealthy (conf=0.91) | leaf_yellowing:mild
+  • Trigger:     [NO_ACTION] — Health status improved from unhealthy to possibly_unhealthy.
+  • Notice:      No action needed. Plant is steady or improving.
+
+--------------------------------------------------------------------------------
+  Completed scenario: improvement (2 days processed)
+--------------------------------------------------------------------------------
+
+================================================================================
+  SCENARIO: low_confidence (low_confidence.json)
+  Confidence drops below the threshold (expected: REQUEST_MORE_INFORMATION)
+================================================================================
+
+  [Day 1] Timestamp: 2026-09-01 10:00:00Z
+  • Observation: status=healthy (conf=0.90) | no symptoms
+  • Trigger:     [NO_ACTION] — Baseline observation recorded as healthy with no symptoms.
+  • Notice:      No action needed. Plant is steady or improving.
+
+  [Day 2] Timestamp: 2026-09-02 10:00:00Z
+  • Observation: status=unhealthy (conf=0.35) | leaf_yellowing:severe
+  • Trigger:     [REQUEST_MORE_INFORMATION] — Overall confidence 0.35 is below threshold 0.50.
+  • Notice:      Image observation confidence too low. No care plan generated.
+
+--------------------------------------------------------------------------------
+  Completed scenario: low_confidence (2 days processed)
+--------------------------------------------------------------------------------
+
+================================================================================
+  SCENARIO: mixed_multiday (mixed_multiday.json)
+  5-day sequence exercising no change, new symptom, severity increase, improvement, and low confidence (expected: mixed per day)
+================================================================================
+
+  [Day 1] Timestamp: 2026-09-01 10:00:00Z
+  • Observation: status=healthy (conf=0.95) | no symptoms
+  • Trigger:     [NO_ACTION] — Baseline observation recorded as healthy with no symptoms.
+  • Notice:      No action needed. Plant is steady or improving.
+
+  [Day 2] Timestamp: 2026-09-02 10:00:00Z
+  • Observation: status=possibly_unhealthy (conf=0.90) | leaf_yellowing:mild
+  • Trigger:     [CARE_ADVICE_REQUIRED] — Health status worsened from healthy to possibly_unhealthy.
+  • Care Plan:   Assessment: "The Monstera deliciosa is likely experiencing leaf yellowing due to overwatering or poor drainage. This conclusion is supported by the recent observations showing mild leaf yellowing and high confidence in this diagnosis." (conf=0.90)
+    Actions:
+      [1] Stop watering immediately.
+      [2] Check soil moisture 2 inches down and ensure drainage holes are unblocked.
+
+  • Companion Output:
+    Hello there! I've been feeling a bit off lately, and I think it's because you've been watering me a bit too much. My leaves have started to turn a little yellow, which is not good for me at all. Could you please stop watering me immediately? And while you're checking on me, make sure the soil isn't too wet by testing 2 inches down. Also, give my drainage holes a quick look to ensure they're clear of any blockages. Thank you so much! I really appreciate your care and attention.
+
+  [Day 3] Timestamp: 2026-09-03 10:00:00Z
+  • Observation: status=unhealthy (conf=0.92) | leaf_yellowing:severe
+  • Trigger:     [CARE_ADVICE_REQUIRED] — Health status worsened from possibly_unhealthy to unhealthy.
+  • Care Plan:   Assessment: "The Monstera deliciosa named Monty is experiencing severe leaf yellowing due to overwatering and poor drainage, leading to root suffocation and root rot." (conf=0.92)
+    Actions:
+      [1] Stop watering immediately. Check the soil moisture 2 inches down. Allow the soil to dry out thoroughly. Ensure that the drainage holes are unblocked.
+      [2] Monitor the plant's recovery and adjust watering frequency based on soil moisture levels. Resume consistent watering when the top 2 inches of soil are dry.
+
+  • Companion Output:
+    Oh dear, I'm feeling pretty limp these days... It's all because of that overwatering you've been doing. Please, stop right now and let me breathe a bit. Check how moist the soil is about two inches down—wait until it dries out completely before watering again. And make sure those drainage holes are clear too; I need to be able to get some air under my roots! Once I start looking better, we can figure out just right when to water me. Thank you so much for helping me recover.
+
+  [Day 4] Timestamp: 2026-09-04 10:00:00Z
+  • Observation: status=possibly_unhealthy (conf=0.89) | leaf_yellowing:mild
+  • Trigger:     [NO_ACTION] — Health status improved from unhealthy to possibly_unhealthy.
+  • Notice:      No action needed. Plant is steady or improving.
+
+  [Day 5] Timestamp: 2026-09-05 10:00:00Z
+  • Observation: status=possibly_unhealthy (conf=0.40) | leaf_yellowing:mild
+  • Trigger:     [REQUEST_MORE_INFORMATION] — Overall confidence 0.40 is below threshold 0.50.
+  • Notice:      Image observation confidence too low. No care plan generated.
+
+--------------------------------------------------------------------------------
+  Completed scenario: mixed_multiday (5 days processed)
+--------------------------------------------------------------------------------
+
+================================================================================
+  SCENARIO: new_symptom (new_symptom.json)
+  A symptom type appears that wasn't in previous observation (expected: CARE_ADVICE_REQUIRED)
+================================================================================
+
+  [Day 1] Timestamp: 2026-09-01 10:00:00Z
+  • Observation: status=healthy (conf=0.92) | no symptoms
+  • Trigger:     [NO_ACTION] — Baseline observation recorded as healthy with no symptoms.
+  • Notice:      No action needed. Plant is steady or improving.
+
+  [Day 2] Timestamp: 2026-09-02 10:00:00Z
+  • Observation: status=possibly_unhealthy (conf=0.90) | leaf_yellowing:mild
+  • Trigger:     [CARE_ADVICE_REQUIRED] — Health status worsened from healthy to possibly_unhealthy.
+  • Care Plan:   Assessment: "The likely root cause of the observed leaf yellowing is overwatering, as indicated by the pale yellow and limp lower leaves. The plant should be allowed to dry out thoroughly, and drainage issues should be addressed." (conf=0.90)
+    Actions:
+      [1] Stop watering immediately and check soil moisture 2 inches down. Allow the soil to dry out thoroughly.
+      [2] Ensure drainage holes are unblocked and consider repotting if necessary into a pot with better drainage.
+
+  • Companion Output:
+    I'm feeling a bit tired, my dear friend, and I think it's because of too much water. The lower leaves look so limp and yellow now. Can you please stop watering for now and check how dry the soil is 2 inches down? It needs time to breathe and get back to normal. Also, could you make sure those drainage holes are clear and maybe give me a new home with better drainage if needed? I promise we'll both feel much better once I'm taken care of properly.
+
+--------------------------------------------------------------------------------
+  Completed scenario: new_symptom (2 days processed)
+--------------------------------------------------------------------------------
+
+================================================================================
+  SCENARIO: no_change (no_change.json)
+  Same health status, same symptoms, day after day (expected: NO_ACTION)
+================================================================================
+
+  [Day 1] Timestamp: 2026-09-01 10:00:00Z
+  • Observation: status=healthy (conf=0.95) | no symptoms
+  • Trigger:     [NO_ACTION] — Baseline observation recorded as healthy with no symptoms.
+  • Notice:      No action needed. Plant is steady or improving.
+
+  [Day 2] Timestamp: 2026-09-02 10:00:00Z
+  • Observation: status=healthy (conf=0.94) | no symptoms
+  • Trigger:     [NO_ACTION] — No new symptoms, no severity increase, and health status is stable.
+  • Notice:      No action needed. Plant is steady or improving.
+
+--------------------------------------------------------------------------------
+  Completed scenario: no_change (2 days processed)
+--------------------------------------------------------------------------------
+
+================================================================================
+  SCENARIO: severity_increase (severity_increase.json)
+  Same symptom type, severity escalates from mild to severe (expected: CARE_ADVICE_REQUIRED)
+================================================================================
+
+  [Day 1] Timestamp: 2026-09-01 10:00:00Z
+  • Observation: status=possibly_unhealthy (conf=0.88) | leaf_yellowing:mild
+  • Trigger:     [CARE_ADVICE_REQUIRED] — Initial observation detected symptoms or non-healthy status.
+  • Care Plan:   Assessment: "The leaf yellowing is likely due to overwatering or poor drainage, which can lead to root issues such as root rot. The soil may be remaining wet for extended periods." (conf=0.63)
+    Actions:
+      [1] Stop watering immediately and check the soil moisture 2 inches down.
+      [2] Ensure that drainage holes are unblocked to prevent water from pooling at the bottom of the pot.
+
+  • Companion Output:
+    Oh no, my leaves are turning yellow and I feel a bit under the weather. I think it might be because I've been getting too much water lately. Could you please stop watering me for now and check if the soil is still moist 2 inches down? And while you're checking, make sure those drainage holes aren't blocked so that any excess water can flow out freely. I really need to dry out a bit to feel better!
+
+  [Day 2] Timestamp: 2026-09-02 10:00:00Z
+  • Observation: status=unhealthy (conf=0.91) | leaf_yellowing:severe
+  • Trigger:     [CARE_ADVICE_REQUIRED] — Health status worsened from possibly_unhealthy to unhealthy.
+  • Care Plan:   Assessment: "The Monstera deliciosa 'Monty' is experiencing severe leaf yellowing (chlorosis), which is most likely due to overwatering or poor drainage. The symptoms are consistent with the primary cause of overwatering, where lower leaves turn pale and limp while soil remains wet." (conf=0.91)
+    Actions:
+      [1] Stop watering immediately and check if the top 2 inches of soil is dry.
+      [2] Ensure drainage holes are unblocked to prevent water from pooling in the pot.
+
+  • Companion Output:
+    Oh, sweetie, I'm so tired right now. My leaves are turning pale, and they feel all limp. It seems like my roots aren't getting enough air because you've been watering me too much lately. Could you please stop for a bit? Just check if the top 2 inches of soil is dry before giving me any more water. And could you also make sure those drainage holes are clear so no water pools up in my pot and keeps my roots wet? I promise to perk up once I get some fresh air!
+
+--------------------------------------------------------------------------------
+  Completed scenario: severity_increase (2 days processed)
+--------------------------------------------------------------------------------
+
+================================================================================
+  BATCH SUMMARY: 7/7 scenarios completed successfully.
+================================================================================

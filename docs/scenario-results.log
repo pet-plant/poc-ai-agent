@@ -9,20 +9,68 @@
 ================================================================================
 
   [Day 1] Timestamp: 2026-09-01 10:00:00Z
-  • Observation: status=healthy (conf=0.95) | no symptoms
+  • Observation: status=healthy (conf=0.95, consensus=1.00 (5 runs)) | no symptoms
+  • VLM Visual:  posture="upright and firm" | color="vibrant deep green"
   • Trigger:     [NO_ACTION] — Baseline observation recorded as healthy with no symptoms.
-  • Notice:      No action needed. Plant is steady or improving.
+
+  • Companion Output (Plant Voice):
+    I'm feeling great and thriving today! Leaves are happy and soaking up the room. Thanks for checking in on me!
+
+  • Frontend JSON Response:
+{
+    "day": 1,
+    "plant_id": "plant-monstera-1",
+    "timestamp": "2026-09-01T10:00:00+00:00",
+    "health_status": "healthy",
+    "decision": "NO_ACTION",
+    "companion_message": "I'm feeling great and thriving today! Leaves are happy and soaking up the room. Thanks for checking in on me!",
+    "milestones_triggered": [],
+    "care_plan": null
+}
 
   [Day 2] Timestamp: 2026-09-02 10:00:00Z
-  • Observation: status=possibly_unhealthy (conf=0.89) | no symptoms
+  • Observation: status=possibly_unhealthy (conf=0.89, consensus=1.00 (5 runs)) | no symptoms
+  • VLM Visual:  posture="slightly drooping stems" | color="dulling green with slight discoloration"
   • Trigger:     [CARE_ADVICE_REQUIRED] — Health status worsened from healthy to possibly_unhealthy.
-  • Care Plan:   Assessment: "The transition from healthy to possibly unhealthy status suggests a potential issue such as overwatering or underwatering. Given the lack of specific symptoms, it's important to check soil moisture and adjust watering accordingly." (conf=0.90)
-    Actions:
-      [1] Check if the top 2 inches of soil are dry.
-      [2] Water thoroughly but ensure proper drainage to avoid root rot.
 
-  • Companion Output:
-    I'm feeling a bit tired, my dear. I think I might need some attention. Could you check if the top 2 inches of my soil are dry? If they are, could you give me a good, thorough watering but make sure there's proper drainage so I don't get too soggy underground? It would mean a lot to me!
+  • Companion Output (Plant Voice):
+    [Template mode — showing care summary]
+    Update on Monty:
+    Symptoms indicate moisture imbalance.
+
+    Recommended actions:
+      • Check soil moisture.
+
+  • Care Plan:   Assessment: "Symptoms indicate moisture imbalance." (conf=0.85)
+    Actions:
+      [1] Check soil moisture.
+
+  • Frontend JSON Response:
+{
+    "day": 2,
+    "plant_id": "plant-monstera-1",
+    "timestamp": "2026-09-02T10:00:00+00:00",
+    "health_status": "possibly_unhealthy",
+    "decision": "CARE_ADVICE_REQUIRED",
+    "companion_message": "[Template mode \u2014 showing care summary]\nUpdate on Monty:\nSymptoms indicate moisture imbalance.\n\nRecommended actions:\n  \u2022 Check soil moisture.",
+    "milestones_triggered": [
+        {
+            "event_type": "first_symptom",
+            "description": "First health symptoms detected: declining health.",
+            "timestamp": "2026-09-02T10:00:00+00:00"
+        }
+    ],
+    "care_plan": {
+        "assessment": "Symptoms indicate moisture imbalance.",
+        "confidence": 0.85,
+        "actions": [
+            {
+                "priority": 1,
+                "action": "Check soil moisture."
+            }
+        ]
+    }
+}
 
 --------------------------------------------------------------------------------
   Completed scenario: health_status_change (2 days processed)
@@ -34,20 +82,73 @@
 ================================================================================
 
   [Day 1] Timestamp: 2026-09-01 10:00:00Z
-  • Observation: status=unhealthy (conf=0.92) | leaf_yellowing:severe
+  • Observation: status=unhealthy (conf=0.92, consensus=1.00 (5 runs)) | leaf_yellowing:severe
+  • VLM Visual:  posture="heavily drooping" | color="chlorotic yellowing on lower leaves"
   • Trigger:     [CARE_ADVICE_REQUIRED] — Initial observation detected symptoms or non-healthy status.
-  • Care Plan:   Assessment: "The Monstera deliciosa 'Monty' is experiencing severe leaf yellowing, which is most likely due to overwatering or poor drainage. The recent observations confirm this pattern, with a high confidence level of 0.89." (conf=0.92)
-    Actions:
-      [1] Stop watering immediately and check the soil moisture 2 inches down.
-      [2] Ensure that drainage holes are unblocked to prevent water from pooling in the pot.
 
-  • Companion Output:
-    Oh, dear owner, I feel so tired lately. My leaves are turning yellow, and it's making me really sad. Could you please stop watering for now? Just check how dry my soil is 2 inches down before you water me again. And could you make sure those drainage holes aren't blocked? They're trying their best to keep me healthy but need a bit of help from you!
+  • Companion Output (Plant Voice):
+    [Template mode — showing care summary]
+    Update on Monty:
+    Symptoms indicate moisture imbalance.
+
+    Recommended actions:
+      • Check soil moisture.
+
+  • Care Plan:   Assessment: "Symptoms indicate moisture imbalance." (conf=0.85)
+    Actions:
+      [1] Check soil moisture.
+
+  • Frontend JSON Response:
+{
+    "day": 1,
+    "plant_id": "plant-monstera-1",
+    "timestamp": "2026-09-01T10:00:00+00:00",
+    "health_status": "unhealthy",
+    "decision": "CARE_ADVICE_REQUIRED",
+    "companion_message": "[Template mode \u2014 showing care summary]\nUpdate on Monty:\nSymptoms indicate moisture imbalance.\n\nRecommended actions:\n  \u2022 Check soil moisture.",
+    "milestones_triggered": [
+        {
+            "event_type": "first_symptom",
+            "description": "First health symptoms detected: leaf_yellowing.",
+            "timestamp": "2026-09-01T10:00:00+00:00"
+        },
+        {
+            "event_type": "health_crisis",
+            "description": "Entered critical unhealthy state at 2026-09-01.",
+            "timestamp": "2026-09-01T10:00:00+00:00"
+        }
+    ],
+    "care_plan": {
+        "assessment": "Symptoms indicate moisture imbalance.",
+        "confidence": 0.85,
+        "actions": [
+            {
+                "priority": 1,
+                "action": "Check soil moisture."
+            }
+        ]
+    }
+}
 
   [Day 2] Timestamp: 2026-09-02 10:00:00Z
-  • Observation: status=possibly_unhealthy (conf=0.91) | leaf_yellowing:mild
+  • Observation: status=possibly_unhealthy (conf=0.91, consensus=0.95 (5 runs)) | leaf_yellowing:mild
+  • VLM Visual:  posture="rebounding upwards with mild tip droop" | color="greening returning, mild yellowing remaining"
   • Trigger:     [NO_ACTION] — Health status improved from unhealthy to possibly_unhealthy.
-  • Notice:      No action needed. Plant is steady or improving.
+
+  • Companion Output (Plant Voice):
+    I'm feeling much better today and bouncing back! Thanks for taking good care of me.
+
+  • Frontend JSON Response:
+{
+    "day": 2,
+    "plant_id": "plant-monstera-1",
+    "timestamp": "2026-09-02T10:00:00+00:00",
+    "health_status": "possibly_unhealthy",
+    "decision": "NO_ACTION",
+    "companion_message": "I'm feeling much better today and bouncing back! Thanks for taking good care of me.",
+    "milestones_triggered": [],
+    "care_plan": null
+}
 
 --------------------------------------------------------------------------------
   Completed scenario: improvement (2 days processed)
@@ -55,21 +156,240 @@
 
 ================================================================================
   SCENARIO: low_confidence (low_confidence.json)
-  Confidence drops below the threshold (expected: REQUEST_MORE_INFORMATION)
+  Confidence and VLM consensus drop below threshold (expected: REQUEST_MORE_INFORMATION)
 ================================================================================
 
   [Day 1] Timestamp: 2026-09-01 10:00:00Z
-  • Observation: status=healthy (conf=0.90) | no symptoms
+  • Observation: status=healthy (conf=0.90, consensus=1.00 (5 runs)) | no symptoms
+  • VLM Visual:  posture="upright and firm" | color="deep green"
   • Trigger:     [NO_ACTION] — Baseline observation recorded as healthy with no symptoms.
-  • Notice:      No action needed. Plant is steady or improving.
+
+  • Companion Output (Plant Voice):
+    I'm feeling great and thriving today! Leaves are happy and soaking up the room. Thanks for checking in on me!
+
+  • Frontend JSON Response:
+{
+    "day": 1,
+    "plant_id": "plant-monstera-1",
+    "timestamp": "2026-09-01T10:00:00+00:00",
+    "health_status": "healthy",
+    "decision": "NO_ACTION",
+    "companion_message": "I'm feeling great and thriving today! Leaves are happy and soaking up the room. Thanks for checking in on me!",
+    "milestones_triggered": [],
+    "care_plan": null
+}
 
   [Day 2] Timestamp: 2026-09-02 10:00:00Z
-  • Observation: status=unhealthy (conf=0.35) | leaf_yellowing:severe
-  • Trigger:     [REQUEST_MORE_INFORMATION] — Overall confidence 0.35 is below threshold 0.50.
-  • Notice:      Image observation confidence too low. No care plan generated.
+  • Observation: status=unhealthy (conf=0.35, consensus=0.40 (5 runs)) | leaf_yellowing:severe
+  • VLM Visual:  posture="irregular positioning and blurry features" | color="ambiguous color with heavy shadows"
+  • Trigger:     [REQUEST_MORE_INFORMATION] — VLM agreement 0.40 is below threshold 0.50.
+
+  • Companion Output (Plant Voice):
+    Hmm, I couldn't get a clear look at my leaves in that photo — it might be a bit too blurry or dark. Could you snap another clear photo for me?
+
+  • Frontend JSON Response:
+{
+    "day": 2,
+    "plant_id": "plant-monstera-1",
+    "timestamp": "2026-09-02T10:00:00+00:00",
+    "health_status": "unhealthy",
+    "decision": "REQUEST_MORE_INFORMATION",
+    "companion_message": "Hmm, I couldn't get a clear look at my leaves in that photo \u2014 it might be a bit too blurry or dark. Could you snap another clear photo for me?",
+    "milestones_triggered": [],
+    "care_plan": null
+}
 
 --------------------------------------------------------------------------------
   Completed scenario: low_confidence (2 days processed)
+--------------------------------------------------------------------------------
+
+================================================================================
+  SCENARIO: milestone_lifecycle (milestone_lifecycle.json)
+  Multi-day lifecycle demonstrating first_symptom, health_crisis, severe_episode, and full_recovery milestones.
+================================================================================
+
+  [Day 1] Timestamp: 2026-09-01 10:00:00Z
+  • Observation: status=healthy (conf=0.95, consensus=1.00 (5 runs)) | no symptoms
+  • VLM Visual:  posture="upright" | color="vibrant green"
+  • Trigger:     [NO_ACTION] — Baseline observation recorded as healthy with no symptoms.
+
+  • Companion Output (Plant Voice):
+    I'm feeling great and thriving today! Leaves are happy and soaking up the room. Thanks for checking in on me!
+
+  • Frontend JSON Response:
+{
+    "day": 1,
+    "plant_id": "plant-monstera-lifecycle",
+    "timestamp": "2026-09-01T10:00:00+00:00",
+    "health_status": "healthy",
+    "decision": "NO_ACTION",
+    "companion_message": "I'm feeling great and thriving today! Leaves are happy and soaking up the room. Thanks for checking in on me!",
+    "milestones_triggered": [],
+    "care_plan": null
+}
+
+  [Day 2] Timestamp: 2026-09-02 10:00:00Z
+  • Observation: status=possibly_unhealthy (conf=0.92, consensus=1.00 (5 runs)) | leaf_yellowing:mild
+  • VLM Visual:  posture="minor droop" | color="pale green with yellow tips"
+  • Trigger:     [CARE_ADVICE_REQUIRED] — Health status worsened from healthy to possibly_unhealthy.
+
+  • Companion Output (Plant Voice):
+    [Template mode — showing care summary]
+    Update on Monty:
+    Symptoms indicate moisture imbalance.
+
+    Recommended actions:
+      • Check soil moisture.
+
+  • Care Plan:   Assessment: "Symptoms indicate moisture imbalance." (conf=0.85)
+    Actions:
+      [1] Check soil moisture.
+
+  • Frontend JSON Response:
+{
+    "day": 2,
+    "plant_id": "plant-monstera-lifecycle",
+    "timestamp": "2026-09-02T10:00:00+00:00",
+    "health_status": "possibly_unhealthy",
+    "decision": "CARE_ADVICE_REQUIRED",
+    "companion_message": "[Template mode \u2014 showing care summary]\nUpdate on Monty:\nSymptoms indicate moisture imbalance.\n\nRecommended actions:\n  \u2022 Check soil moisture.",
+    "milestones_triggered": [
+        {
+            "event_type": "first_symptom",
+            "description": "First health symptoms detected: leaf_yellowing.",
+            "timestamp": "2026-09-02T10:00:00+00:00"
+        }
+    ],
+    "care_plan": {
+        "assessment": "Symptoms indicate moisture imbalance.",
+        "confidence": 0.85,
+        "actions": [
+            {
+                "priority": 1,
+                "action": "Check soil moisture."
+            }
+        ]
+    }
+}
+
+  [Day 3] Timestamp: 2026-09-03 10:00:00Z
+  • Observation: status=unhealthy (conf=0.94, consensus=1.00 (5 runs)) | brown_spots:severe
+  • VLM Visual:  posture="severe drooping" | color="dark brown patches"
+  • Trigger:     [CARE_ADVICE_REQUIRED] — Health status worsened from possibly_unhealthy to unhealthy.
+
+  • Companion Output (Plant Voice):
+    [Template mode — showing care summary]
+    Update on Monty:
+    Symptoms indicate moisture imbalance.
+
+    Recommended actions:
+      • Check soil moisture.
+
+  • Care Plan:   Assessment: "Symptoms indicate moisture imbalance." (conf=0.85)
+    Actions:
+      [1] Check soil moisture.
+
+  • Frontend JSON Response:
+{
+    "day": 3,
+    "plant_id": "plant-monstera-lifecycle",
+    "timestamp": "2026-09-03T10:00:00+00:00",
+    "health_status": "unhealthy",
+    "decision": "CARE_ADVICE_REQUIRED",
+    "companion_message": "[Template mode \u2014 showing care summary]\nUpdate on Monty:\nSymptoms indicate moisture imbalance.\n\nRecommended actions:\n  \u2022 Check soil moisture.",
+    "milestones_triggered": [
+        {
+            "event_type": "health_crisis",
+            "description": "Entered critical unhealthy state at 2026-09-03.",
+            "timestamp": "2026-09-03T10:00:00+00:00"
+        }
+    ],
+    "care_plan": {
+        "assessment": "Symptoms indicate moisture imbalance.",
+        "confidence": 0.85,
+        "actions": [
+            {
+                "priority": 1,
+                "action": "Check soil moisture."
+            }
+        ]
+    }
+}
+
+  [Day 4] Timestamp: 2026-09-04 10:00:00Z
+  • Observation: status=unhealthy (conf=0.93, consensus=1.00 (5 runs)) | brown_spots:severe
+  • VLM Visual:  posture="severe drooping" | color="dark brown patches expanding"
+  • Trigger:     [NO_ACTION] — No new symptoms, no severity increase, and health status is stable.
+
+  • Companion Output (Plant Voice):
+    I'm feeling great and thriving today! Leaves are happy and soaking up the room. Thanks for checking in on me!
+
+  • Frontend JSON Response:
+{
+    "day": 4,
+    "plant_id": "plant-monstera-lifecycle",
+    "timestamp": "2026-09-04T10:00:00+00:00",
+    "health_status": "unhealthy",
+    "decision": "NO_ACTION",
+    "companion_message": "I'm feeling great and thriving today! Leaves are happy and soaking up the room. Thanks for checking in on me!",
+    "milestones_triggered": [],
+    "care_plan": null
+}
+
+  [Day 5] Timestamp: 2026-09-05 10:00:00Z
+  • Observation: status=unhealthy (conf=0.92, consensus=1.00 (5 runs)) | brown_spots:severe
+  • VLM Visual:  posture="severe drooping and wilting" | color="dark brown patches across lower foliage"
+  • Trigger:     [NO_ACTION] — No new symptoms, no severity increase, and health status is stable.
+
+  • Companion Output (Plant Voice):
+    I'm feeling great and thriving today! Leaves are happy and soaking up the room. Thanks for checking in on me!
+
+  • Frontend JSON Response:
+{
+    "day": 5,
+    "plant_id": "plant-monstera-lifecycle",
+    "timestamp": "2026-09-05T10:00:00+00:00",
+    "health_status": "unhealthy",
+    "decision": "NO_ACTION",
+    "companion_message": "I'm feeling great and thriving today! Leaves are happy and soaking up the room. Thanks for checking in on me!",
+    "milestones_triggered": [
+        {
+            "event_type": "severe_episode",
+            "description": "Persistent severe health crisis for 3 consecutive days.",
+            "timestamp": "2026-09-05T10:00:00+00:00"
+        }
+    ],
+    "care_plan": null
+}
+
+  [Day 6] Timestamp: 2026-09-06 10:00:00Z
+  • Observation: status=healthy (conf=0.96, consensus=1.00 (5 runs)) | no symptoms
+  • VLM Visual:  posture="upright and firm" | color="healthy fresh green growth"
+  • Trigger:     [NO_ACTION] — Health status improved from unhealthy to healthy.
+
+  • Companion Output (Plant Voice):
+    I'm feeling much better today and bouncing back! Thanks for taking good care of me.
+
+  • Frontend JSON Response:
+{
+    "day": 6,
+    "plant_id": "plant-monstera-lifecycle",
+    "timestamp": "2026-09-06T10:00:00+00:00",
+    "health_status": "healthy",
+    "decision": "NO_ACTION",
+    "companion_message": "I'm feeling much better today and bouncing back! Thanks for taking good care of me.",
+    "milestones_triggered": [
+        {
+            "event_type": "full_recovery",
+            "description": "Full recovery back to healthy status on 2026-09-06.",
+            "timestamp": "2026-09-06T10:00:00+00:00"
+        }
+    ],
+    "care_plan": null
+}
+
+--------------------------------------------------------------------------------
+  Completed scenario: milestone_lifecycle (6 days processed)
 --------------------------------------------------------------------------------
 
 ================================================================================
@@ -78,41 +398,152 @@
 ================================================================================
 
   [Day 1] Timestamp: 2026-09-01 10:00:00Z
-  • Observation: status=healthy (conf=0.95) | no symptoms
+  • Observation: status=healthy (conf=0.95, consensus=1.00 (5 runs)) | no symptoms
+  • VLM Visual:  posture="upright and firm" | color="vibrant deep green"
   • Trigger:     [NO_ACTION] — Baseline observation recorded as healthy with no symptoms.
-  • Notice:      No action needed. Plant is steady or improving.
+
+  • Companion Output (Plant Voice):
+    I'm feeling great and thriving today! Leaves are happy and soaking up the room. Thanks for checking in on me!
+
+  • Frontend JSON Response:
+{
+    "day": 1,
+    "plant_id": "plant-monstera-1",
+    "timestamp": "2026-09-01T10:00:00+00:00",
+    "health_status": "healthy",
+    "decision": "NO_ACTION",
+    "companion_message": "I'm feeling great and thriving today! Leaves are happy and soaking up the room. Thanks for checking in on me!",
+    "milestones_triggered": [],
+    "care_plan": null
+}
 
   [Day 2] Timestamp: 2026-09-02 10:00:00Z
-  • Observation: status=possibly_unhealthy (conf=0.90) | leaf_yellowing:mild
+  • Observation: status=possibly_unhealthy (conf=0.90, consensus=1.00 (5 runs)) | leaf_yellowing:mild
+  • VLM Visual:  posture="mild drooping stems" | color="pale green with early yellowing on tips"
   • Trigger:     [CARE_ADVICE_REQUIRED] — Health status worsened from healthy to possibly_unhealthy.
-  • Care Plan:   Assessment: "The Monstera deliciosa is likely experiencing leaf yellowing due to overwatering or poor drainage. This conclusion is supported by the recent observations showing mild leaf yellowing and high confidence in this diagnosis." (conf=0.90)
-    Actions:
-      [1] Stop watering immediately.
-      [2] Check soil moisture 2 inches down and ensure drainage holes are unblocked.
 
-  • Companion Output:
-    Hello there! I've been feeling a bit off lately, and I think it's because you've been watering me a bit too much. My leaves have started to turn a little yellow, which is not good for me at all. Could you please stop watering me immediately? And while you're checking on me, make sure the soil isn't too wet by testing 2 inches down. Also, give my drainage holes a quick look to ensure they're clear of any blockages. Thank you so much! I really appreciate your care and attention.
+  • Companion Output (Plant Voice):
+    [Template mode — showing care summary]
+    Update on Monty:
+    Symptoms indicate moisture imbalance.
+
+    Recommended actions:
+      • Check soil moisture.
+
+  • Care Plan:   Assessment: "Symptoms indicate moisture imbalance." (conf=0.85)
+    Actions:
+      [1] Check soil moisture.
+
+  • Frontend JSON Response:
+{
+    "day": 2,
+    "plant_id": "plant-monstera-1",
+    "timestamp": "2026-09-02T10:00:00+00:00",
+    "health_status": "possibly_unhealthy",
+    "decision": "CARE_ADVICE_REQUIRED",
+    "companion_message": "[Template mode \u2014 showing care summary]\nUpdate on Monty:\nSymptoms indicate moisture imbalance.\n\nRecommended actions:\n  \u2022 Check soil moisture.",
+    "milestones_triggered": [
+        {
+            "event_type": "first_symptom",
+            "description": "First health symptoms detected: leaf_yellowing.",
+            "timestamp": "2026-09-02T10:00:00+00:00"
+        }
+    ],
+    "care_plan": {
+        "assessment": "Symptoms indicate moisture imbalance.",
+        "confidence": 0.85,
+        "actions": [
+            {
+                "priority": 1,
+                "action": "Check soil moisture."
+            }
+        ]
+    }
+}
 
   [Day 3] Timestamp: 2026-09-03 10:00:00Z
-  • Observation: status=unhealthy (conf=0.92) | leaf_yellowing:severe
+  • Observation: status=unhealthy (conf=0.92, consensus=1.00 (5 runs)) | leaf_yellowing:severe
+  • VLM Visual:  posture="heavily drooping and bent towards the floor" | color="severe chlorosis and brown necrotic margins"
   • Trigger:     [CARE_ADVICE_REQUIRED] — Health status worsened from possibly_unhealthy to unhealthy.
-  • Care Plan:   Assessment: "The Monstera deliciosa named Monty is experiencing severe leaf yellowing due to overwatering and poor drainage, leading to root suffocation and root rot." (conf=0.92)
-    Actions:
-      [1] Stop watering immediately. Check the soil moisture 2 inches down. Allow the soil to dry out thoroughly. Ensure that the drainage holes are unblocked.
-      [2] Monitor the plant's recovery and adjust watering frequency based on soil moisture levels. Resume consistent watering when the top 2 inches of soil are dry.
 
-  • Companion Output:
-    Oh dear, I'm feeling pretty limp these days... It's all because of that overwatering you've been doing. Please, stop right now and let me breathe a bit. Check how moist the soil is about two inches down—wait until it dries out completely before watering again. And make sure those drainage holes are clear too; I need to be able to get some air under my roots! Once I start looking better, we can figure out just right when to water me. Thank you so much for helping me recover.
+  • Companion Output (Plant Voice):
+    [Template mode — showing care summary]
+    Update on Monty:
+    Symptoms indicate moisture imbalance.
+
+    Recommended actions:
+      • Check soil moisture.
+
+  • Care Plan:   Assessment: "Symptoms indicate moisture imbalance." (conf=0.85)
+    Actions:
+      [1] Check soil moisture.
+
+  • Frontend JSON Response:
+{
+    "day": 3,
+    "plant_id": "plant-monstera-1",
+    "timestamp": "2026-09-03T10:00:00+00:00",
+    "health_status": "unhealthy",
+    "decision": "CARE_ADVICE_REQUIRED",
+    "companion_message": "[Template mode \u2014 showing care summary]\nUpdate on Monty:\nSymptoms indicate moisture imbalance.\n\nRecommended actions:\n  \u2022 Check soil moisture.",
+    "milestones_triggered": [
+        {
+            "event_type": "health_crisis",
+            "description": "Entered critical unhealthy state at 2026-09-03.",
+            "timestamp": "2026-09-03T10:00:00+00:00"
+        }
+    ],
+    "care_plan": {
+        "assessment": "Symptoms indicate moisture imbalance.",
+        "confidence": 0.85,
+        "actions": [
+            {
+                "priority": 1,
+                "action": "Check soil moisture."
+            }
+        ]
+    }
+}
 
   [Day 4] Timestamp: 2026-09-04 10:00:00Z
-  • Observation: status=possibly_unhealthy (conf=0.89) | leaf_yellowing:mild
+  • Observation: status=possibly_unhealthy (conf=0.89, consensus=0.95 (5 runs)) | leaf_yellowing:mild
+  • VLM Visual:  posture="rebounding upwards with mild tip droop" | color="greening returning, mild yellowing remaining"
   • Trigger:     [NO_ACTION] — Health status improved from unhealthy to possibly_unhealthy.
-  • Notice:      No action needed. Plant is steady or improving.
+
+  • Companion Output (Plant Voice):
+    I'm feeling much better today and bouncing back! Thanks for taking good care of me.
+
+  • Frontend JSON Response:
+{
+    "day": 4,
+    "plant_id": "plant-monstera-1",
+    "timestamp": "2026-09-04T10:00:00+00:00",
+    "health_status": "possibly_unhealthy",
+    "decision": "NO_ACTION",
+    "companion_message": "I'm feeling much better today and bouncing back! Thanks for taking good care of me.",
+    "milestones_triggered": [],
+    "care_plan": null
+}
 
   [Day 5] Timestamp: 2026-09-05 10:00:00Z
-  • Observation: status=possibly_unhealthy (conf=0.40) | leaf_yellowing:mild
-  • Trigger:     [REQUEST_MORE_INFORMATION] — Overall confidence 0.40 is below threshold 0.50.
-  • Notice:      Image observation confidence too low. No care plan generated.
+  • Observation: status=possibly_unhealthy (conf=0.40, consensus=0.40 (5 runs)) | leaf_yellowing:mild
+  • VLM Visual:  posture="indistinct leaf posture due to bad lighting" | color="unclear color tones and heavy contrast"
+  • Trigger:     [REQUEST_MORE_INFORMATION] — VLM agreement 0.40 is below threshold 0.50.
+
+  • Companion Output (Plant Voice):
+    Hmm, I couldn't get a clear look at my leaves in that photo — it might be a bit too blurry or dark. Could you snap another clear photo for me?
+
+  • Frontend JSON Response:
+{
+    "day": 5,
+    "plant_id": "plant-monstera-1",
+    "timestamp": "2026-09-05T10:00:00+00:00",
+    "health_status": "possibly_unhealthy",
+    "decision": "REQUEST_MORE_INFORMATION",
+    "companion_message": "Hmm, I couldn't get a clear look at my leaves in that photo \u2014 it might be a bit too blurry or dark. Could you snap another clear photo for me?",
+    "milestones_triggered": [],
+    "care_plan": null
+}
 
 --------------------------------------------------------------------------------
   Completed scenario: mixed_multiday (5 days processed)
@@ -124,20 +555,68 @@
 ================================================================================
 
   [Day 1] Timestamp: 2026-09-01 10:00:00Z
-  • Observation: status=healthy (conf=0.92) | no symptoms
+  • Observation: status=healthy (conf=0.92, consensus=1.00 (5 runs)) | no symptoms
+  • VLM Visual:  posture="upright and rigid" | color="lush green"
   • Trigger:     [NO_ACTION] — Baseline observation recorded as healthy with no symptoms.
-  • Notice:      No action needed. Plant is steady or improving.
+
+  • Companion Output (Plant Voice):
+    I'm feeling great and thriving today! Leaves are happy and soaking up the room. Thanks for checking in on me!
+
+  • Frontend JSON Response:
+{
+    "day": 1,
+    "plant_id": "plant-monstera-1",
+    "timestamp": "2026-09-01T10:00:00+00:00",
+    "health_status": "healthy",
+    "decision": "NO_ACTION",
+    "companion_message": "I'm feeling great and thriving today! Leaves are happy and soaking up the room. Thanks for checking in on me!",
+    "milestones_triggered": [],
+    "care_plan": null
+}
 
   [Day 2] Timestamp: 2026-09-02 10:00:00Z
-  • Observation: status=possibly_unhealthy (conf=0.90) | leaf_yellowing:mild
+  • Observation: status=possibly_unhealthy (conf=0.90, consensus=0.95 (5 runs)) | leaf_yellowing:mild
+  • VLM Visual:  posture="minor drooping at leaf margins" | color="pale green with early yellowing on tips"
   • Trigger:     [CARE_ADVICE_REQUIRED] — Health status worsened from healthy to possibly_unhealthy.
-  • Care Plan:   Assessment: "The likely root cause of the observed leaf yellowing is overwatering, as indicated by the pale yellow and limp lower leaves. The plant should be allowed to dry out thoroughly, and drainage issues should be addressed." (conf=0.90)
-    Actions:
-      [1] Stop watering immediately and check soil moisture 2 inches down. Allow the soil to dry out thoroughly.
-      [2] Ensure drainage holes are unblocked and consider repotting if necessary into a pot with better drainage.
 
-  • Companion Output:
-    I'm feeling a bit tired, my dear friend, and I think it's because of too much water. The lower leaves look so limp and yellow now. Can you please stop watering for now and check how dry the soil is 2 inches down? It needs time to breathe and get back to normal. Also, could you make sure those drainage holes are clear and maybe give me a new home with better drainage if needed? I promise we'll both feel much better once I'm taken care of properly.
+  • Companion Output (Plant Voice):
+    [Template mode — showing care summary]
+    Update on Monty:
+    Symptoms indicate moisture imbalance.
+
+    Recommended actions:
+      • Check soil moisture.
+
+  • Care Plan:   Assessment: "Symptoms indicate moisture imbalance." (conf=0.85)
+    Actions:
+      [1] Check soil moisture.
+
+  • Frontend JSON Response:
+{
+    "day": 2,
+    "plant_id": "plant-monstera-1",
+    "timestamp": "2026-09-02T10:00:00+00:00",
+    "health_status": "possibly_unhealthy",
+    "decision": "CARE_ADVICE_REQUIRED",
+    "companion_message": "[Template mode \u2014 showing care summary]\nUpdate on Monty:\nSymptoms indicate moisture imbalance.\n\nRecommended actions:\n  \u2022 Check soil moisture.",
+    "milestones_triggered": [
+        {
+            "event_type": "first_symptom",
+            "description": "First health symptoms detected: leaf_yellowing.",
+            "timestamp": "2026-09-02T10:00:00+00:00"
+        }
+    ],
+    "care_plan": {
+        "assessment": "Symptoms indicate moisture imbalance.",
+        "confidence": 0.85,
+        "actions": [
+            {
+                "priority": 1,
+                "action": "Check soil moisture."
+            }
+        ]
+    }
+}
 
 --------------------------------------------------------------------------------
   Completed scenario: new_symptom (2 days processed)
@@ -149,14 +628,44 @@
 ================================================================================
 
   [Day 1] Timestamp: 2026-09-01 10:00:00Z
-  • Observation: status=healthy (conf=0.95) | no symptoms
+  • Observation: status=healthy (conf=0.95, consensus=1.00 (5 runs)) | no symptoms
+  • VLM Visual:  posture="upright and firm" | color="vibrant deep green"
   • Trigger:     [NO_ACTION] — Baseline observation recorded as healthy with no symptoms.
-  • Notice:      No action needed. Plant is steady or improving.
+
+  • Companion Output (Plant Voice):
+    I'm feeling great and thriving today! Leaves are happy and soaking up the room. Thanks for checking in on me!
+
+  • Frontend JSON Response:
+{
+    "day": 1,
+    "plant_id": "plant-monstera-1",
+    "timestamp": "2026-09-01T10:00:00+00:00",
+    "health_status": "healthy",
+    "decision": "NO_ACTION",
+    "companion_message": "I'm feeling great and thriving today! Leaves are happy and soaking up the room. Thanks for checking in on me!",
+    "milestones_triggered": [],
+    "care_plan": null
+}
 
   [Day 2] Timestamp: 2026-09-02 10:00:00Z
-  • Observation: status=healthy (conf=0.94) | no symptoms
+  • Observation: status=healthy (conf=0.94, consensus=1.00 (5 runs)) | no symptoms
+  • VLM Visual:  posture="upright and firm" | color="vibrant deep green"
   • Trigger:     [NO_ACTION] — No new symptoms, no severity increase, and health status is stable.
-  • Notice:      No action needed. Plant is steady or improving.
+
+  • Companion Output (Plant Voice):
+    I'm feeling great and thriving today! Leaves are happy and soaking up the room. Thanks for checking in on me!
+
+  • Frontend JSON Response:
+{
+    "day": 2,
+    "plant_id": "plant-monstera-1",
+    "timestamp": "2026-09-02T10:00:00+00:00",
+    "health_status": "healthy",
+    "decision": "NO_ACTION",
+    "companion_message": "I'm feeling great and thriving today! Leaves are happy and soaking up the room. Thanks for checking in on me!",
+    "milestones_triggered": [],
+    "care_plan": null
+}
 
 --------------------------------------------------------------------------------
   Completed scenario: no_change (2 days processed)
@@ -168,32 +677,98 @@
 ================================================================================
 
   [Day 1] Timestamp: 2026-09-01 10:00:00Z
-  • Observation: status=possibly_unhealthy (conf=0.88) | leaf_yellowing:mild
+  • Observation: status=possibly_unhealthy (conf=0.88, consensus=0.90 (5 runs)) | leaf_yellowing:mild
+  • VLM Visual:  posture="mild drooping" | color="dark green with slight yellow tips"
   • Trigger:     [CARE_ADVICE_REQUIRED] — Initial observation detected symptoms or non-healthy status.
-  • Care Plan:   Assessment: "The leaf yellowing is likely due to overwatering or poor drainage, which can lead to root issues such as root rot. The soil may be remaining wet for extended periods." (conf=0.63)
-    Actions:
-      [1] Stop watering immediately and check the soil moisture 2 inches down.
-      [2] Ensure that drainage holes are unblocked to prevent water from pooling at the bottom of the pot.
 
-  • Companion Output:
-    Oh no, my leaves are turning yellow and I feel a bit under the weather. I think it might be because I've been getting too much water lately. Could you please stop watering me for now and check if the soil is still moist 2 inches down? And while you're checking, make sure those drainage holes aren't blocked so that any excess water can flow out freely. I really need to dry out a bit to feel better!
+  • Companion Output (Plant Voice):
+    [Template mode — showing care summary]
+    Update on Monty:
+    Symptoms indicate moisture imbalance.
+
+    Recommended actions:
+      • Check soil moisture.
+
+  • Care Plan:   Assessment: "Symptoms indicate moisture imbalance." (conf=0.85)
+    Actions:
+      [1] Check soil moisture.
+
+  • Frontend JSON Response:
+{
+    "day": 1,
+    "plant_id": "plant-monstera-1",
+    "timestamp": "2026-09-01T10:00:00+00:00",
+    "health_status": "possibly_unhealthy",
+    "decision": "CARE_ADVICE_REQUIRED",
+    "companion_message": "[Template mode \u2014 showing care summary]\nUpdate on Monty:\nSymptoms indicate moisture imbalance.\n\nRecommended actions:\n  \u2022 Check soil moisture.",
+    "milestones_triggered": [
+        {
+            "event_type": "first_symptom",
+            "description": "First health symptoms detected: leaf_yellowing.",
+            "timestamp": "2026-09-01T10:00:00+00:00"
+        }
+    ],
+    "care_plan": {
+        "assessment": "Symptoms indicate moisture imbalance.",
+        "confidence": 0.85,
+        "actions": [
+            {
+                "priority": 1,
+                "action": "Check soil moisture."
+            }
+        ]
+    }
+}
 
   [Day 2] Timestamp: 2026-09-02 10:00:00Z
-  • Observation: status=unhealthy (conf=0.91) | leaf_yellowing:severe
+  • Observation: status=unhealthy (conf=0.91, consensus=1.00 (5 runs)) | leaf_yellowing:severe
+  • VLM Visual:  posture="heavily drooping and bent towards the floor" | color="severe chlorosis and brown necrotic margins"
   • Trigger:     [CARE_ADVICE_REQUIRED] — Health status worsened from possibly_unhealthy to unhealthy.
-  • Care Plan:   Assessment: "The Monstera deliciosa 'Monty' is experiencing severe leaf yellowing (chlorosis), which is most likely due to overwatering or poor drainage. The symptoms are consistent with the primary cause of overwatering, where lower leaves turn pale and limp while soil remains wet." (conf=0.91)
-    Actions:
-      [1] Stop watering immediately and check if the top 2 inches of soil is dry.
-      [2] Ensure drainage holes are unblocked to prevent water from pooling in the pot.
 
-  • Companion Output:
-    Oh, sweetie, I'm so tired right now. My leaves are turning pale, and they feel all limp. It seems like my roots aren't getting enough air because you've been watering me too much lately. Could you please stop for a bit? Just check if the top 2 inches of soil is dry before giving me any more water. And could you also make sure those drainage holes are clear so no water pools up in my pot and keeps my roots wet? I promise to perk up once I get some fresh air!
+  • Companion Output (Plant Voice):
+    [Template mode — showing care summary]
+    Update on Monty:
+    Symptoms indicate moisture imbalance.
+
+    Recommended actions:
+      • Check soil moisture.
+
+  • Care Plan:   Assessment: "Symptoms indicate moisture imbalance." (conf=0.85)
+    Actions:
+      [1] Check soil moisture.
+
+  • Frontend JSON Response:
+{
+    "day": 2,
+    "plant_id": "plant-monstera-1",
+    "timestamp": "2026-09-02T10:00:00+00:00",
+    "health_status": "unhealthy",
+    "decision": "CARE_ADVICE_REQUIRED",
+    "companion_message": "[Template mode \u2014 showing care summary]\nUpdate on Monty:\nSymptoms indicate moisture imbalance.\n\nRecommended actions:\n  \u2022 Check soil moisture.",
+    "milestones_triggered": [
+        {
+            "event_type": "health_crisis",
+            "description": "Entered critical unhealthy state at 2026-09-02.",
+            "timestamp": "2026-09-02T10:00:00+00:00"
+        }
+    ],
+    "care_plan": {
+        "assessment": "Symptoms indicate moisture imbalance.",
+        "confidence": 0.85,
+        "actions": [
+            {
+                "priority": 1,
+                "action": "Check soil moisture."
+            }
+        ]
+    }
+}
 
 --------------------------------------------------------------------------------
   Completed scenario: severity_increase (2 days processed)
 --------------------------------------------------------------------------------
 
 ================================================================================
-  BATCH SUMMARY: 7/7 scenarios completed successfully.
+  BATCH SUMMARY: 8/8 scenarios completed successfully.
 ================================================================================
 

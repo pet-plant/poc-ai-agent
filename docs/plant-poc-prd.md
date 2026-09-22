@@ -1,7 +1,19 @@
 # PRD — POC: Post-VLM Pipeline (Event Engine → Knowledge RAG → Care Advisor → Companion)
 
-**Status:** Draft for agent-driven implementation
-**Scope:** Proof of concept only. Not production. No auth, no multi-tenant concerns, no MinIO/object storage, no real device integration.
+> [!WARNING]
+> **SUPERSEDED / HISTORICAL SPECIFICATION**
+> This initial draft PRD has been superseded by the approved production architecture and active implementation.
+> Please refer to:
+> - **System Architecture & Data Flow (SSOT):** [docs/production-architecture.md](file:///Users/tinnapatplangsri/Documents/UTS%20semester%203/Industry%20project/codebase/poc-ai-agent/docs/production-architecture.md)
+> - **POC Implementation & Execution Guide:** [README.md](file:///Users/tinnapatplangsri/Documents/UTS%20semester%203/Industry%20project/codebase/poc-ai-agent/README.md)
+>
+> **Key obsolete items in this document:**
+> 1. **5-Table Schema** with separate `diagnoses` and `care_events` (superseded by unified 4-table schema with `plant_milestones`).
+> 2. **Branch A** (`REQUEST_MORE_INFORMATION` user notification loop) (superseded by upstream VLM blur/consensus retake loop).
+> 3. **Minimal Observation Schema** (superseded by production VLM probe schema).
+
+**Status:** Superseded / Historical Reference
+**Scope:** Initial Proof of Concept Draft.
 
 ---
 

@@ -8,40 +8,20 @@
       "timestamp": "2026-09-01T10:00:00Z",
       "health_status": "healthy",
       "confidence": 0.92,
-      "consensus": {
-        "agreement": 1.0,
-        "runs": 5,
-        "model_stated_average": 0.92
-      },
-      "leaf_posture": "upright and rigid",
-      "leaf_color_detail": "lush green",
-      "observations": [],
-      "image_refs": [
-        "file:///images/monstera_day1.jpg"
-      ]
+      "observations": []
     },
     {
       "plant_id": "plant-monstera-1",
       "species": "Monstera deliciosa",
       "timestamp": "2026-09-02T10:00:00Z",
       "health_status": "possibly_unhealthy",
-      "confidence": 0.90,
-      "consensus": {
-        "agreement": 0.95,
-        "runs": 5,
-        "model_stated_average": 0.90
-      },
-      "leaf_posture": "minor drooping at leaf margins",
-      "leaf_color_detail": "pale green with early yellowing on tips",
+      "confidence": 0.9,
       "observations": [
         {
           "type": "leaf_yellowing",
           "severity": "mild",
           "confidence": 0.88
         }
-      ],
-      "image_refs": [
-        "file:///images/monstera_day2.jpg"
       ]
     }
   ]

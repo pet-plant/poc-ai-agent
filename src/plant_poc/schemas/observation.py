@@ -1,8 +1,7 @@
-"""Observation and plant profile schemas matching PRD §3 and §4."""
+"""Pydantic schemas representing input from the VLM and internal plant state."""
 
 from datetime import datetime
 from enum import Enum
-from typing import Literal
 from pydantic import BaseModel, Field
 
 
@@ -13,20 +12,23 @@ class HealthStatus(str, Enum):
 
 
 class Observation(BaseModel):
-    type: str  # e.g. "leaf_yellowing", "drooping", "brown_spots"
-    severity: Literal["mild", "moderate", "severe"]
+    type: str  # e.g. "leaf_yellowing", "dry_tips", "drooping"
+    severity: str  # "mild", "moderate", "severe"
     confidence: float = Field(ge=0.0, le=1.0)
 
 
 class VLMConsensus(BaseModel):
-    """Consensus metadata computed across multiple VLM runs."""
-
+    """Consensus data from upstream VLM multi-run evaluation."""
     agreement: float = Field(
         ge=0.0,
         le=1.0,
-        description="Inter-run agreement ratio (1.0 = all runs agreed)",
+        description="Fraction of runs that agreed on the health assessment (0.0 to 1.0)",
     )
-    runs: int = Field(ge=1, description="Number of VLM inference runs executed")
+    runs: int = Field(
+        default=5,
+        ge=1,
+        description="Number of parallel VLM inference runs executed",
+    )
     model_stated_average: float = Field(
         ge=0.0,
         le=1.0,
@@ -59,6 +61,10 @@ class VLMObservation(BaseModel):
     image_refs: list[str] = Field(
         default_factory=list,
         description="URIs/paths of images analyzed by VLM (for audit trail)",
+    )
+    companion_message: str | None = Field(
+        default=None,
+        description="Companion plant dialogue message generated for this observation",
     )
 
 

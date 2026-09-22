@@ -8,22 +8,12 @@
       "timestamp": "2026-09-01T10:00:00Z",
       "health_status": "possibly_unhealthy",
       "confidence": 0.88,
-      "consensus": {
-        "agreement": 0.90,
-        "runs": 5,
-        "model_stated_average": 0.88
-      },
-      "leaf_posture": "mild drooping",
-      "leaf_color_detail": "dark green with slight yellow tips",
       "observations": [
         {
           "type": "leaf_yellowing",
           "severity": "mild",
           "confidence": 0.85
         }
-      ],
-      "image_refs": [
-        "file:///images/monstera_day1.jpg"
       ]
     },
     {
@@ -32,22 +22,12 @@
       "timestamp": "2026-09-02T10:00:00Z",
       "health_status": "unhealthy",
       "confidence": 0.91,
-      "consensus": {
-        "agreement": 1.0,
-        "runs": 5,
-        "model_stated_average": 0.91
-      },
-      "leaf_posture": "heavily drooping and bent towards the floor",
-      "leaf_color_detail": "severe chlorosis and brown necrotic margins",
       "observations": [
         {
           "type": "leaf_yellowing",
           "severity": "severe",
-          "confidence": 0.90
+          "confidence": 0.9
         }
-      ],
-      "image_refs": [
-        "file:///images/monstera_day2.jpg"
       ]
     }
   ]

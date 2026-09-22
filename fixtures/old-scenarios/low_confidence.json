@@ -1,0 +1,28 @@
+{
+  "scenario": "low_confidence",
+  "description": "Confidence drops below the threshold (expected: REQUEST_MORE_INFORMATION)",
+  "observations": [
+    {
+      "plant_id": "plant-monstera-1",
+      "species": "Monstera deliciosa",
+      "timestamp": "2026-09-01T10:00:00Z",
+      "health_status": "healthy",
+      "confidence": 0.9,
+      "observations": []
+    },
+    {
+      "plant_id": "plant-monstera-1",
+      "species": "Monstera deliciosa",
+      "timestamp": "2026-09-02T10:00:00Z",
+      "health_status": "unhealthy",
+      "confidence": 0.35,
+      "observations": [
+        {
+          "type": "leaf_yellowing",
+          "severity": "severe",
+          "confidence": 0.3
+        }
+      ]
+    }
+  ]
+}

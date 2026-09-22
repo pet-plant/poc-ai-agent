@@ -17,6 +17,10 @@ from plant_poc.schemas.knowledge import (
     KnowledgeChunk,
     SearchResult,
 )
+from plant_poc.schemas.milestone import (
+    MilestoneType,
+    PlantMilestone,
+)
 
 __all__ = [
     "HealthStatus",
@@ -30,4 +34,6 @@ __all__ = [
     "CarePlan",
     "KnowledgeChunk",
     "SearchResult",
+    "MilestoneType",
+    "PlantMilestone",
 ]

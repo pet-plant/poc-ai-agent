@@ -75,3 +75,69 @@ def test_companion_llm_mode_with_validation_fallback():
 
     # Fallback template must contain the action
     assert "Check moisture 2 inches down." in text
+
+def test_companion_two_tier_memory_injection():
+    from datetime import datetime
+    from plant_poc.schemas import VLMObservation, Observation, HealthStatus, PlantMilestone, MilestoneType
+
+    plan = CarePlan(
+        plant_id="plant-1",
+        assessment="Leaves yellowing again.",
+        confidence=0.9,
+        actions=[CareAction(action="Hold watering for 3 days.", priority=1)],
+    )
+    profile = PlantProfile(
+        plant_id="plant-1",
+        species="Monstera deliciosa",
+        nickname="Monty",
+        location="Living Room",
+    )
+
+    recent_obs = [
+        VLMObservation(
+            plant_id="plant-1",
+            timestamp=datetime(2026, 9, 1),
+            health_status=HealthStatus.HEALTHY,
+            confidence=0.95,
+        ),
+        VLMObservation(
+            plant_id="plant-1",
+            timestamp=datetime(2026, 9, 2),
+            health_status=HealthStatus.POSSIBLY_UNHEALTHY,
+            confidence=0.9,
+            observations=[Observation(type="leaf_yellowing", severity="mild", confidence=0.9)],
+        ),
+    ]
+
+    milestones = [
+        PlantMilestone(
+            plant_id="plant-1",
+            timestamp=datetime(2026, 3, 10),
+            event_type=MilestoneType.SEVERE_EPISODE,
+            description="Persistent severe root rot for 5 days.",
+        )
+    ]
+
+    captured_prompts = []
+
+    class CapturingMockLLM(MockLLMClient):
+        def chat(self, messages, temperature=0.7, tools=None):
+            captured_prompts.append(messages)
+            return LLMResponse(content="I'm Monty! Hold watering for 3 days please!")
+
+    companion = CompanionAgent(llm_client=CapturingMockLLM(), use_llm=True)
+    msg = companion.generate_message(
+        care_plan=plan,
+        plant_profile=profile,
+        health_status=HealthStatus.POSSIBLY_UNHEALTHY,
+        recent_observations=recent_obs,
+        milestones=milestones,
+    )
+
+    assert "Hold watering for 3 days" in msg
+    assert len(captured_prompts) == 1
+    user_content = captured_prompts[0][1]["content"]
+    assert "Recent 7-day health history:" in user_content
+    assert "2026-09-01" in user_content
+    assert "Major past life events" in user_content
+    assert "Persistent severe root rot" in user_content

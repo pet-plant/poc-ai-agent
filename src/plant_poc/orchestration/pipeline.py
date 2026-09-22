@@ -1,8 +1,8 @@
 """In-process pipeline orchestrator connecting Event Engine, Care Advisor, and Companion."""
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Optional
-from plant_poc.event_engine import evaluate
+from plant_poc.event_engine import evaluate, detect_milestones
 from plant_poc.registry import PlantRegistry, init_db
 from plant_poc.knowledge import (
     KnowledgeRetriever,
@@ -19,6 +19,7 @@ from plant_poc.schemas import (
     TriggerDecision,
     CarePlan,
     PlantProfile,
+    PlantMilestone,
 )
 from plant_poc.config import KNOWLEDGE_DIR
 
@@ -31,6 +32,38 @@ class PipelineStepResult:
     trigger_result: TriggerResult
     care_plan: Optional[CarePlan] = None
     companion_message: Optional[str] = None
+    milestones_triggered: list[PlantMilestone] = field(default_factory=list)
+
+    def to_frontend_dict(self) -> dict:
+        """Structured response payload ready to be sent directly to the frontend/client."""
+        return {
+            "day": self.day_index,
+            "plant_id": self.observation.plant_id,
+            "timestamp": self.observation.timestamp.isoformat(),
+            "health_status": self.observation.health_status.value,
+            "decision": self.trigger_result.decision.value,
+            "companion_message": self.companion_message,
+            "milestones_triggered": [
+                {
+                    "event_type": m.event_type.value,
+                    "description": m.description,
+                    "timestamp": m.timestamp.isoformat(),
+                }
+                for m in self.milestones_triggered
+            ],
+            "care_plan": (
+                {
+                    "assessment": self.care_plan.assessment,
+                    "confidence": self.care_plan.confidence,
+                    "actions": [
+                        {"priority": a.priority, "action": a.action}
+                        for a in sorted(self.care_plan.actions, key=lambda x: x.priority)
+                    ],
+                }
+                if self.care_plan
+                else None
+            ),
+        }
 
 
 class PlantPipeline:
@@ -76,9 +109,11 @@ class PlantPipeline:
         day_index: int = 1,
         require_consensus: bool = False,
     ) -> PipelineStepResult:
-        """Process a single day's observation through the pipeline."""
-        # 1. Fetch previous observation from registry
+        """Process a single day's observation through the pipeline with two-tier memory."""
+        # 1. Fetch historical observation baseline and context
         previous_obs = self.registry.get_previous_observation(obs.plant_id)
+        recent_history = self.registry.get_recent_observations(obs.plant_id, n=7)
+        existing_milestones = self.registry.get_milestones(obs.plant_id)
 
         # 2. Evaluate deterministic Event Engine rules
         trigger_res = evaluate(
@@ -87,17 +122,58 @@ class PlantPipeline:
             require_consensus=require_consensus,
         )
 
-        # 3. Save new observation to registry for future days
-        self.registry.save_observation(obs)
+        new_milestones: list[PlantMilestone] = []
+
+        # 3. Save clean observation to registry for future days (do not pollute DB on low-confidence scans)
+        if trigger_res.decision != TriggerDecision.REQUEST_MORE_INFORMATION:
+            self.registry.save_observation(obs)
+
+            # 4. Detect and record new milestones on clean observations
+            new_milestones = detect_milestones(
+                new_obs=obs,
+                history=recent_history,
+                existing_milestones=existing_milestones,
+            )
+            for m in new_milestones:
+                self.registry.record_milestone(m)
 
         care_plan: Optional[CarePlan] = None
         companion_msg: Optional[str] = None
+        profile = self.registry.get_plant_profile(obs.plant_id)
 
-        # 4. If care advice required, run Care Advisor and Companion
+        # Combine all milestones for memory context
+        all_milestones = existing_milestones + new_milestones
+
+        # 5. Generate botanical CarePlan (if advice required) and Companion response for the owner
         if trigger_res.decision == TriggerDecision.CARE_ADVICE_REQUIRED:
             care_plan = self.care_advisor.advise(obs, trigger_res)
-            profile = self.registry.get_plant_profile(obs.plant_id)
-            companion_msg = self.companion.generate_message(care_plan, profile, health_status=obs.health_status)
+            companion_msg = self.companion.generate_message(
+                care_plan=care_plan,
+                plant_profile=profile,
+                health_status=obs.health_status,
+                recent_observations=recent_history,
+                milestones=all_milestones,
+            )
+        elif trigger_res.decision == TriggerDecision.REQUEST_MORE_INFORMATION:
+            companion_msg = self.companion.generate_info_request_message(
+                reason=trigger_res.reason,
+                plant_profile=profile,
+            )
+        else:  # NO_ACTION
+            companion_msg = self.companion.generate_steady_message(
+                obs=obs,
+                previous_obs=previous_obs,
+                plant_profile=profile,
+            )
+
+        # 6. Persist generated dialogue message to the observation record
+        if trigger_res.decision != TriggerDecision.REQUEST_MORE_INFORMATION and companion_msg:
+            obs.companion_message = companion_msg
+            self.registry.update_observation_companion_message(
+                plant_id=obs.plant_id,
+                timestamp=obs.timestamp,
+                companion_message=companion_msg,
+            )
 
         return PipelineStepResult(
             day_index=day_index,
@@ -105,6 +181,7 @@ class PlantPipeline:
             trigger_result=trigger_res,
             care_plan=care_plan,
             companion_message=companion_msg,
+            milestones_triggered=new_milestones,
         )
 
     def process_vlm_probe_result(

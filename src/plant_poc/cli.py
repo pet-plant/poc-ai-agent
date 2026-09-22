@@ -11,9 +11,11 @@ from plant_poc.config import SCENARIOS_DIR, BASE_DIR
 from plant_poc.llm import OllamaClient, MockLLMClient
 from plant_poc.orchestration import PlantPipeline, PipelineStepResult
 from plant_poc.schemas import VLMObservation, TriggerDecision
+from plant_poc.vlm_adapter import parse_vlm_probe_result
 
-# Default log output path
+# Default log output paths
 LOG_PATH = BASE_DIR / "docs" / "scenario-results.log"
+JSON_LOG_PATH = BASE_DIR / "docs" / "scenario-results.json"
 
 
 class _Tee:
@@ -37,9 +39,21 @@ def load_scenario_file(file_path: Path) -> tuple[str, str, list[VLMObservation]]
         data = json.load(f)
     name = data.get("scenario", file_path.stem)
     desc = data.get("description", "No description available.")
-    observations = [
-        VLMObservation.model_validate(raw) for raw in data.get("observations", [])
-    ]
+
+    observations: list[VLMObservation] = []
+    raw_list = data.get("observations") or data.get("probe_results", [])
+    default_plant_id = data.get("plant_id", "plant-monstera-1")
+    default_species = data.get("species", "Monstera deliciosa")
+
+    for raw in raw_list:
+        if isinstance(raw, dict) and "observation" in raw and isinstance(raw["observation"], dict) and "visible_stress_level" in raw["observation"]:
+            # Native VLM PROBE RESULT payload
+            p_id = raw.get("plant_id", default_plant_id)
+            s_name = raw.get("species", default_species)
+            observations.append(parse_vlm_probe_result(raw, plant_id=p_id, species=s_name))
+        else:
+            observations.append(VLMObservation.model_validate(raw))
+
     return name, desc, observations
 
 
@@ -85,24 +99,53 @@ def print_step_result(res: PipelineStepResult, tee: "_Tee") -> None:
     )
 
     tee.print(f"\n  [Day {res.day_index}] Timestamp: {obs.timestamp.strftime('%Y-%m-%d %H:%M:%SZ')}")
-    tee.print(f"  • Observation: status={obs.health_status.value} (conf={obs.confidence:.2f}) | {symptoms_summary}")
+    conf_detail = f"conf={obs.confidence:.2f}"
+    if obs.consensus:
+        conf_detail += f", consensus={obs.consensus.agreement:.2f} ({obs.consensus.runs} runs)"
+    tee.print(f"  • Observation: status={obs.health_status.value} ({conf_detail}) | {symptoms_summary}")
+
+    if obs.leaf_posture or obs.leaf_color_detail:
+        visual_parts = []
+        if obs.leaf_posture:
+            visual_parts.append(f'posture="{obs.leaf_posture}"')
+        if obs.leaf_color_detail:
+            visual_parts.append(f'color="{obs.leaf_color_detail}"')
+        tee.print(f"  • VLM Visual:  {' | '.join(visual_parts)}")
+
     tee.print(f"  • Trigger:     [{res.trigger_result.decision.value}] — {res.trigger_result.reason}")
 
-    if res.trigger_result.decision == TriggerDecision.CARE_ADVICE_REQUIRED and res.care_plan:
+    if res.companion_message:
+        tee.print("\n  • Companion Output (Plant Voice):")
+        for line in res.companion_message.splitlines():
+            tee.print(f"    {line}")
+
+    if res.care_plan:
         plan = res.care_plan
-        tee.print(f"  • Care Plan:   Assessment: \"{plan.assessment}\" (conf={plan.confidence:.2f})")
+        tee.print(f"\n  • Care Plan:   Assessment: \"{plan.assessment}\" (conf={plan.confidence:.2f})")
         tee.print("    Actions:")
         for action in sorted(plan.actions, key=lambda a: a.priority):
             tee.print(f"      [{action.priority}] {action.action}")
 
-        if res.companion_message:
-            tee.print("\n  • Companion Output:")
-            for line in res.companion_message.splitlines():
-                tee.print(f"    {line}")
-    elif res.trigger_result.decision == TriggerDecision.REQUEST_MORE_INFORMATION:
-        tee.print("  • Notice:      Image observation confidence too low. No care plan generated.")
-    else:
-        tee.print("  • Notice:      No action needed. Plant is steady or improving.")
+    # Display the exact JSON response sent to the frontend for this day's check-in
+    frontend_payload = res.to_frontend_dict()
+    tee.print("\n  • Frontend JSON Response:")
+    tee.print(json.dumps(frontend_payload, indent=4))
+
+
+def format_scenario_json(
+    name: str,
+    path: Path,
+    desc: str,
+    results: list[PipelineStepResult],
+) -> dict:
+    """Format pipeline results into a clean, structured dictionary."""
+    return {
+        "scenario": name,
+        "scenario_file": path.name,
+        "description": desc,
+        "days_processed": len(results),
+        "steps": [res.to_frontend_dict() for res in results],
+    }
 
 
 def run_single_scenario(
@@ -110,7 +153,7 @@ def run_single_scenario(
     use_mock: bool = False,
     use_companion_llm: bool = False,
     tee: Optional["_Tee"] = None,
-) -> bool:
+) -> dict:
     """Execute a single scenario from file through an isolated pipeline."""
     if tee is None:
         tee = _Tee()
@@ -130,10 +173,12 @@ def run_single_scenario(
     for res in results:
         print_step_result(res, tee)
 
+    scenario_data = format_scenario_json(name, path, desc, results)
+
     tee.print("\n" + "-" * 80)
     tee.print(f"  Completed scenario: {name} ({len(results)} days processed)")
     tee.print("-" * 80)
-    return True
+    return scenario_data
 
 
 def cmd_run_batch(
@@ -185,9 +230,16 @@ def cmd_run_batch(
             tee.print("  RUNNING ALL SCENARIOS IN SEQUENCE")
             tee.print("#" * 80)
             success_count = 0
+            batch_results = []
             for name, path, desc in scenarios:
                 try:
-                    run_single_scenario(path, use_mock=use_mock, use_companion_llm=use_companion_llm, tee=tee)
+                    s_data = run_single_scenario(
+                        path,
+                        use_mock=use_mock,
+                        use_companion_llm=use_companion_llm,
+                        tee=tee,
+                    )
+                    batch_results.append(s_data)
                     success_count += 1
                 except Exception as e:
                     tee.print(f"\n[ERROR] Scenario {name} failed with error: {e}")
@@ -197,6 +249,9 @@ def cmd_run_batch(
             tee.print("=" * 80 + "\n")
             if should_log:
                 print(f"✅ Results saved to: {LOG_PATH}")
+                with open(JSON_LOG_PATH, "w", encoding="utf-8") as jf:
+                    json.dump(batch_results, jf, indent=2)
+                print(f"📊 Structured JSON saved to: {JSON_LOG_PATH}")
             return
 
         # 3. Run single named scenario
@@ -222,9 +277,17 @@ def cmd_run_batch(
             tee.print("Run 'plant-poc list-scenarios' to see available options.")
             sys.exit(1)
 
-        run_single_scenario(target_path, use_mock=use_mock, use_companion_llm=use_companion_llm, tee=tee)
+        s_data = run_single_scenario(
+            target_path,
+            use_mock=use_mock,
+            use_companion_llm=use_companion_llm,
+            tee=tee,
+        )
         if should_log:
             print(f"✅ Results saved to: {LOG_PATH}")
+            with open(JSON_LOG_PATH, "w", encoding="utf-8") as jf:
+                json.dump([s_data], jf, indent=2)
+            print(f"📊 Structured JSON saved to: {JSON_LOG_PATH}")
     finally:
         if log_file:
             log_file.close()

@@ -30,6 +30,7 @@ def init_db(db_path: str = ":memory:") -> sqlite3.Connection:
                 leaf_posture TEXT,
                 leaf_color_detail TEXT,
                 image_refs_json TEXT,
+                companion_message TEXT,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 FOREIGN KEY (plant_id) REFERENCES plants(plant_id)
             );
@@ -40,6 +41,17 @@ def init_db(db_path: str = ":memory:") -> sqlite3.Connection:
                 assessment TEXT NOT NULL,
                 confidence REAL NOT NULL,
                 actions_json TEXT NOT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (plant_id) REFERENCES plants(plant_id)
+            );
+
+            CREATE TABLE IF NOT EXISTS plant_milestones (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                plant_id TEXT NOT NULL,
+                timestamp TEXT NOT NULL,
+                event_type TEXT NOT NULL,
+                description TEXT NOT NULL,
+                resolved_at TEXT,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 FOREIGN KEY (plant_id) REFERENCES plants(plant_id)
             );
@@ -75,6 +87,7 @@ def _migrate_observations_table(conn: sqlite3.Connection) -> None:
         ("leaf_posture", "TEXT"),
         ("leaf_color_detail", "TEXT"),
         ("image_refs_json", "TEXT"),
+        ("companion_message", "TEXT"),
     ]
     for col_name, col_type in new_cols:
         if col_name not in existing_cols:

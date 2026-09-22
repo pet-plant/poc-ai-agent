@@ -1,14 +1,24 @@
 {
   "scenario": "low_confidence",
-  "description": "Confidence drops below the threshold (expected: REQUEST_MORE_INFORMATION)",
+  "description": "Confidence and VLM consensus drop below threshold (expected: REQUEST_MORE_INFORMATION)",
   "observations": [
     {
       "plant_id": "plant-monstera-1",
       "species": "Monstera deliciosa",
       "timestamp": "2026-09-01T10:00:00Z",
       "health_status": "healthy",
-      "confidence": 0.9,
-      "observations": []
+      "confidence": 0.90,
+      "consensus": {
+        "agreement": 1.0,
+        "runs": 5,
+        "model_stated_average": 0.90
+      },
+      "leaf_posture": "upright and firm",
+      "leaf_color_detail": "deep green",
+      "observations": [],
+      "image_refs": [
+        "file:///images/monstera_day1.jpg"
+      ]
     },
     {
       "plant_id": "plant-monstera-1",
@@ -16,12 +26,22 @@
       "timestamp": "2026-09-02T10:00:00Z",
       "health_status": "unhealthy",
       "confidence": 0.35,
+      "consensus": {
+        "agreement": 0.40,
+        "runs": 5,
+        "model_stated_average": 0.45
+      },
+      "leaf_posture": "irregular positioning and blurry features",
+      "leaf_color_detail": "ambiguous color with heavy shadows",
       "observations": [
         {
           "type": "leaf_yellowing",
           "severity": "severe",
-          "confidence": 0.3
+          "confidence": 0.30
         }
+      ],
+      "image_refs": [
+        "file:///images/monstera_day2.jpg"
       ]
     }
   ]

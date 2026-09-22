@@ -1,4 +1,4 @@
-"""Repository data access functions for plants, observations, and care plans."""
+"""Repository data access functions for plants, observations, care plans, and milestones."""
 
 import json
 import sqlite3
@@ -13,6 +13,8 @@ from plant_poc.schemas import (
     CareAction,
     Observation,
     HealthStatus,
+    PlantMilestone,
+    MilestoneType,
 )
 
 
@@ -84,8 +86,8 @@ class PlantRegistry:
                 """
                 INSERT INTO observations
                 (plant_id, timestamp, health_status, confidence, observations_json,
-                 consensus_json, leaf_posture, leaf_color_detail, image_refs_json)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                 consensus_json, leaf_posture, leaf_color_detail, image_refs_json, companion_message)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """,
                 (
                     obs.plant_id,
@@ -97,7 +99,25 @@ class PlantRegistry:
                     obs.leaf_posture,
                     obs.leaf_color_detail,
                     image_refs_json,
+                    obs.companion_message,
                 ),
+            )
+
+    def update_observation_companion_message(
+        self,
+        plant_id: str,
+        timestamp: datetime,
+        companion_message: str,
+    ) -> None:
+        """Update companion dialogue message on an existing observation."""
+        with self.conn:
+            self.conn.execute(
+                """
+                UPDATE observations
+                SET companion_message = ?
+                WHERE plant_id = ? AND timestamp = ?
+                """,
+                (companion_message, plant_id, timestamp.isoformat()),
             )
 
     def get_previous_observation(self, plant_id: str) -> Optional[VLMObservation]:
@@ -106,7 +126,7 @@ class PlantRegistry:
         cursor.execute(
             """
             SELECT plant_id, timestamp, health_status, confidence, observations_json,
-                   consensus_json, leaf_posture, leaf_color_detail, image_refs_json
+                   consensus_json, leaf_posture, leaf_color_detail, image_refs_json, companion_message
             FROM observations
             WHERE plant_id = ?
             ORDER BY id DESC
@@ -119,13 +139,13 @@ class PlantRegistry:
             return None
         return self._row_to_vlm_observation(row)
 
-    def get_recent_observations(self, plant_id: str, n: int = 5) -> list[VLMObservation]:
+    def get_recent_observations(self, plant_id: str, n: int = 7) -> list[VLMObservation]:
         """Fetch recent observations up to n items in chronological order."""
         cursor = self.conn.cursor()
         cursor.execute(
             """
             SELECT plant_id, timestamp, health_status, confidence, observations_json,
-                   consensus_json, leaf_posture, leaf_color_detail, image_refs_json
+                   consensus_json, leaf_posture, leaf_color_detail, image_refs_json, companion_message
             FROM observations
             WHERE plant_id = ?
             ORDER BY id DESC
@@ -135,8 +155,55 @@ class PlantRegistry:
         )
         rows = cursor.fetchall()
         observations = [self._row_to_vlm_observation(r) for r in rows]
-        observations.reverse()  # Return chronological
+        observations.reverse()  # Return chronological (oldest to newest)
         return observations
+
+    def record_milestone(self, milestone: PlantMilestone) -> int:
+        """Record a major episodic milestone event."""
+        resolved_at_str = milestone.resolved_at.isoformat() if milestone.resolved_at else None
+        with self.conn:
+            cursor = self.conn.execute(
+                """
+                INSERT INTO plant_milestones (plant_id, timestamp, event_type, description, resolved_at)
+                VALUES (?, ?, ?, ?, ?)
+                """,
+                (
+                    milestone.plant_id,
+                    milestone.timestamp.isoformat(),
+                    milestone.event_type.value,
+                    milestone.description,
+                    resolved_at_str,
+                ),
+            )
+            return cursor.lastrowid
+
+    def get_milestones(self, plant_id: str) -> list[PlantMilestone]:
+        """Fetch all historical milestones for a plant in chronological order."""
+        cursor = self.conn.cursor()
+        cursor.execute(
+            """
+            SELECT id, plant_id, timestamp, event_type, description, resolved_at
+            FROM plant_milestones
+            WHERE plant_id = ?
+            ORDER BY id ASC
+            """,
+            (plant_id,),
+        )
+        rows = cursor.fetchall()
+        milestones = []
+        for r in rows:
+            resolved_at = datetime.fromisoformat(r["resolved_at"]) if r["resolved_at"] else None
+            milestones.append(
+                PlantMilestone(
+                    id=r["id"],
+                    plant_id=r["plant_id"],
+                    timestamp=datetime.fromisoformat(r["timestamp"]),
+                    event_type=MilestoneType(r["event_type"]),
+                    description=r["description"],
+                    resolved_at=resolved_at,
+                )
+            )
+        return milestones
 
     def save_care_plan(self, plant_id: str, plan: CarePlan) -> None:
         """Save an approved or generated care plan."""
@@ -198,6 +265,8 @@ class PlantRegistry:
         if "image_refs_json" in row.keys() and row["image_refs_json"]:
             image_refs = json.loads(row["image_refs_json"])
 
+        companion_message = row["companion_message"] if "companion_message" in row.keys() else None
+
         return VLMObservation(
             plant_id=row["plant_id"],
             timestamp=datetime.fromisoformat(row["timestamp"]),
@@ -208,4 +277,5 @@ class PlantRegistry:
             leaf_posture=leaf_posture,
             leaf_color_detail=leaf_color_detail,
             image_refs=image_refs,
+            companion_message=companion_message,
         )

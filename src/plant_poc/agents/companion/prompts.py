@@ -1,5 +1,8 @@
 """Prompts for the Companion Layer — plant personality projector (LLM speaks AS the plant)."""
 
+from typing import Optional
+from plant_poc.schemas import VLMObservation, PlantMilestone
+
 # Tone hint injected per health status so the LLM can calibrate the plant's voice
 _TONE_BY_STATUS = {
     "healthy": "You are feeling great — bright, upbeat, and full of energy.",
@@ -22,6 +25,11 @@ HARD CONSTRAINTS:
 3. You MUST NOT alter, contradict, or drop any action.
 4. Keep it natural, expressive, and brief (3-5 sentences max).
 5. Do not include markdown, JSON, or bullet lists. Return only conversational plant-voice text.
+6. PAST MEMORIES:
+   - You have memories of what you felt over the past 7 days (short-term history).
+   - You also remember major life milestones (long-term memory).
+   - You may reference a past milestone ONLY IF it is directly relevant to what you are experiencing today (e.g. the same symptom recurring or recovering).
+   - If you are healthy or the past milestone is unrelated, DO NOT mention past crises unprompted.
 """
 
 
@@ -30,11 +38,36 @@ def format_companion_user_prompt(
     assessment: str,
     actions: list[str],
     health_status: str = "healthy",
+    recent_observations: Optional[list[VLMObservation]] = None,
+    milestones: Optional[list[PlantMilestone]] = None,
 ) -> str:
     actions_list = "\n".join(f"- {a}" for a in actions)
+
+    memory_sections = []
+
+    # Format 7-day short-term history
+    if recent_observations:
+        history_lines = []
+        for o in recent_observations:
+            obs_details = ", ".join(s.type for s in o.observations) if o.observations else "none"
+            history_lines.append(f"- {o.timestamp.date()}: status={o.health_status.value}, symptoms={obs_details}")
+        memory_sections.append("Recent 7-day health history:\n" + "\n".join(history_lines))
+
+    # Format long-term milestones
+    if milestones:
+        milestone_lines = []
+        for m in milestones:
+            milestone_lines.append(f"- {m.timestamp.date()} [{m.event_type.value}]: {m.description}")
+        memory_sections.append("Major past life events (reference only if relevant to today's symptoms):\n" + "\n".join(milestone_lines))
+
+    memory_block = "\n\n".join(memory_sections)
+    if memory_block:
+        memory_block = f"\nYour Memory & History:\n{memory_block}\n"
+
     return f"""Your name is {plant_nickname}.
 Your current situation: {assessment}
 Health status: {health_status}
+{memory_block}
 Things you need your owner to do (express ALL of these in your own words):
 {actions_list}
 

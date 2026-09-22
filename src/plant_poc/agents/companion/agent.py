@@ -7,7 +7,13 @@ from plant_poc.agents.companion.prompts import (
 )
 from plant_poc.agents.companion.validator import validate_fact_preservation
 from plant_poc.llm import LLMClient
-from plant_poc.schemas import CarePlan, PlantProfile, HealthStatus
+from plant_poc.schemas import (
+    CarePlan,
+    PlantProfile,
+    HealthStatus,
+    VLMObservation,
+    PlantMilestone,
+)
 
 
 class CompanionAgent:
@@ -26,8 +32,10 @@ class CompanionAgent:
         care_plan: CarePlan,
         plant_profile: Optional[PlantProfile] = None,
         health_status: Optional[HealthStatus] = None,
+        recent_observations: Optional[list[VLMObservation]] = None,
+        milestones: Optional[list[PlantMilestone]] = None,
     ) -> str:
-        """Generate a first-person plant-voice message, falling back to 3rd-person template if LLM unavailable."""
+        """Generate a first-person plant-voice message with two-tier memory context."""
         nickname = plant_profile.nickname if plant_profile else "your plant"
         status_str = health_status.value if health_status else "healthy"
 
@@ -40,6 +48,8 @@ class CompanionAgent:
                 assessment=care_plan.assessment,
                 actions=action_texts,
                 health_status=status_str,
+                recent_observations=recent_observations,
+                milestones=milestones,
             )
             try:
                 res = self.llm_client.chat(
@@ -94,3 +104,39 @@ class CompanionAgent:
             f"{action_lines}"
         )
 
+    def generate_steady_message(
+        self,
+        obs: VLMObservation,
+        previous_obs: Optional[VLMObservation] = None,
+        plant_profile: Optional[PlantProfile] = None,
+    ) -> str:
+        """Generate a plant-voice message when plant is healthy or steady/improving (NO_ACTION).
+
+        Per production architecture Step 8b: Always uses fast static templates (0 tokens, < 1ms)
+        to eliminate LLM latency and cost on healthy/steady checks.
+        """
+        # Check if improving from a worse state
+        is_improving = (
+            previous_obs is not None
+            and previous_obs.health_status in (HealthStatus.UNHEALTHY, HealthStatus.POSSIBLY_UNHEALTHY)
+            and (
+                obs.health_status == HealthStatus.HEALTHY
+                or (previous_obs.health_status == HealthStatus.UNHEALTHY and obs.health_status == HealthStatus.POSSIBLY_UNHEALTHY)
+            )
+        )
+
+        if is_improving:
+            return "I'm feeling much better today and bouncing back! Thanks for taking good care of me."
+        return "I'm feeling great and thriving today! Leaves are happy and soaking up the room. Thanks for checking in on me!"
+
+    def generate_info_request_message(
+        self,
+        reason: str,
+        plant_profile: Optional[PlantProfile] = None,
+    ) -> str:
+        """Generate a plant-voice message when image quality/consensus is too low (REQUEST_MORE_INFORMATION).
+
+        Per production architecture Step 8a: Uses fast static templates (0 tokens, < 1ms)
+        prompting the user to retake the photo without incurring LLM charges.
+        """
+        return "Hmm, I couldn't get a clear look at my leaves in that photo — it might be a bit too blurry or dark. Could you snap another clear photo for me?"

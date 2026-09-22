@@ -8,7 +8,17 @@
       "timestamp": "2026-09-01T10:00:00Z",
       "health_status": "healthy",
       "confidence": 0.95,
-      "observations": []
+      "consensus": {
+        "agreement": 1.0,
+        "runs": 5,
+        "model_stated_average": 0.95
+      },
+      "leaf_posture": "upright and firm",
+      "leaf_color_detail": "vibrant deep green",
+      "observations": [],
+      "image_refs": [
+        "file:///images/monstera_day1.jpg"
+      ]
     },
     {
       "plant_id": "plant-monstera-1",
@@ -16,7 +26,17 @@
       "timestamp": "2026-09-02T10:00:00Z",
       "health_status": "possibly_unhealthy",
       "confidence": 0.89,
-      "observations": []
+      "consensus": {
+        "agreement": 1.0,
+        "runs": 5,
+        "model_stated_average": 0.89
+      },
+      "leaf_posture": "slightly drooping stems",
+      "leaf_color_detail": "dulling green with slight discoloration",
+      "observations": [],
+      "image_refs": [
+        "file:///images/monstera_day2.jpg"
+      ]
     }
   ]
 }

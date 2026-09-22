@@ -89,3 +89,51 @@ def test_registry_migration_adds_missing_columns():
     assert "leaf_color_detail" in cols
     assert "image_refs_json" in cols
 
+
+def test_registry_milestones_crud():
+    conn = init_db(":memory:")
+    reg = PlantRegistry(conn)
+
+    from plant_poc.schemas import PlantMilestone, MilestoneType
+
+    milestone = PlantMilestone(
+        plant_id="plant-monstera-1",
+        timestamp=datetime(2026, 9, 2),
+        event_type=MilestoneType.FIRST_SYMPTOM,
+        description="First symptom detected",
+    )
+    m_id = reg.record_milestone(milestone)
+    assert m_id > 0
+
+    all_m = reg.get_milestones("plant-monstera-1")
+    assert len(all_m) == 1
+    assert all_m[0].event_type == MilestoneType.FIRST_SYMPTOM
+    assert all_m[0].description == "First symptom detected"
+
+
+def test_registry_companion_message_update_and_retrieval():
+    conn = init_db(":memory:")
+    reg = PlantRegistry(conn)
+
+    ts = datetime(2026, 9, 2, 10, 0, 0)
+    obs = VLMObservation(
+        plant_id="plant-monstera-1",
+        timestamp=ts,
+        health_status=HealthStatus.HEALTHY,
+        confidence=0.95,
+    )
+    reg.save_observation(obs)
+
+    reg.update_observation_companion_message(
+        plant_id="plant-monstera-1",
+        timestamp=ts,
+        companion_message="I'm feeling wonderful today!",
+    )
+
+    retrieved = reg.get_previous_observation("plant-monstera-1")
+    assert retrieved is not None
+    assert retrieved.companion_message == "I'm feeling wonderful today!"
+
+    recent = reg.get_recent_observations("plant-monstera-1", n=7)
+    assert len(recent) == 1
+    assert recent[0].companion_message == "I'm feeling wonderful today!"

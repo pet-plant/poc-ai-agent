@@ -8,40 +8,20 @@
       "timestamp": "2026-09-01T10:00:00Z",
       "health_status": "healthy",
       "confidence": 0.95,
-      "consensus": {
-        "agreement": 1.0,
-        "runs": 5,
-        "model_stated_average": 0.95
-      },
-      "leaf_posture": "upright and firm",
-      "leaf_color_detail": "vibrant deep green",
-      "observations": [],
-      "image_refs": [
-        "file:///images/monstera_day1.jpg"
-      ]
+      "observations": []
     },
     {
       "plant_id": "plant-monstera-1",
       "species": "Monstera deliciosa",
       "timestamp": "2026-09-02T10:00:00Z",
       "health_status": "possibly_unhealthy",
-      "confidence": 0.90,
-      "consensus": {
-        "agreement": 1.0,
-        "runs": 5,
-        "model_stated_average": 0.90
-      },
-      "leaf_posture": "mild drooping stems",
-      "leaf_color_detail": "pale green with early yellowing on tips",
+      "confidence": 0.9,
       "observations": [
         {
           "type": "leaf_yellowing",
           "severity": "mild",
           "confidence": 0.88
         }
-      ],
-      "image_refs": [
-        "file:///images/monstera_day2.jpg"
       ]
     },
     {
@@ -50,22 +30,12 @@
       "timestamp": "2026-09-03T10:00:00Z",
       "health_status": "unhealthy",
       "confidence": 0.92,
-      "consensus": {
-        "agreement": 1.0,
-        "runs": 5,
-        "model_stated_average": 0.92
-      },
-      "leaf_posture": "heavily drooping and bent towards the floor",
-      "leaf_color_detail": "severe chlorosis and brown necrotic margins",
       "observations": [
         {
           "type": "leaf_yellowing",
           "severity": "severe",
           "confidence": 0.91
         }
-      ],
-      "image_refs": [
-        "file:///images/monstera_day3.jpg"
       ]
     },
     {
@@ -74,22 +44,12 @@
       "timestamp": "2026-09-04T10:00:00Z",
       "health_status": "possibly_unhealthy",
       "confidence": 0.89,
-      "consensus": {
-        "agreement": 0.95,
-        "runs": 5,
-        "model_stated_average": 0.89
-      },
-      "leaf_posture": "rebounding upwards with mild tip droop",
-      "leaf_color_detail": "greening returning, mild yellowing remaining",
       "observations": [
         {
           "type": "leaf_yellowing",
           "severity": "mild",
           "confidence": 0.86
         }
-      ],
-      "image_refs": [
-        "file:///images/monstera_day4.jpg"
       ]
     },
     {
@@ -97,23 +57,13 @@
       "species": "Monstera deliciosa",
       "timestamp": "2026-09-05T10:00:00Z",
       "health_status": "possibly_unhealthy",
-      "confidence": 0.40,
-      "consensus": {
-        "agreement": 0.40,
-        "runs": 5,
-        "model_stated_average": 0.40
-      },
-      "leaf_posture": "indistinct leaf posture due to bad lighting",
-      "leaf_color_detail": "unclear color tones and heavy contrast",
+      "confidence": 0.4,
       "observations": [
         {
           "type": "leaf_yellowing",
           "severity": "mild",
           "confidence": 0.35
         }
-      ],
-      "image_refs": [
-        "file:///images/monstera_day5.jpg"
       ]
     }
   ]

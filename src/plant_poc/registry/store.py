@@ -37,7 +37,9 @@ def init_db(db_path: str = ":memory:") -> sqlite3.Connection:
 
             CREATE TABLE IF NOT EXISTS care_plans (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
+                care_plan_id TEXT,
                 plant_id TEXT NOT NULL,
+                status_label TEXT,
                 assessment TEXT NOT NULL,
                 confidence REAL NOT NULL,
                 actions_json TEXT NOT NULL,
@@ -70,9 +72,23 @@ def init_db(db_path: str = ":memory:") -> sqlite3.Connection:
                 notes TEXT,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
+
+            -- Performance indexes for common plant_id + timestamp lookups
+            CREATE INDEX IF NOT EXISTS idx_observations_plant_ts
+                ON observations(plant_id, timestamp DESC);
+
+            CREATE INDEX IF NOT EXISTS idx_care_plans_plant
+                ON care_plans(plant_id, created_at DESC);
+
+            CREATE INDEX IF NOT EXISTS idx_milestones_plant
+                ON plant_milestones(plant_id, timestamp DESC);
+
+            CREATE INDEX IF NOT EXISTS idx_care_events_plant
+                ON care_events(plant_id, event_type, created_at DESC);
             """
         )
         _migrate_observations_table(conn)
+        _migrate_care_plans_table(conn)
     return conn
 
 
@@ -92,3 +108,19 @@ def _migrate_observations_table(conn: sqlite3.Connection) -> None:
     for col_name, col_type in new_cols:
         if col_name not in existing_cols:
             conn.execute(f"ALTER TABLE observations ADD COLUMN {col_name} {col_type}")
+
+
+def _migrate_care_plans_table(conn: sqlite3.Connection) -> None:
+    """Ensure newly added nullable columns exist in care_plans table for backward compatibility."""
+    cursor = conn.cursor()
+    cursor.execute("PRAGMA table_info(care_plans)")
+    existing_cols = {row["name"] for row in cursor.fetchall()}
+
+    new_cols = [
+        ("care_plan_id", "TEXT"),
+        ("status_label", "TEXT"),
+    ]
+    for col_name, col_type in new_cols:
+        if col_name not in existing_cols:
+            conn.execute(f"ALTER TABLE care_plans ADD COLUMN {col_name} {col_type}")
+

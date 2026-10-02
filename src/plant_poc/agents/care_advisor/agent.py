@@ -2,16 +2,24 @@
 
 from __future__ import annotations
 
+import asyncio
 import json
 import re
 from typing import Any, Optional, Union
 
-from langchain.agents import create_agent
 from langchain_core.language_models import BaseChatModel
-from langchain_core.messages import AIMessage, BaseMessage
+from langchain_core.messages import AIMessage, BaseMessage, HumanMessage, SystemMessage
 from langchain_core.output_parsers import PydanticOutputParser
 from langchain_core.outputs import ChatGeneration, ChatResult
 
+try:
+    from langchain.agents import AgentExecutor, create_tool_calling_agent
+    from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
+    _HAS_AGENT_EXECUTOR = True
+except ImportError:
+    _HAS_AGENT_EXECUTOR = False
+
+from plant_poc.exceptions import LLMUnavailableError
 from plant_poc.agents.care_advisor.prompts import (
     CARE_ADVISOR_SYSTEM_PROMPT,
     format_advisor_user_prompt,
@@ -20,6 +28,40 @@ from plant_poc.agents.care_advisor.tools import build_care_advisor_tools
 from plant_poc.knowledge import KnowledgeRetriever
 from plant_poc.registry import PlantRegistry
 from plant_poc.schemas import CarePlan, TriggerResult, VLMObservation
+
+
+class _SimpleAgentWrapper:
+    """Minimal agent wrapper for when AgentExecutor is unavailable or no tools are needed."""
+
+    def __init__(self, llm: BaseChatModel, system_prompt: str):
+        self.llm = llm
+        self.system_prompt = system_prompt
+
+    def invoke(self, input_dict: dict) -> dict:
+        messages_raw = input_dict.get("messages", [])
+        messages: list[BaseMessage] = [SystemMessage(content=self.system_prompt)]
+        for m in messages_raw:
+            if isinstance(m, BaseMessage):
+                messages.append(m)
+            elif isinstance(m, dict):
+                messages.append(HumanMessage(content=m.get("content", "")))
+        result = self.llm.invoke(messages)
+        return {"messages": messages + [result]}
+
+
+def _build_agent(llm: BaseChatModel, tools: list, system_prompt: str) -> Any:
+    """Build an agent wrapper that passes the system prompt and user messages to the LLM.
+
+    Uses _SimpleAgentWrapper for all cases because the system prompt contains
+    raw JSON examples with braces that break ChatPromptTemplate variable parsing.
+    The LLM is expected to have tools bound via bind_tools if needed.
+    """
+    if tools and hasattr(llm, "bind_tools"):
+        try:
+            llm = llm.bind_tools(tools)
+        except (NotImplementedError, AttributeError):
+            pass
+    return _SimpleAgentWrapper(llm=llm, system_prompt=system_prompt)
 
 
 class _LegacyLLMAdapter(BaseChatModel):
@@ -74,7 +116,16 @@ class CareAdvisorAgent:
         model = llm if llm is not None else llm_client
         if model is None:
             from plant_poc.llm import get_llm
-            model = get_llm()
+            try:
+                model = get_llm()
+            except Exception as exc:
+                raise LLMUnavailableError(
+                    message="Failed to initialize default LLM provider.",
+                    original_error=exc,
+                ) from exc
+
+        if model is None:
+            raise LLMUnavailableError("No LLM client or model provided to CareAdvisorAgent.")
 
         if not isinstance(model, BaseChatModel):
             self.llm = _LegacyLLMAdapter(client=model)
@@ -90,8 +141,8 @@ class CareAdvisorAgent:
         )
         self.parser = PydanticOutputParser(pydantic_object=CarePlan)
 
-        self.agent = create_agent(
-            model=self.llm,
+        self.agent = _build_agent(
+            llm=self.llm,
             tools=self.tools,
             system_prompt=CARE_ADVISOR_SYSTEM_PROMPT,
         )
@@ -124,9 +175,18 @@ class CareAdvisorAgent:
             else None,
         )
 
-        result = self.agent.invoke(
-            {"messages": [{"role": "user", "content": user_prompt}]}
-        )
+        try:
+            result = self.agent.invoke(
+                {"messages": [{"role": "user", "content": user_prompt}]}
+            )
+        except Exception as exc:
+            if isinstance(exc, LLMUnavailableError):
+                raise
+            raise LLMUnavailableError(
+                message=f"Failed to generate care plan: LLM reasoning service is unavailable ({exc})",
+                original_error=exc,
+            ) from exc
+
         final_message = result["messages"][-1]
         raw_output = (
             final_message.content
@@ -141,6 +201,17 @@ class CareAdvisorAgent:
 
         return plan
 
+    async def advise_async(
+        self,
+        observation: VLMObservation,
+        trigger_result: TriggerResult,
+    ) -> CarePlan:
+        """Async wrapper around :meth:`advise` that offloads the blocking LLM
+        call to a thread so it does not stall an async event loop (e.g.
+        FastAPI, Starlette).
+        """
+        return await asyncio.to_thread(self.advise, observation, trigger_result)
+
     def _parse_care_plan(self, text: str, plant_id: str) -> CarePlan:
         try:
             return self.parser.parse(text)
@@ -149,11 +220,14 @@ class CareAdvisorAgent:
             if match:
                 try:
                     data = json.loads(match.group(1))
+                    if "plant_id" not in data:
+                        data["plant_id"] = plant_id
                     return CarePlan.model_validate(data)
                 except Exception:
                     pass
             return CarePlan(
                 plant_id=plant_id,
+                status_label="Care advice required",
                 assessment="Automated assessment: observation recorded.",
                 confidence=0.5,
                 actions=[],

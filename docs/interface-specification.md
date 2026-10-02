@@ -1,10 +1,12 @@
+													
+
 # Interface Specification: Upstream VLM Output & Downstream Frontend Response
 
 **Project:** `pet-plant` / Post-VLM Agentic Care Pipeline
 **Document:** External Interface Contract & Data Dictionary
-**Target Audiences:** Upstream VLM Perception Team, Downstream Mobile / Frontend Team
-**Status:** Approved Interface Specification (v2.0 — Latest)
-**Date:** September 2026
+**Target Audiences:** Upstream VLM Perception Team, Backend Server Team (MVCS), Downstream Frontend / Web Team
+**Status:** Approved Interface Specification (v2.1 — Frontend MVCS Alignment)
+**Date:** October 2026
 
 ---
 
@@ -24,12 +26,20 @@
 │    (This Codebase / Engine)   │
 └───────────────┬───────────────┘
                 │
-                │  INTERFACE 2: FRONTEND DELIVERY PAYLOAD (JSON)
-                │  Emitted for client rendering, push alerts & timeline
+                │  PERSISTS DIRECTLY TO DB (SQLite / PostgreSQL)
+                │  plants, observations, care_plans, care_events
                 ▼
 ┌───────────────────────────────┐
-│    Mobile App / Frontend      │
-│      (Flutter Client)         │
+│     Backend Server (MVCS)     │
+│  (Controller / Service / Repo)│
+└───────────────┬───────────────┘
+                │
+                │  INTERFACE 2: REST API (GET /companion/devices/me/state)
+                │  Queried by web client on page load or refresh
+                ▼
+┌───────────────────────────────┐
+│     Web Frontend Client       │
+│        (Web App / UI)         │
 └───────────────────────────────┘
 ```
 
@@ -176,107 +186,209 @@ The agent pipeline accepts either the unified probe format or the raw observatio
 
 To ensure seamless integration with the Event Engine, the VLM model should assign `health_status` using the following criteria:
 
-| `health_status` | Visual Stress Level | Typical Symptoms | Visual Indicators |
-| :--- | :--- | :--- | :--- |
-| **`healthy`** | None | `observations: []` (empty) | Foliage is turgid, upright, natural uniform color, no lesions or drooping. |
-| **`possibly_unhealthy`** | Mild to Moderate | Symptoms with `mild` or `moderate` severity | Slight drooping on lower stems, initial tip crisping/browning, localized minor yellowing on 1 leaf. Serves as early warning. |
-| **`unhealthy`** | Severe | Symptoms with `severe` severity (or multiple co-occurring symptoms) | Widespread chlorosis (multiple yellow leaves), severe limpness/wilting, extensive necrosis, rotting stem bases. |
+| `health_status`                | Visual Stress Level | Typical Symptoms                                                     | Visual Indicators                                                                                                            |
+| :------------------------------- | :------------------ | :------------------------------------------------------------------- | :--------------------------------------------------------------------------------------------------------------------------- |
+| **`healthy`**            | None                | `observations: []` (empty)                                         | Foliage is turgid, upright, natural uniform color, no lesions or drooping.                                                   |
+| **`possibly_unhealthy`** | Mild to Moderate    | Symptoms with`mild` or `moderate` severity                       | Slight drooping on lower stems, initial tip crisping/browning, localized minor yellowing on 1 leaf. Serves as early warning. |
+| **`unhealthy`**          | Severe              | Symptoms with`severe` severity (or multiple co-occurring symptoms) | Widespread chlorosis (multiple yellow leaves), severe limpness/wilting, extensive necrosis, rotting stem bases.              |
 
 ---
 
-## 3. Interface 2: Agent Pipeline $\rightarrow$ Frontend / Mobile Client
+## 3. Interface 2: Backend REST API $\rightarrow$ Web Frontend Client
 
 ### 3.1 Purpose & Delivery Modes
 
-The post-VLM pipeline processes the observation and produces a serialized response via `PipelineStepResult.to_frontend_dict()`. The mobile client uses this payload to update the UI across three delivery modes:
+The post-VLM pipeline processes the observation and persists all state directly to the database. The backend server (MVCS) queries this state via repository/service and exposes `GET /companion/devices/me/state` wrapped in a standard `BaseResponse` envelope where `data: <object>` holds the state payload (or serialized directly in tests via `PipelineStepResult.to_frontend_dict()`). The web client uses this payload to update the UI across three delivery modes:
 
-1. **Steady / Healthy (`NO_ACTION`)**: Silent timeline update. Green indicator in UI, cheerful companion check-in card, zero push notification alert.
-2. **Action Needed (`CARE_ADVICE_REQUIRED`)**: High-priority push notification, red/amber indicator, interactive care card with prioritized action checklist, and 1st-person plant voice.
+1. **Steady / Healthy (`NO_ACTION`)**: Silent timeline update. Green indicator in UI, cheerful companion check-in card, zero alert popup, `care_plan: null`.
+2. **Action Needed (`CARE_ADVICE_REQUIRED`)**: High-priority alert banner, red/amber indicator, interactive care card with prioritized action checklist, 2–3 word button labels, and 1st-person plant voice.
 3. **Fallback Photo Retake (`REQUEST_MORE_INFORMATION`)**: Friendly photo retake prompt in UI when image quality or consensus falls below threshold (`< 0.50`), with `care_plan: null`.
 
-### 3.2 Frontend Payload Schema (Data Dictionary)
+### 3.2 Base HTTP Response Envelope (`BaseResponse<T>`)
 
-| Field                    | Type                   |     Requirement     | Allowed Values                                                | Description & Frontend UI Mapping                                    |
-| :----------------------- | :--------------------- | :-----------------: | :------------------------------------------------------------ | :------------------------------------------------------------------- |
-| `day`                  | `integer`            | **Mandatory** | $\ge 1$                                                     | 1-indexed sequential observation counter for this plant.             |
-| `plant_id`             | `string`             | **Mandatory** | String identifier                                             | Target plant ID to route to the correct UI screen.                   |
-| `timestamp`            | `string`             | **Mandatory** | ISO-8601 UTC string                                           | Timestamp of the processed scan.                                     |
-| `health_status`        | `string`             | **Mandatory** | `"healthy"` \| `"possibly_unhealthy"` \| `"unhealthy"`  | Status badge color (Green / Yellow / Red).                           |
-| `decision`             | `string`             | **Mandatory** | `"NO_ACTION"` \| `"CARE_ADVICE_REQUIRED"` \| `"REQUEST_MORE_INFORMATION"` | Controls whether to render care card, silent timeline, or photo retake prompt. |
-| `companion_message`    | `string`             | **Mandatory** | Non-empty string                                              | **1st-person speech bubble** spoken by the plant.              |
-| `milestones_triggered` | `list[object]`       | **Mandatory** | List (empty`[]` if none)                                    | Milestone badges to celebrate or log in plant history (See §3.2.1). |
-| `care_plan`            | `object` \| `null` | **Optional** | `null` on `NO_ACTION` / `REQUEST_MORE_INFORMATION`, Object on `CARE_ADVICE_REQUIRED` | Detailed botanical action plan (See §3.2.2).                        |
-
-#### 3.2.1 `milestones_triggered[]` Object Schema
-
-| Field           | Type       |     Requirement     | Allowed Values                                                                                                | Description                                                                |
-| :-------------- | :--------- | :-----------------: | :------------------------------------------------------------------------------------------------------------ | :------------------------------------------------------------------------- |
-| `event_type`  | `string` | **Mandatory** | `"first_symptom"` \| `"health_crisis"` \| `"severe_episode"` \| `"near_death"` \| `"full_recovery"` | Milestone category key.                                                    |
-| `description` | `string` | **Mandatory** | Human-readable string                                                                                         | Timeline description (e.g.`"Severe condition for 3+ consecutive days"`). |
-| `timestamp`   | `string` | **Mandatory** | ISO-8601 UTC string                                                                                           | Time milestone was recognized.                                             |
-
-#### 3.2.2 `care_plan` Object Schema
-
-| Field          | Type             |     Requirement     | Description                                                                 |
-| :------------- | :--------------- | :-----------------: | :-------------------------------------------------------------------------- |
-| `assessment` | `string`       | **Mandatory** | Botanical reasoning explaining root cause (e.g. overwatering, fungal).      |
-| `confidence` | `float`        | **Mandatory** | Care advisor confidence in the recommendation (`0.0` - `1.0`).          |
-| `actions`    | `list[object]` | **Mandatory** | Ordered list of action items (`[{"priority": 1, "action": "..."}, ...]`). |
-
----
-
-### 3.3 Concrete Frontend Response Examples
-
-#### Example 2A: `CARE_ADVICE_REQUIRED` Payload (Push Alert & Action Card)
+All responses emitted by the backend server for client endpoints follow a unified response envelope. The actual business payload is nested under the `data` field:
 
 ```json
 {
-  "day": 2,
-  "plant_id": "plant-monstera-1",
-  "timestamp": "2026-09-22T08:30:00Z",
-  "health_status": "unhealthy",
-  "decision": "CARE_ADVICE_REQUIRED",
-  "companion_message": "Hey there! My lower leaves are turning yellow and drooping, just like back when we overwatered in March. Could you pause watering for 5 days so my roots can get some oxygen? 🌿",
-  "milestones_triggered": [
-    {
-      "event_type": "health_crisis",
-      "description": "Health dropped to unhealthy: leaf_yellowing (severe)",
-      "timestamp": "2026-09-22T08:30:00Z"
+  "success": true,
+  "data": { ... },
+  "message": null,
+  "error": null
+}
+```
+
+#### Envelope Field Specification
+
+| Field | Type | Requirement | Description |
+| :--- | :--- | :---: | :--- |
+| `success` | `boolean` | **Mandatory** | `true` for successful operations (`2xx`), `false` on failures (`4xx`/`5xx`). |
+| `data` | `object` \| `null` | **Nullable** | The payload object on success; `null` when an error occurs. |
+| `message` | `string` \| `null` | **Optional (Nullable)** | Human-readable explanation or diagnostic message; `null` if none. |
+| `error` | `object` \| `null` | **Optional (Nullable)** | Structured error details when `success: false`; `null` on success. |
+| `error.code` | `string` | **Mandatory on error** | Machine-readable error code (e.g. `LLM_UNAVAILABLE`, `INTERNAL_SERVER_ERROR`). |
+| `error.details` | `object` \| `null` | **Optional (Nullable)** | Additional contextual data or diagnostic details. |
+
+---
+
+### 3.3 `data` Object Schema: Plant Companion State (Data Dictionary)
+
+When `success` is `true`, the `data` object contains the following fields:
+
+| Field                 | Type                   |     Requirement     | Allowed Values                                                                               | Description & Frontend UI Mapping                                              |
+| :-------------------- | :--------------------- | :-----------------: | :------------------------------------------------------------------------------------------- | :----------------------------------------------------------------------------- |
+| `plant_id`          | `string`             | **Mandatory** | String identifier                                                                            | Target plant ID to route to the correct UI screen.                             |
+| `name`              | `string`             | **Mandatory** | Non-empty string (e.g.`"Monty"`)                                                           | Plant nickname displayed at the top of the screen.                             |
+| `species`           | `string`             | **Mandatory** | Botanical name (e.g.`"Monstera deliciosa"`)                                                | Botanical species reference.                                                   |
+| `dayCount`          | `integer`            | **Mandatory** | $\ge 1$                                                                                    | 1-indexed sequential observation counter for this plant.                       |
+| `timestamp`         | `string`             | **Mandatory** | ISO-8601 UTC string                                                                          | Timestamp of the processed scan.                                               |
+| `wateredTimestamp`  | `string` \| `null` | **Optional (Nullable)** | ISO-8601 UTC string or`null`                                                               | Timestamp of last watering event recorded in`care_events`; `null` if unwatered.|
+| `level`             | `integer`            | **Mandatory** | $\ge 1$ (default `1`)                                                                    | Gamification character level.                                                  |
+| `xpRatio`           | `float`              | **Mandatory** | `0.0` to `1.0` (default `0.0`)                                                         | Progress ratio towards next level for UI progress bar.                         |
+| `health_status`     | `string`             | **Mandatory** | `"healthy"` \| `"possibly_unhealthy"` \| `"unhealthy"`                                 | Status badge color (Green / Amber / Red).                                      |
+| `decision`          | `string`             | **Mandatory** | `"NO_ACTION"` \| `"CARE_ADVICE_REQUIRED"` \| `"REQUEST_MORE_INFORMATION"`              | Controls whether to render care card, silent timeline, or photo retake prompt. |
+| `companion_message` | `string`             | **Mandatory** | Non-empty string                                                                             | **1st-person speech bubble** spoken by the plant.                        |
+| `care_plan`         | `object` \| `null` | **Optional (Nullable)** | `null` on `NO_ACTION` / `REQUEST_MORE_INFORMATION`, Object on `CARE_ADVICE_REQUIRED` | Detailed botanical action plan (See §3.3.1); `null` when healthy/retake.        |
+
+> [!NOTE]
+> **Milestones in Companion Voice:** Raw `milestones_triggered` arrays are omitted from the client response. The Companion Agent automatically weaves relevant episodic milestones (e.g., past overwatering or recoveries) directly into the 1st-person `companion_message` speech bubble.
+
+#### 3.3.1 `care_plan` Object Schema
+
+| Field            | Type             |     Requirement     | Description                                                                        |
+| :--------------- | :--------------- | :-----------------: | :--------------------------------------------------------------------------------- |
+| `id`           | `string`       | **Mandatory** | Unique identifier for this care plan (e.g.`"cp_a7b8c9d0e1f2"`).                  |
+| `status_label` | `string`       | **Mandatory** | Short summary headline for the care card (e.g.`"Overwatering stress"`).          |
+| `assessment`   | `string`       | **Mandatory** | Botanical reasoning explaining root cause (e.g. overwatering, fungal).             |
+| `actions`      | `list[object]` | **Mandatory** | Ordered list of action items (`[{"id": "...", "priority": 1, ...}]`, see below). |
+
+> [!NOTE]
+> **Confidence Handling:** `confidence` is excluded from the public frontend JSON contract to avoid user confusion from uncalibrated LLM scores. It remains preserved internally in the backend database (`care_plans` table) for model telemetry and audit logging.
+
+#### 3.3.2 `care_plan.actions[]` Object Schema
+
+| Field        | Type        |     Requirement     | Allowed Values                                            | Description                                                         |
+| :----------- | :---------- | :-----------------: | :-------------------------------------------------------- | :------------------------------------------------------------------ |
+| `id`       | `string`  | **Mandatory** | e.g.`"act_8e4b1a2c"`                                    | Unique action identifier for tracking user completions.             |
+| `priority` | `integer` | **Mandatory** | $\ge 1$ (1 is highest priority)                         | Relative priority of the action item.                               |
+| `action`   | `string`  | **Mandatory** | Full botanical instruction string                         | Detailed explanation shown in action card or modal.                 |
+| `label`    | `string`  | **Mandatory** | 2–3 words (max 30 chars)                                 | **Short button text** for Web UI (e.g. `"Pause water"`).            |
+| `type`     | `string`  | **Mandatory** | `"water"` \| `"move"` \| `"inspect"` \| `"other"` | Categorical action type for UI iconography and navigation.          |
+
+---
+
+### 3.4 Concrete Response Examples
+
+#### Example 2A: Success Response — `CARE_ADVICE_REQUIRED` (Push Alert & Action Card)
+
+```json
+{
+  "success": true,
+  "data": {
+    "plant_id": "plant-monstera-1",
+    "name": "Monty",
+    "species": "Monstera deliciosa",
+    "dayCount": 2,
+    "timestamp": "2026-09-22T08:30:00Z",
+    "wateredTimestamp": "2026-09-19T14:20:00Z",
+    "level": 1,
+    "xpRatio": 0.0,
+    "health_status": "unhealthy",
+    "decision": "CARE_ADVICE_REQUIRED",
+    "companion_message": "Hey there! My lower leaves are turning yellow and drooping, just like back when we overwatered in March. Could you pause watering for 5 days so my roots can get some oxygen? 🌿",
+    "care_plan": {
+      "id": "cp_a7b8c9d0e1f2",
+      "status_label": "Overwatering stress",
+      "assessment": "Severe chlorosis and drooping indicates soil moisture saturation leading to root hypoxia. Immediate water restriction is essential.",
+      "actions": [
+        {
+          "id": "act_8e4b1a2c",
+          "priority": 1,
+          "action": "Hold watering for 5 days until top 2 inches of soil are dry to the touch.",
+          "label": "Pause water",
+          "type": "water"
+        },
+        {
+          "id": "act_9f5c2b3d",
+          "priority": 2,
+          "action": "Check drainage holes at the bottom of the pot are unblocked.",
+          "label": "Drain tray",
+          "type": "inspect"
+        },
+        {
+          "id": "act_0a6d3c4e",
+          "priority": 3,
+          "action": "Move to a bright location with indirect sunlight to assist transpiration.",
+          "label": "Move plant",
+          "type": "move"
+        }
+      ]
     }
-  ],
-  "care_plan": {
-    "assessment": "Severe chlorosis and drooping indicates soil moisture saturation leading to root hypoxia. Immediate water restriction is essential.",
-    "confidence": 0.95,
-    "actions": [
-      {
-        "priority": 1,
-        "action": "Hold watering for 5 days until the top 2 inches of soil are dry to the touch."
-      },
-      {
-        "priority": 2,
-        "action": "Ensure drainage holes at the bottom of the pot are unblocked."
-      },
-      {
-        "priority": 3,
-        "action": "Move to a bright location with indirect sunlight to assist transpiration."
-      }
-    ]
+  },
+  "message": null,
+  "error": null
+}
+```
+
+#### Example 2B: Success Response — `NO_ACTION` (Silent Green Timeline Update)
+
+```json
+{
+  "success": true,
+  "data": {
+    "plant_id": "plant-pothos-2",
+    "name": "Perky",
+    "species": "Epipremnum aureum",
+    "dayCount": 5,
+    "timestamp": "2026-09-22T09:00:00Z",
+    "wateredTimestamp": "2026-09-20T10:00:00Z",
+    "level": 1,
+    "xpRatio": 0.0,
+    "health_status": "healthy",
+    "decision": "NO_ACTION",
+    "companion_message": "I'm feeling great today! My leaves are perky and getting plenty of light. 🌱✨",
+    "care_plan": null
+  },
+  "message": null,
+  "error": null
+}
+```
+
+#### Example 2C: Error Response — LLM Service Unavailable (`LLM_UNAVAILABLE`)
+
+Returned (HTTP 503) when the post-VLM agent pipeline cannot communicate with the configured LLM provider (Ollama, OpenAI, Claude, Gemini) during Care Advisor reasoning:
+
+```json
+{
+  "success": false,
+  "data": null,
+  "message": "AI reasoning service (LLM) is currently unavailable. Please verify provider connectivity.",
+  "error": {
+    "code": "LLM_UNAVAILABLE",
+    "details": {
+      "provider": "ollama",
+      "model": "llama3.2:latest",
+      "reason": "Connection refused at http://localhost:11434"
+    }
   }
 }
 ```
 
-#### Example 2B: `NO_ACTION` Payload (Silent Green Timeline Update)
+#### Example 2D: Error Response — General Internal Server Error (`INTERNAL_SERVER_ERROR`)
+
+Returned (HTTP 500) when an unexpected backend or database fault occurs during state retrieval or pipeline execution:
 
 ```json
 {
-  "day": 5,
-  "plant_id": "plant-pothos-2",
-  "timestamp": "2026-09-22T09:00:00Z",
-  "health_status": "healthy",
-  "decision": "NO_ACTION",
-  "companion_message": "I'm feeling great today! My leaves are perky and getting plenty of light. 🌱✨",
-  "milestones_triggered": [],
-  "care_plan": null
+  "success": false,
+  "data": null,
+  "message": "An unexpected internal server error occurred while processing the plant companion state.",
+  "error": {
+    "code": "INTERNAL_SERVER_ERROR",
+    "details": {
+      "request_id": "req_8f1b2c3d4e5f",
+      "reason": "Database connection timeout while querying plant state"
+    }
+  }
 }
 ```
 
@@ -301,30 +413,35 @@ The Event Engine ranks health statuses: `healthy (1) < possibly_unhealthy (2) < 
 
 ```json
 {
-  "day": 3,
   "plant_id": "plant-monstera-1",
+  "name": "Monty",
+  "species": "Monstera deliciosa",
+  "dayCount": 3,
   "timestamp": "2026-09-22T08:30:00Z",
+  "wateredTimestamp": "2026-09-20T08:30:00Z",
+  "level": 1,
+  "xpRatio": 0.0,
   "health_status": "possibly_unhealthy",
   "decision": "CARE_ADVICE_REQUIRED",
   "companion_message": "Hey friend! Just noticed the tips of my lower leaves are getting a bit crisp. Could you check if the air is too dry or if I'm too close to the AC vent? 🌿",
-  "milestones_triggered": [
-    {
-      "event_type": "first_symptom",
-      "description": "First symptom observed: dry_tips (mild)",
-      "timestamp": "2026-09-22T08:30:00Z"
-    }
-  ],
   "care_plan": {
+    "id": "cp_c3d4e5f6a1b2",
+    "status_label": "Dry tip warning",
     "assessment": "Mild dry tips indicate localized low humidity or initial moisture stress. Early intervention prevents leaf browning.",
-    "confidence": 0.88,
     "actions": [
       {
+        "id": "act_1b2c3d4e",
         "priority": 1,
-        "action": "Mist foliage lightly or move away from direct air conditioning flow."
+        "action": "Mist foliage lightly or move away from direct air conditioning flow.",
+        "label": "Mist leaves",
+        "type": "water"
       },
       {
+        "id": "act_2c3d4e5f",
         "priority": 2,
-        "action": "Verify top 1 inch of soil moisture before scheduled watering."
+        "action": "Verify top 1 inch of soil moisture before scheduled watering.",
+        "label": "Check soil",
+        "type": "inspect"
       }
     ]
   }
@@ -335,13 +452,17 @@ The Event Engine ranks health statuses: `healthy (1) < possibly_unhealthy (2) < 
 
 ```json
 {
-  "day": 2,
   "plant_id": "plant-monstera-1",
+  "name": "Monty",
+  "species": "Monstera deliciosa",
+  "dayCount": 2,
   "timestamp": "2026-09-22T08:30:00Z",
+  "wateredTimestamp": null,
+  "level": 1,
+  "xpRatio": 0.0,
   "health_status": "unhealthy",
   "decision": "REQUEST_MORE_INFORMATION",
   "companion_message": "Hmm, I couldn't get a clear look at my leaves in that photo — it might be a bit too blurry or dark. Could you snap another clear photo for me?",
-  "milestones_triggered": [],
   "care_plan": null
 }
 ```
@@ -358,7 +479,7 @@ The Event Engine ranks health statuses: `healthy (1) < possibly_unhealthy (2) < 
   pytest tests/test_vlm_adapter.py -v
   ```
 
-### For Mobile / Frontend Team
+### For Frontend / Web Team
 
 * Consume `PipelineStepResult.to_frontend_dict()` directly as JSON.
 * Run mock scenarios from CLI to generate live sample payloads:

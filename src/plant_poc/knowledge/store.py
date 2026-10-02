@@ -8,8 +8,83 @@ import re
 from typing import Any, Optional
 import numpy as np
 
+from langchain_core.documents import Document
 from langchain_core.embeddings import Embeddings
-from langchain_core.vectorstores import InMemoryVectorStore, VectorStore
+from langchain_core.vectorstores import VectorStore
+
+try:
+    from langchain_core.vectorstores import InMemoryVectorStore
+except ImportError:
+    # langchain_core < 0.3 doesn't ship InMemoryVectorStore.
+    # Provide a minimal shim matching the API surface we actually use.
+    from typing import Iterable, Sequence
+
+    class InMemoryVectorStore(VectorStore):  # type: ignore[no-redef]
+        """Lightweight in-memory vector store compatible with langchain_core 0.2.x."""
+
+        def __init__(self, embedding: Embeddings, **kwargs: Any):
+            self._embedding = embedding
+            self.store: dict[str, dict[str, Any]] = {}
+
+        @property
+        def embeddings(self) -> Embeddings:  # type: ignore[override]
+            return self._embedding
+
+        def add_texts(
+            self,
+            texts: Iterable[str],
+            metadatas: Optional[list[dict[str, Any]]] = None,
+            ids: Optional[list[str]] = None,
+            **kwargs: Any,
+        ) -> list[str]:
+            text_list = list(texts)
+            vectors = self._embedding.embed_documents(text_list)
+            result_ids: list[str] = []
+            for i, text in enumerate(text_list):
+                doc_id = (ids[i] if ids and i < len(ids) else hashlib.md5(text.encode()).hexdigest())
+                meta = metadatas[i] if metadatas and i < len(metadatas) else {}
+                self.store[doc_id] = {"text": text, "metadata": meta, "vector": vectors[i]}
+                result_ids.append(doc_id)
+            return result_ids
+
+        def similarity_search_with_score(
+            self, query: str, k: int = 4, **kwargs: Any
+        ) -> list[tuple[Document, float]]:
+            if not self.store:
+                return []
+            q_vec = np.array(self._embedding.embed_query(query))
+            scored: list[tuple[str, float]] = []
+            for doc_id, entry in self.store.items():
+                d_vec = np.array(entry["vector"])
+                norm_q = np.linalg.norm(q_vec)
+                norm_d = np.linalg.norm(d_vec)
+                if norm_q > 0 and norm_d > 0:
+                    score = float(np.dot(q_vec, d_vec) / (norm_q * norm_d))
+                else:
+                    score = 0.0
+                scored.append((doc_id, score))
+            scored.sort(key=lambda x: x[1], reverse=True)
+            results: list[tuple[Document, float]] = []
+            for doc_id, score in scored[:k]:
+                entry = self.store[doc_id]
+                doc = Document(page_content=entry["text"], metadata=entry.get("metadata", {}))
+                results.append((doc, score))
+            return results
+
+        def similarity_search(self, query: str, k: int = 4, **kwargs: Any) -> list[Document]:
+            return [doc for doc, _ in self.similarity_search_with_score(query, k, **kwargs)]
+
+        @classmethod
+        def from_texts(
+            cls,
+            texts: list[str],
+            embedding: Embeddings,
+            metadatas: Optional[list[dict[str, Any]]] = None,
+            **kwargs: Any,
+        ) -> "InMemoryVectorStore":
+            store = cls(embedding=embedding)
+            store.add_texts(texts, metadatas=metadatas)
+            return store
 
 from plant_poc.config import (
     LLM_PROVIDER,

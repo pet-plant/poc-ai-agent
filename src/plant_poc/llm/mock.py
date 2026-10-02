@@ -27,13 +27,15 @@ class MockChatModel(BaseChatModel):
 
     responses: list[Any] = []
     call_history: list[Any] = []
-    _idx: int = 0
+
+    class Config:
+        underscore_attrs_are_private = True
 
     def __init__(self, responses: Optional[list[Any]] = None, **kwargs: Any):
         super().__init__(**kwargs)
-        self.responses = list(responses or [DEFAULT_MOCK_CARE_PLAN])
-        self.call_history = []
-        self._idx = 0
+        object.__setattr__(self, "responses", list(responses or [DEFAULT_MOCK_CARE_PLAN]))
+        object.__setattr__(self, "call_history", [])
+        object.__setattr__(self, "_idx", 0)
 
     def _generate(
         self,
@@ -49,7 +51,7 @@ class MockChatModel(BaseChatModel):
 
         if self._idx < len(self.responses):
             resp = self.responses[self._idx]
-            self._idx += 1
+            object.__setattr__(self, "_idx", self._idx + 1)
         else:
             resp = self.responses[-1]
 

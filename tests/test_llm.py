@@ -3,13 +3,22 @@
 import pytest
 from langchain_core.language_models import BaseChatModel
 from langchain_core.messages import AIMessage
-from langchain_ollama import ChatOllama
-from langchain_openai import ChatOpenAI
+
+try:
+    from langchain_ollama import ChatOllama
+except ImportError:
+    ChatOllama = None
+
+try:
+    from langchain_openai import ChatOpenAI
+except ImportError:
+    ChatOpenAI = None
 
 from plant_poc.llm import get_llm
 from tests.conftest import MockChatModel
 
 
+@pytest.mark.skipif(ChatOllama is None or ChatOpenAI is None, reason="langchain_ollama/langchain_openai not installed")
 def test_get_llm_factory_providers(monkeypatch):
     ollama_model = get_llm(provider="ollama")
     assert isinstance(ollama_model, BaseChatModel)

@@ -6,7 +6,7 @@ from typing import Optional
 
 def init_db(db_path: str = ":memory:") -> sqlite3.Connection:
     """Initialize SQLite database with required tables."""
-    conn = sqlite3.connect(db_path)
+    conn = sqlite3.connect(db_path, check_same_thread=False)
     conn.row_factory = sqlite3.Row
     with conn:
         conn.executescript(

@@ -36,14 +36,16 @@
   • Companion Output (Plant Voice):
     [Template mode — showing care summary]
     Update on Monty:
-    Symptoms indicate moisture imbalance.
-
+    Offline mock assessment: Observations noted and care schedule adjusted.
+    
     Recommended actions:
-      • Check soil moisture.
+      • Check soil moisture 2 inches down.
+      • Adjust watering schedule based on moisture level.
 
-  • Care Plan:   Assessment: "Symptoms indicate moisture imbalance." (conf=0.85)
+  • Care Plan:   Assessment: "Offline mock assessment: Observations noted and care schedule adjusted." (conf=0.90)
     Actions:
-      [1] Check soil moisture.
+      [1] Check soil moisture 2 inches down.
+      [2] Adjust watering schedule based on moisture level.
 
   • Frontend JSON Response:
 {
@@ -52,7 +54,7 @@
     "timestamp": "2026-09-02T10:00:00+00:00",
     "health_status": "possibly_unhealthy",
     "decision": "CARE_ADVICE_REQUIRED",
-    "companion_message": "[Template mode \u2014 showing care summary]\nUpdate on Monty:\nSymptoms indicate moisture imbalance.\n\nRecommended actions:\n  \u2022 Check soil moisture.",
+    "companion_message": "[Template mode \u2014 showing care summary]\nUpdate on Monty:\nOffline mock assessment: Observations noted and care schedule adjusted.\n\nRecommended actions:\n  \u2022 Check soil moisture 2 inches down.\n  \u2022 Adjust watering schedule based on moisture level.",
     "milestones_triggered": [
         {
             "event_type": "first_symptom",
@@ -61,12 +63,16 @@
         }
     ],
     "care_plan": {
-        "assessment": "Symptoms indicate moisture imbalance.",
-        "confidence": 0.85,
+        "assessment": "Offline mock assessment: Observations noted and care schedule adjusted.",
+        "confidence": 0.9,
         "actions": [
             {
                 "priority": 1,
-                "action": "Check soil moisture."
+                "action": "Check soil moisture 2 inches down."
+            },
+            {
+                "priority": 2,
+                "action": "Adjust watering schedule based on moisture level."
             }
         ]
     }
@@ -89,14 +95,16 @@
   • Companion Output (Plant Voice):
     [Template mode — showing care summary]
     Update on Monty:
-    Symptoms indicate moisture imbalance.
-
+    Offline mock assessment: Observations noted and care schedule adjusted.
+    
     Recommended actions:
-      • Check soil moisture.
+      • Check soil moisture 2 inches down.
+      • Adjust watering schedule based on moisture level.
 
-  • Care Plan:   Assessment: "Symptoms indicate moisture imbalance." (conf=0.85)
+  • Care Plan:   Assessment: "Offline mock assessment: Observations noted and care schedule adjusted." (conf=0.90)
     Actions:
-      [1] Check soil moisture.
+      [1] Check soil moisture 2 inches down.
+      [2] Adjust watering schedule based on moisture level.
 
   • Frontend JSON Response:
 {
@@ -105,7 +113,7 @@
     "timestamp": "2026-09-01T10:00:00+00:00",
     "health_status": "unhealthy",
     "decision": "CARE_ADVICE_REQUIRED",
-    "companion_message": "[Template mode \u2014 showing care summary]\nUpdate on Monty:\nSymptoms indicate moisture imbalance.\n\nRecommended actions:\n  \u2022 Check soil moisture.",
+    "companion_message": "[Template mode \u2014 showing care summary]\nUpdate on Monty:\nOffline mock assessment: Observations noted and care schedule adjusted.\n\nRecommended actions:\n  \u2022 Check soil moisture 2 inches down.\n  \u2022 Adjust watering schedule based on moisture level.",
     "milestones_triggered": [
         {
             "event_type": "first_symptom",
@@ -119,12 +127,16 @@
         }
     ],
     "care_plan": {
-        "assessment": "Symptoms indicate moisture imbalance.",
-        "confidence": 0.85,
+        "assessment": "Offline mock assessment: Observations noted and care schedule adjusted.",
+        "confidence": 0.9,
         "actions": [
             {
                 "priority": 1,
-                "action": "Check soil moisture."
+                "action": "Check soil moisture 2 inches down."
+            },
+            {
+                "priority": 2,
+                "action": "Adjust watering schedule based on moisture level."
             }
         ]
     }
@@ -236,14 +248,16 @@
   • Companion Output (Plant Voice):
     [Template mode — showing care summary]
     Update on Monty:
-    Symptoms indicate moisture imbalance.
-
+    Offline mock assessment: Observations noted and care schedule adjusted.
+    
     Recommended actions:
-      • Check soil moisture.
+      • Check soil moisture 2 inches down.
+      • Adjust watering schedule based on moisture level.
 
-  • Care Plan:   Assessment: "Symptoms indicate moisture imbalance." (conf=0.85)
+  • Care Plan:   Assessment: "Offline mock assessment: Observations noted and care schedule adjusted." (conf=0.90)
     Actions:
-      [1] Check soil moisture.
+      [1] Check soil moisture 2 inches down.
+      [2] Adjust watering schedule based on moisture level.
 
   • Frontend JSON Response:
 {
@@ -252,7 +266,7 @@
     "timestamp": "2026-09-02T10:00:00+00:00",
     "health_status": "possibly_unhealthy",
     "decision": "CARE_ADVICE_REQUIRED",
-    "companion_message": "[Template mode \u2014 showing care summary]\nUpdate on Monty:\nSymptoms indicate moisture imbalance.\n\nRecommended actions:\n  \u2022 Check soil moisture.",
+    "companion_message": "[Template mode \u2014 showing care summary]\nUpdate on Monty:\nOffline mock assessment: Observations noted and care schedule adjusted.\n\nRecommended actions:\n  \u2022 Check soil moisture 2 inches down.\n  \u2022 Adjust watering schedule based on moisture level.",
     "milestones_triggered": [
         {
             "event_type": "first_symptom",
@@ -261,12 +275,16 @@
         }
     ],
     "care_plan": {
-        "assessment": "Symptoms indicate moisture imbalance.",
-        "confidence": 0.85,
+        "assessment": "Offline mock assessment: Observations noted and care schedule adjusted.",
+        "confidence": 0.9,
         "actions": [
             {
                 "priority": 1,
-                "action": "Check soil moisture."
+                "action": "Check soil moisture 2 inches down."
+            },
+            {
+                "priority": 2,
+                "action": "Adjust watering schedule based on moisture level."
             }
         ]
     }
@@ -280,14 +298,16 @@
   • Companion Output (Plant Voice):
     [Template mode — showing care summary]
     Update on Monty:
-    Symptoms indicate moisture imbalance.
-
+    Offline mock assessment: Observations noted and care schedule adjusted.
+    
     Recommended actions:
-      • Check soil moisture.
+      • Check soil moisture 2 inches down.
+      • Adjust watering schedule based on moisture level.
 
-  • Care Plan:   Assessment: "Symptoms indicate moisture imbalance." (conf=0.85)
+  • Care Plan:   Assessment: "Offline mock assessment: Observations noted and care schedule adjusted." (conf=0.90)
     Actions:
-      [1] Check soil moisture.
+      [1] Check soil moisture 2 inches down.
+      [2] Adjust watering schedule based on moisture level.
 
   • Frontend JSON Response:
 {
@@ -296,7 +316,7 @@
     "timestamp": "2026-09-03T10:00:00+00:00",
     "health_status": "unhealthy",
     "decision": "CARE_ADVICE_REQUIRED",
-    "companion_message": "[Template mode \u2014 showing care summary]\nUpdate on Monty:\nSymptoms indicate moisture imbalance.\n\nRecommended actions:\n  \u2022 Check soil moisture.",
+    "companion_message": "[Template mode \u2014 showing care summary]\nUpdate on Monty:\nOffline mock assessment: Observations noted and care schedule adjusted.\n\nRecommended actions:\n  \u2022 Check soil moisture 2 inches down.\n  \u2022 Adjust watering schedule based on moisture level.",
     "milestones_triggered": [
         {
             "event_type": "health_crisis",
@@ -305,12 +325,16 @@
         }
     ],
     "care_plan": {
-        "assessment": "Symptoms indicate moisture imbalance.",
-        "confidence": 0.85,
+        "assessment": "Offline mock assessment: Observations noted and care schedule adjusted.",
+        "confidence": 0.9,
         "actions": [
             {
                 "priority": 1,
-                "action": "Check soil moisture."
+                "action": "Check soil moisture 2 inches down."
+            },
+            {
+                "priority": 2,
+                "action": "Adjust watering schedule based on moisture level."
             }
         ]
     }
@@ -425,14 +449,16 @@
   • Companion Output (Plant Voice):
     [Template mode — showing care summary]
     Update on Monty:
-    Symptoms indicate moisture imbalance.
-
+    Offline mock assessment: Observations noted and care schedule adjusted.
+    
     Recommended actions:
-      • Check soil moisture.
+      • Check soil moisture 2 inches down.
+      • Adjust watering schedule based on moisture level.
 
-  • Care Plan:   Assessment: "Symptoms indicate moisture imbalance." (conf=0.85)
+  • Care Plan:   Assessment: "Offline mock assessment: Observations noted and care schedule adjusted." (conf=0.90)
     Actions:
-      [1] Check soil moisture.
+      [1] Check soil moisture 2 inches down.
+      [2] Adjust watering schedule based on moisture level.
 
   • Frontend JSON Response:
 {
@@ -441,7 +467,7 @@
     "timestamp": "2026-09-02T10:00:00+00:00",
     "health_status": "possibly_unhealthy",
     "decision": "CARE_ADVICE_REQUIRED",
-    "companion_message": "[Template mode \u2014 showing care summary]\nUpdate on Monty:\nSymptoms indicate moisture imbalance.\n\nRecommended actions:\n  \u2022 Check soil moisture.",
+    "companion_message": "[Template mode \u2014 showing care summary]\nUpdate on Monty:\nOffline mock assessment: Observations noted and care schedule adjusted.\n\nRecommended actions:\n  \u2022 Check soil moisture 2 inches down.\n  \u2022 Adjust watering schedule based on moisture level.",
     "milestones_triggered": [
         {
             "event_type": "first_symptom",
@@ -450,12 +476,16 @@
         }
     ],
     "care_plan": {
-        "assessment": "Symptoms indicate moisture imbalance.",
-        "confidence": 0.85,
+        "assessment": "Offline mock assessment: Observations noted and care schedule adjusted.",
+        "confidence": 0.9,
         "actions": [
             {
                 "priority": 1,
-                "action": "Check soil moisture."
+                "action": "Check soil moisture 2 inches down."
+            },
+            {
+                "priority": 2,
+                "action": "Adjust watering schedule based on moisture level."
             }
         ]
     }
@@ -469,14 +499,16 @@
   • Companion Output (Plant Voice):
     [Template mode — showing care summary]
     Update on Monty:
-    Symptoms indicate moisture imbalance.
-
+    Offline mock assessment: Observations noted and care schedule adjusted.
+    
     Recommended actions:
-      • Check soil moisture.
+      • Check soil moisture 2 inches down.
+      • Adjust watering schedule based on moisture level.
 
-  • Care Plan:   Assessment: "Symptoms indicate moisture imbalance." (conf=0.85)
+  • Care Plan:   Assessment: "Offline mock assessment: Observations noted and care schedule adjusted." (conf=0.90)
     Actions:
-      [1] Check soil moisture.
+      [1] Check soil moisture 2 inches down.
+      [2] Adjust watering schedule based on moisture level.
 
   • Frontend JSON Response:
 {
@@ -485,7 +517,7 @@
     "timestamp": "2026-09-03T10:00:00+00:00",
     "health_status": "unhealthy",
     "decision": "CARE_ADVICE_REQUIRED",
-    "companion_message": "[Template mode \u2014 showing care summary]\nUpdate on Monty:\nSymptoms indicate moisture imbalance.\n\nRecommended actions:\n  \u2022 Check soil moisture.",
+    "companion_message": "[Template mode \u2014 showing care summary]\nUpdate on Monty:\nOffline mock assessment: Observations noted and care schedule adjusted.\n\nRecommended actions:\n  \u2022 Check soil moisture 2 inches down.\n  \u2022 Adjust watering schedule based on moisture level.",
     "milestones_triggered": [
         {
             "event_type": "health_crisis",
@@ -494,12 +526,16 @@
         }
     ],
     "care_plan": {
-        "assessment": "Symptoms indicate moisture imbalance.",
-        "confidence": 0.85,
+        "assessment": "Offline mock assessment: Observations noted and care schedule adjusted.",
+        "confidence": 0.9,
         "actions": [
             {
                 "priority": 1,
-                "action": "Check soil moisture."
+                "action": "Check soil moisture 2 inches down."
+            },
+            {
+                "priority": 2,
+                "action": "Adjust watering schedule based on moisture level."
             }
         ]
     }
@@ -582,14 +618,16 @@
   • Companion Output (Plant Voice):
     [Template mode — showing care summary]
     Update on Monty:
-    Symptoms indicate moisture imbalance.
-
+    Offline mock assessment: Observations noted and care schedule adjusted.
+    
     Recommended actions:
-      • Check soil moisture.
+      • Check soil moisture 2 inches down.
+      • Adjust watering schedule based on moisture level.
 
-  • Care Plan:   Assessment: "Symptoms indicate moisture imbalance." (conf=0.85)
+  • Care Plan:   Assessment: "Offline mock assessment: Observations noted and care schedule adjusted." (conf=0.90)
     Actions:
-      [1] Check soil moisture.
+      [1] Check soil moisture 2 inches down.
+      [2] Adjust watering schedule based on moisture level.
 
   • Frontend JSON Response:
 {
@@ -598,7 +636,7 @@
     "timestamp": "2026-09-02T10:00:00+00:00",
     "health_status": "possibly_unhealthy",
     "decision": "CARE_ADVICE_REQUIRED",
-    "companion_message": "[Template mode \u2014 showing care summary]\nUpdate on Monty:\nSymptoms indicate moisture imbalance.\n\nRecommended actions:\n  \u2022 Check soil moisture.",
+    "companion_message": "[Template mode \u2014 showing care summary]\nUpdate on Monty:\nOffline mock assessment: Observations noted and care schedule adjusted.\n\nRecommended actions:\n  \u2022 Check soil moisture 2 inches down.\n  \u2022 Adjust watering schedule based on moisture level.",
     "milestones_triggered": [
         {
             "event_type": "first_symptom",
@@ -607,12 +645,16 @@
         }
     ],
     "care_plan": {
-        "assessment": "Symptoms indicate moisture imbalance.",
-        "confidence": 0.85,
+        "assessment": "Offline mock assessment: Observations noted and care schedule adjusted.",
+        "confidence": 0.9,
         "actions": [
             {
                 "priority": 1,
-                "action": "Check soil moisture."
+                "action": "Check soil moisture 2 inches down."
+            },
+            {
+                "priority": 2,
+                "action": "Adjust watering schedule based on moisture level."
             }
         ]
     }
@@ -684,14 +726,16 @@
   • Companion Output (Plant Voice):
     [Template mode — showing care summary]
     Update on Monty:
-    Symptoms indicate moisture imbalance.
-
+    Offline mock assessment: Observations noted and care schedule adjusted.
+    
     Recommended actions:
-      • Check soil moisture.
+      • Check soil moisture 2 inches down.
+      • Adjust watering schedule based on moisture level.
 
-  • Care Plan:   Assessment: "Symptoms indicate moisture imbalance." (conf=0.85)
+  • Care Plan:   Assessment: "Offline mock assessment: Observations noted and care schedule adjusted." (conf=0.90)
     Actions:
-      [1] Check soil moisture.
+      [1] Check soil moisture 2 inches down.
+      [2] Adjust watering schedule based on moisture level.
 
   • Frontend JSON Response:
 {
@@ -700,7 +744,7 @@
     "timestamp": "2026-09-01T10:00:00+00:00",
     "health_status": "possibly_unhealthy",
     "decision": "CARE_ADVICE_REQUIRED",
-    "companion_message": "[Template mode \u2014 showing care summary]\nUpdate on Monty:\nSymptoms indicate moisture imbalance.\n\nRecommended actions:\n  \u2022 Check soil moisture.",
+    "companion_message": "[Template mode \u2014 showing care summary]\nUpdate on Monty:\nOffline mock assessment: Observations noted and care schedule adjusted.\n\nRecommended actions:\n  \u2022 Check soil moisture 2 inches down.\n  \u2022 Adjust watering schedule based on moisture level.",
     "milestones_triggered": [
         {
             "event_type": "first_symptom",
@@ -709,12 +753,16 @@
         }
     ],
     "care_plan": {
-        "assessment": "Symptoms indicate moisture imbalance.",
-        "confidence": 0.85,
+        "assessment": "Offline mock assessment: Observations noted and care schedule adjusted.",
+        "confidence": 0.9,
         "actions": [
             {
                 "priority": 1,
-                "action": "Check soil moisture."
+                "action": "Check soil moisture 2 inches down."
+            },
+            {
+                "priority": 2,
+                "action": "Adjust watering schedule based on moisture level."
             }
         ]
     }
@@ -728,14 +776,16 @@
   • Companion Output (Plant Voice):
     [Template mode — showing care summary]
     Update on Monty:
-    Symptoms indicate moisture imbalance.
-
+    Offline mock assessment: Observations noted and care schedule adjusted.
+    
     Recommended actions:
-      • Check soil moisture.
+      • Check soil moisture 2 inches down.
+      • Adjust watering schedule based on moisture level.
 
-  • Care Plan:   Assessment: "Symptoms indicate moisture imbalance." (conf=0.85)
+  • Care Plan:   Assessment: "Offline mock assessment: Observations noted and care schedule adjusted." (conf=0.90)
     Actions:
-      [1] Check soil moisture.
+      [1] Check soil moisture 2 inches down.
+      [2] Adjust watering schedule based on moisture level.
 
   • Frontend JSON Response:
 {
@@ -744,7 +794,7 @@
     "timestamp": "2026-09-02T10:00:00+00:00",
     "health_status": "unhealthy",
     "decision": "CARE_ADVICE_REQUIRED",
-    "companion_message": "[Template mode \u2014 showing care summary]\nUpdate on Monty:\nSymptoms indicate moisture imbalance.\n\nRecommended actions:\n  \u2022 Check soil moisture.",
+    "companion_message": "[Template mode \u2014 showing care summary]\nUpdate on Monty:\nOffline mock assessment: Observations noted and care schedule adjusted.\n\nRecommended actions:\n  \u2022 Check soil moisture 2 inches down.\n  \u2022 Adjust watering schedule based on moisture level.",
     "milestones_triggered": [
         {
             "event_type": "health_crisis",
@@ -753,12 +803,16 @@
         }
     ],
     "care_plan": {
-        "assessment": "Symptoms indicate moisture imbalance.",
-        "confidence": 0.85,
+        "assessment": "Offline mock assessment: Observations noted and care schedule adjusted.",
+        "confidence": 0.9,
         "actions": [
             {
                 "priority": 1,
-                "action": "Check soil moisture."
+                "action": "Check soil moisture 2 inches down."
+            },
+            {
+                "priority": 2,
+                "action": "Adjust watering schedule based on moisture level."
             }
         ]
     }

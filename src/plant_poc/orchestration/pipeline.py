@@ -1,7 +1,7 @@
 """In-process pipeline orchestrator connecting Event Engine, Care Advisor, and Companion."""
 
 from dataclasses import dataclass, field
-from typing import Optional
+from typing import Any, Optional
 from plant_poc.event_engine import evaluate, detect_milestones
 from plant_poc.registry import PlantRegistry, init_db
 from plant_poc.knowledge import (
@@ -10,7 +10,7 @@ from plant_poc.knowledge import (
     init_knowledge_db,
     ingest_knowledge_directory,
 )
-from plant_poc.llm import LLMClient, OllamaClient
+from plant_poc.llm import get_llm
 from plant_poc.agents.care_advisor import CareAdvisorAgent
 from plant_poc.agents.companion import CompanionAgent
 from plant_poc.schemas import (
@@ -82,11 +82,12 @@ class PlantPipeline:
     @classmethod
     def create_default(
         cls,
-        llm_client: Optional[LLMClient] = None,
+        llm: Optional[Any] = None,
+        llm_client: Optional[Any] = None,
         use_companion_llm: bool = False,
     ) -> "PlantPipeline":
         """Factory creating an isolated pipeline instance with in-memory DBs."""
-        client = llm_client or OllamaClient()
+        client = llm if llm is not None else (llm_client or get_llm())
 
         # Isolated SQLite Plant Registry
         reg_conn = init_db(":memory:")

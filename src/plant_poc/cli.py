@@ -8,7 +8,7 @@ from pathlib import Path
 from typing import Optional
 
 from plant_poc.config import SCENARIOS_DIR, BASE_DIR
-from plant_poc.llm import OllamaClient, MockLLMClient
+from plant_poc.llm import get_llm
 from plant_poc.orchestration import PlantPipeline, PipelineStepResult
 from plant_poc.schemas import VLMObservation, TriggerDecision
 from plant_poc.vlm_adapter import parse_vlm_probe_result
@@ -163,9 +163,13 @@ def run_single_scenario(
     tee.print(f"  {desc}")
     tee.print("=" * 80)
 
-    llm_client = MockLLMClient() if use_mock else OllamaClient()
+    if use_mock:
+        llm = get_llm("mock")
+    else:
+        llm = get_llm()
+
     pipeline = PlantPipeline.create_default(
-        llm_client=llm_client,
+        llm=llm,
         use_companion_llm=use_companion_llm,
     )
 

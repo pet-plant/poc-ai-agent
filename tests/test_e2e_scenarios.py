@@ -3,9 +3,9 @@
 import json
 import pytest
 from plant_poc.config import SCENARIOS_DIR
-from plant_poc.llm import MockLLMClient, LLMResponse
 from plant_poc.orchestration import PlantPipeline
 from plant_poc.schemas import TriggerDecision, VLMObservation
+from tests.conftest import MockChatModel
 
 EXPECTED_TRIGGERS_MAP = {
     "no_change.json": [TriggerDecision.NO_ACTION, TriggerDecision.NO_ACTION],
@@ -26,21 +26,19 @@ EXPECTED_TRIGGERS_MAP = {
 
 @pytest.mark.parametrize("scenario_file,expected_decisions", EXPECTED_TRIGGERS_MAP.items())
 def test_e2e_scenario_triggers_match_prd_spec(scenario_file, expected_decisions):
-    # Setup offline mock client to verify pipeline logic quickly and deterministically
-    mock_client = MockLLMClient(
-        canned_responses=[
-            LLMResponse(
-                content="""{
-                    "plant_id": "plant-monstera-1",
-                    "assessment": "Overwatering stress detected.",
-                    "confidence": 0.88,
-                    "actions": [{"action": "Check soil moisture.", "priority": 1}]
-                }"""
-            )
+    # Setup offline mock chat model to verify pipeline logic quickly and deterministically
+    mock_model = MockChatModel(
+        responses=[
+            """{
+                "plant_id": "plant-monstera-1",
+                "assessment": "Overwatering stress detected.",
+                "confidence": 0.88,
+                "actions": [{"action": "Check soil moisture.", "priority": 1}]
+            }"""
             for _ in range(10)
         ]
     )
-    pipeline = PlantPipeline.create_default(llm_client=mock_client)
+    pipeline = PlantPipeline.create_default(llm=mock_model)
 
     path = SCENARIOS_DIR / scenario_file
     with open(path) as f:

@@ -6,40 +6,49 @@
     "days_processed": 2,
     "steps": [
       {
-        "day": 1,
         "plant_id": "plant-monstera-1",
+        "name": "Monty",
+        "species": "Monstera deliciosa",
+        "dayCount": 1,
         "timestamp": "2026-09-01T10:00:00+00:00",
+        "wateredTimestamp": null,
+        "level": 1,
+        "xpRatio": 0.0,
         "health_status": "healthy",
         "decision": "NO_ACTION",
         "companion_message": "I'm feeling great and thriving today! Leaves are happy and soaking up the room. Thanks for checking in on me!",
-        "milestones_triggered": [],
         "care_plan": null
       },
       {
-        "day": 2,
         "plant_id": "plant-monstera-1",
+        "name": "Monty",
+        "species": "Monstera deliciosa",
+        "dayCount": 2,
         "timestamp": "2026-09-02T10:00:00+00:00",
+        "wateredTimestamp": null,
+        "level": 1,
+        "xpRatio": 0.0,
         "health_status": "possibly_unhealthy",
         "decision": "CARE_ADVICE_REQUIRED",
         "companion_message": "[Template mode \u2014 showing care summary]\nUpdate on Monty:\nOffline mock assessment: Observations noted and care schedule adjusted.\n\nRecommended actions:\n  \u2022 Check soil moisture 2 inches down.\n  \u2022 Adjust watering schedule based on moisture level.",
-        "milestones_triggered": [
-          {
-            "event_type": "first_symptom",
-            "description": "First health symptoms detected: declining health.",
-            "timestamp": "2026-09-02T10:00:00+00:00"
-          }
-        ],
         "care_plan": {
+          "id": "cp_7b510fa386c4",
+          "status_label": "Plant issue detected",
           "assessment": "Offline mock assessment: Observations noted and care schedule adjusted.",
-          "confidence": 0.9,
           "actions": [
             {
+              "id": "act_be2586ff",
               "priority": 1,
-              "action": "Check soil moisture 2 inches down."
+              "action": "Check soil moisture 2 inches down.",
+              "label": "Inspect plant",
+              "type": "inspect"
             },
             {
+              "id": "act_e8230f37",
               "priority": 2,
-              "action": "Adjust watering schedule based on moisture level."
+              "action": "Adjust watering schedule based on moisture level.",
+              "label": "Inspect plant",
+              "type": "inspect"
             }
           ]
         }
@@ -53,47 +62,51 @@
     "days_processed": 2,
     "steps": [
       {
-        "day": 1,
         "plant_id": "plant-monstera-1",
+        "name": "Monty",
+        "species": "Monstera deliciosa",
+        "dayCount": 1,
         "timestamp": "2026-09-01T10:00:00+00:00",
+        "wateredTimestamp": null,
+        "level": 1,
+        "xpRatio": 0.0,
         "health_status": "unhealthy",
         "decision": "CARE_ADVICE_REQUIRED",
         "companion_message": "[Template mode \u2014 showing care summary]\nUpdate on Monty:\nOffline mock assessment: Observations noted and care schedule adjusted.\n\nRecommended actions:\n  \u2022 Check soil moisture 2 inches down.\n  \u2022 Adjust watering schedule based on moisture level.",
-        "milestones_triggered": [
-          {
-            "event_type": "first_symptom",
-            "description": "First health symptoms detected: leaf_yellowing.",
-            "timestamp": "2026-09-01T10:00:00+00:00"
-          },
-          {
-            "event_type": "health_crisis",
-            "description": "Entered critical unhealthy state at 2026-09-01.",
-            "timestamp": "2026-09-01T10:00:00+00:00"
-          }
-        ],
         "care_plan": {
+          "id": "cp_be663a1ca991",
+          "status_label": "Plant issue detected",
           "assessment": "Offline mock assessment: Observations noted and care schedule adjusted.",
-          "confidence": 0.9,
           "actions": [
             {
+              "id": "act_43a564f2",
               "priority": 1,
-              "action": "Check soil moisture 2 inches down."
+              "action": "Check soil moisture 2 inches down.",
+              "label": "Inspect plant",
+              "type": "inspect"
             },
             {
+              "id": "act_6d501939",
               "priority": 2,
-              "action": "Adjust watering schedule based on moisture level."
+              "action": "Adjust watering schedule based on moisture level.",
+              "label": "Inspect plant",
+              "type": "inspect"
             }
           ]
         }
       },
       {
-        "day": 2,
         "plant_id": "plant-monstera-1",
+        "name": "Monty",
+        "species": "Monstera deliciosa",
+        "dayCount": 2,
         "timestamp": "2026-09-02T10:00:00+00:00",
+        "wateredTimestamp": null,
+        "level": 1,
+        "xpRatio": 0.0,
         "health_status": "possibly_unhealthy",
         "decision": "NO_ACTION",
         "companion_message": "I'm feeling much better today and bouncing back! Thanks for taking good care of me.",
-        "milestones_triggered": [],
         "care_plan": null
       }
     ]
@@ -105,23 +118,31 @@
     "days_processed": 2,
     "steps": [
       {
-        "day": 1,
         "plant_id": "plant-monstera-1",
+        "name": "Monty",
+        "species": "Monstera deliciosa",
+        "dayCount": 1,
         "timestamp": "2026-09-01T10:00:00+00:00",
+        "wateredTimestamp": null,
+        "level": 1,
+        "xpRatio": 0.0,
         "health_status": "healthy",
         "decision": "NO_ACTION",
         "companion_message": "I'm feeling great and thriving today! Leaves are happy and soaking up the room. Thanks for checking in on me!",
-        "milestones_triggered": [],
         "care_plan": null
       },
       {
-        "day": 2,
         "plant_id": "plant-monstera-1",
+        "name": "Monty",
+        "species": "Monstera deliciosa",
+        "dayCount": 2,
         "timestamp": "2026-09-02T10:00:00+00:00",
+        "wateredTimestamp": null,
+        "level": 1,
+        "xpRatio": 0.0,
         "health_status": "unhealthy",
         "decision": "REQUEST_MORE_INFORMATION",
         "companion_message": "Hmm, I couldn't get a clear look at my leaves in that photo \u2014 it might be a bit too blurry or dark. Could you snap another clear photo for me?",
-        "milestones_triggered": [],
         "care_plan": null
       }
     ]
@@ -133,113 +154,127 @@
     "days_processed": 6,
     "steps": [
       {
-        "day": 1,
         "plant_id": "plant-monstera-lifecycle",
+        "name": "Monty",
+        "species": "Monstera deliciosa",
+        "dayCount": 1,
         "timestamp": "2026-09-01T10:00:00+00:00",
+        "wateredTimestamp": null,
+        "level": 1,
+        "xpRatio": 0.0,
         "health_status": "healthy",
         "decision": "NO_ACTION",
         "companion_message": "I'm feeling great and thriving today! Leaves are happy and soaking up the room. Thanks for checking in on me!",
-        "milestones_triggered": [],
         "care_plan": null
       },
       {
-        "day": 2,
         "plant_id": "plant-monstera-lifecycle",
+        "name": "Monty",
+        "species": "Monstera deliciosa",
+        "dayCount": 2,
         "timestamp": "2026-09-02T10:00:00+00:00",
+        "wateredTimestamp": null,
+        "level": 1,
+        "xpRatio": 0.0,
         "health_status": "possibly_unhealthy",
         "decision": "CARE_ADVICE_REQUIRED",
         "companion_message": "[Template mode \u2014 showing care summary]\nUpdate on Monty:\nOffline mock assessment: Observations noted and care schedule adjusted.\n\nRecommended actions:\n  \u2022 Check soil moisture 2 inches down.\n  \u2022 Adjust watering schedule based on moisture level.",
-        "milestones_triggered": [
-          {
-            "event_type": "first_symptom",
-            "description": "First health symptoms detected: leaf_yellowing.",
-            "timestamp": "2026-09-02T10:00:00+00:00"
-          }
-        ],
         "care_plan": {
+          "id": "cp_3f7b7088edbd",
+          "status_label": "Plant issue detected",
           "assessment": "Offline mock assessment: Observations noted and care schedule adjusted.",
-          "confidence": 0.9,
           "actions": [
             {
+              "id": "act_4b98e312",
               "priority": 1,
-              "action": "Check soil moisture 2 inches down."
+              "action": "Check soil moisture 2 inches down.",
+              "label": "Inspect plant",
+              "type": "inspect"
             },
             {
+              "id": "act_c2fb100b",
               "priority": 2,
-              "action": "Adjust watering schedule based on moisture level."
+              "action": "Adjust watering schedule based on moisture level.",
+              "label": "Inspect plant",
+              "type": "inspect"
             }
           ]
         }
       },
       {
-        "day": 3,
         "plant_id": "plant-monstera-lifecycle",
+        "name": "Monty",
+        "species": "Monstera deliciosa",
+        "dayCount": 3,
         "timestamp": "2026-09-03T10:00:00+00:00",
+        "wateredTimestamp": null,
+        "level": 1,
+        "xpRatio": 0.0,
         "health_status": "unhealthy",
         "decision": "CARE_ADVICE_REQUIRED",
         "companion_message": "[Template mode \u2014 showing care summary]\nUpdate on Monty:\nOffline mock assessment: Observations noted and care schedule adjusted.\n\nRecommended actions:\n  \u2022 Check soil moisture 2 inches down.\n  \u2022 Adjust watering schedule based on moisture level.",
-        "milestones_triggered": [
-          {
-            "event_type": "health_crisis",
-            "description": "Entered critical unhealthy state at 2026-09-03.",
-            "timestamp": "2026-09-03T10:00:00+00:00"
-          }
-        ],
         "care_plan": {
+          "id": "cp_344068280232",
+          "status_label": "Plant issue detected",
           "assessment": "Offline mock assessment: Observations noted and care schedule adjusted.",
-          "confidence": 0.9,
           "actions": [
             {
+              "id": "act_ef9dd31b",
               "priority": 1,
-              "action": "Check soil moisture 2 inches down."
+              "action": "Check soil moisture 2 inches down.",
+              "label": "Inspect plant",
+              "type": "inspect"
             },
             {
+              "id": "act_8e5045a0",
               "priority": 2,
-              "action": "Adjust watering schedule based on moisture level."
+              "action": "Adjust watering schedule based on moisture level.",
+              "label": "Inspect plant",
+              "type": "inspect"
             }
           ]
         }
       },
       {
-        "day": 4,
         "plant_id": "plant-monstera-lifecycle",
+        "name": "Monty",
+        "species": "Monstera deliciosa",
+        "dayCount": 4,
         "timestamp": "2026-09-04T10:00:00+00:00",
+        "wateredTimestamp": null,
+        "level": 1,
+        "xpRatio": 0.0,
         "health_status": "unhealthy",
         "decision": "NO_ACTION",
         "companion_message": "I'm feeling great and thriving today! Leaves are happy and soaking up the room. Thanks for checking in on me!",
-        "milestones_triggered": [],
         "care_plan": null
       },
       {
-        "day": 5,
         "plant_id": "plant-monstera-lifecycle",
+        "name": "Monty",
+        "species": "Monstera deliciosa",
+        "dayCount": 5,
         "timestamp": "2026-09-05T10:00:00+00:00",
+        "wateredTimestamp": null,
+        "level": 1,
+        "xpRatio": 0.0,
         "health_status": "unhealthy",
         "decision": "NO_ACTION",
         "companion_message": "I'm feeling great and thriving today! Leaves are happy and soaking up the room. Thanks for checking in on me!",
-        "milestones_triggered": [
-          {
-            "event_type": "severe_episode",
-            "description": "Persistent severe health crisis for 3 consecutive days.",
-            "timestamp": "2026-09-05T10:00:00+00:00"
-          }
-        ],
         "care_plan": null
       },
       {
-        "day": 6,
         "plant_id": "plant-monstera-lifecycle",
+        "name": "Monty",
+        "species": "Monstera deliciosa",
+        "dayCount": 6,
         "timestamp": "2026-09-06T10:00:00+00:00",
+        "wateredTimestamp": null,
+        "level": 1,
+        "xpRatio": 0.0,
         "health_status": "healthy",
         "decision": "NO_ACTION",
         "companion_message": "I'm feeling much better today and bouncing back! Thanks for taking good care of me.",
-        "milestones_triggered": [
-          {
-            "event_type": "full_recovery",
-            "description": "Full recovery back to healthy status on 2026-09-06.",
-            "timestamp": "2026-09-06T10:00:00+00:00"
-          }
-        ],
         "care_plan": null
       }
     ]
@@ -251,91 +286,113 @@
     "days_processed": 5,
     "steps": [
       {
-        "day": 1,
         "plant_id": "plant-monstera-1",
+        "name": "Monty",
+        "species": "Monstera deliciosa",
+        "dayCount": 1,
         "timestamp": "2026-09-01T10:00:00+00:00",
+        "wateredTimestamp": null,
+        "level": 1,
+        "xpRatio": 0.0,
         "health_status": "healthy",
         "decision": "NO_ACTION",
         "companion_message": "I'm feeling great and thriving today! Leaves are happy and soaking up the room. Thanks for checking in on me!",
-        "milestones_triggered": [],
         "care_plan": null
       },
       {
-        "day": 2,
         "plant_id": "plant-monstera-1",
+        "name": "Monty",
+        "species": "Monstera deliciosa",
+        "dayCount": 2,
         "timestamp": "2026-09-02T10:00:00+00:00",
+        "wateredTimestamp": null,
+        "level": 1,
+        "xpRatio": 0.0,
         "health_status": "possibly_unhealthy",
         "decision": "CARE_ADVICE_REQUIRED",
         "companion_message": "[Template mode \u2014 showing care summary]\nUpdate on Monty:\nOffline mock assessment: Observations noted and care schedule adjusted.\n\nRecommended actions:\n  \u2022 Check soil moisture 2 inches down.\n  \u2022 Adjust watering schedule based on moisture level.",
-        "milestones_triggered": [
-          {
-            "event_type": "first_symptom",
-            "description": "First health symptoms detected: leaf_yellowing.",
-            "timestamp": "2026-09-02T10:00:00+00:00"
-          }
-        ],
         "care_plan": {
+          "id": "cp_37b638cd980f",
+          "status_label": "Plant issue detected",
           "assessment": "Offline mock assessment: Observations noted and care schedule adjusted.",
-          "confidence": 0.9,
           "actions": [
             {
+              "id": "act_cb6c3977",
               "priority": 1,
-              "action": "Check soil moisture 2 inches down."
+              "action": "Check soil moisture 2 inches down.",
+              "label": "Inspect plant",
+              "type": "inspect"
             },
             {
+              "id": "act_abcde7c7",
               "priority": 2,
-              "action": "Adjust watering schedule based on moisture level."
+              "action": "Adjust watering schedule based on moisture level.",
+              "label": "Inspect plant",
+              "type": "inspect"
             }
           ]
         }
       },
       {
-        "day": 3,
         "plant_id": "plant-monstera-1",
+        "name": "Monty",
+        "species": "Monstera deliciosa",
+        "dayCount": 3,
         "timestamp": "2026-09-03T10:00:00+00:00",
+        "wateredTimestamp": null,
+        "level": 1,
+        "xpRatio": 0.0,
         "health_status": "unhealthy",
         "decision": "CARE_ADVICE_REQUIRED",
         "companion_message": "[Template mode \u2014 showing care summary]\nUpdate on Monty:\nOffline mock assessment: Observations noted and care schedule adjusted.\n\nRecommended actions:\n  \u2022 Check soil moisture 2 inches down.\n  \u2022 Adjust watering schedule based on moisture level.",
-        "milestones_triggered": [
-          {
-            "event_type": "health_crisis",
-            "description": "Entered critical unhealthy state at 2026-09-03.",
-            "timestamp": "2026-09-03T10:00:00+00:00"
-          }
-        ],
         "care_plan": {
+          "id": "cp_6d74bace634f",
+          "status_label": "Plant issue detected",
           "assessment": "Offline mock assessment: Observations noted and care schedule adjusted.",
-          "confidence": 0.9,
           "actions": [
             {
+              "id": "act_c58d1c75",
               "priority": 1,
-              "action": "Check soil moisture 2 inches down."
+              "action": "Check soil moisture 2 inches down.",
+              "label": "Inspect plant",
+              "type": "inspect"
             },
             {
+              "id": "act_2c7eeb50",
               "priority": 2,
-              "action": "Adjust watering schedule based on moisture level."
+              "action": "Adjust watering schedule based on moisture level.",
+              "label": "Inspect plant",
+              "type": "inspect"
             }
           ]
         }
       },
       {
-        "day": 4,
         "plant_id": "plant-monstera-1",
+        "name": "Monty",
+        "species": "Monstera deliciosa",
+        "dayCount": 4,
         "timestamp": "2026-09-04T10:00:00+00:00",
+        "wateredTimestamp": null,
+        "level": 1,
+        "xpRatio": 0.0,
         "health_status": "possibly_unhealthy",
         "decision": "NO_ACTION",
         "companion_message": "I'm feeling much better today and bouncing back! Thanks for taking good care of me.",
-        "milestones_triggered": [],
         "care_plan": null
       },
       {
-        "day": 5,
         "plant_id": "plant-monstera-1",
+        "name": "Monty",
+        "species": "Monstera deliciosa",
+        "dayCount": 5,
         "timestamp": "2026-09-05T10:00:00+00:00",
+        "wateredTimestamp": null,
+        "level": 1,
+        "xpRatio": 0.0,
         "health_status": "possibly_unhealthy",
         "decision": "REQUEST_MORE_INFORMATION",
         "companion_message": "Hmm, I couldn't get a clear look at my leaves in that photo \u2014 it might be a bit too blurry or dark. Could you snap another clear photo for me?",
-        "milestones_triggered": [],
         "care_plan": null
       }
     ]
@@ -347,40 +404,49 @@
     "days_processed": 2,
     "steps": [
       {
-        "day": 1,
         "plant_id": "plant-monstera-1",
+        "name": "Monty",
+        "species": "Monstera deliciosa",
+        "dayCount": 1,
         "timestamp": "2026-09-01T10:00:00+00:00",
+        "wateredTimestamp": null,
+        "level": 1,
+        "xpRatio": 0.0,
         "health_status": "healthy",
         "decision": "NO_ACTION",
         "companion_message": "I'm feeling great and thriving today! Leaves are happy and soaking up the room. Thanks for checking in on me!",
-        "milestones_triggered": [],
         "care_plan": null
       },
       {
-        "day": 2,
         "plant_id": "plant-monstera-1",
+        "name": "Monty",
+        "species": "Monstera deliciosa",
+        "dayCount": 2,
         "timestamp": "2026-09-02T10:00:00+00:00",
+        "wateredTimestamp": null,
+        "level": 1,
+        "xpRatio": 0.0,
         "health_status": "possibly_unhealthy",
         "decision": "CARE_ADVICE_REQUIRED",
         "companion_message": "[Template mode \u2014 showing care summary]\nUpdate on Monty:\nOffline mock assessment: Observations noted and care schedule adjusted.\n\nRecommended actions:\n  \u2022 Check soil moisture 2 inches down.\n  \u2022 Adjust watering schedule based on moisture level.",
-        "milestones_triggered": [
-          {
-            "event_type": "first_symptom",
-            "description": "First health symptoms detected: leaf_yellowing.",
-            "timestamp": "2026-09-02T10:00:00+00:00"
-          }
-        ],
         "care_plan": {
+          "id": "cp_298936fdb4fd",
+          "status_label": "Plant issue detected",
           "assessment": "Offline mock assessment: Observations noted and care schedule adjusted.",
-          "confidence": 0.9,
           "actions": [
             {
+              "id": "act_72dd7715",
               "priority": 1,
-              "action": "Check soil moisture 2 inches down."
+              "action": "Check soil moisture 2 inches down.",
+              "label": "Inspect plant",
+              "type": "inspect"
             },
             {
+              "id": "act_8ef103b6",
               "priority": 2,
-              "action": "Adjust watering schedule based on moisture level."
+              "action": "Adjust watering schedule based on moisture level.",
+              "label": "Inspect plant",
+              "type": "inspect"
             }
           ]
         }
@@ -394,23 +460,31 @@
     "days_processed": 2,
     "steps": [
       {
-        "day": 1,
         "plant_id": "plant-monstera-1",
+        "name": "Monty",
+        "species": "Monstera deliciosa",
+        "dayCount": 1,
         "timestamp": "2026-09-01T10:00:00+00:00",
+        "wateredTimestamp": null,
+        "level": 1,
+        "xpRatio": 0.0,
         "health_status": "healthy",
         "decision": "NO_ACTION",
         "companion_message": "I'm feeling great and thriving today! Leaves are happy and soaking up the room. Thanks for checking in on me!",
-        "milestones_triggered": [],
         "care_plan": null
       },
       {
-        "day": 2,
         "plant_id": "plant-monstera-1",
+        "name": "Monty",
+        "species": "Monstera deliciosa",
+        "dayCount": 2,
         "timestamp": "2026-09-02T10:00:00+00:00",
+        "wateredTimestamp": null,
+        "level": 1,
+        "xpRatio": 0.0,
         "health_status": "healthy",
         "decision": "NO_ACTION",
         "companion_message": "I'm feeling great and thriving today! Leaves are happy and soaking up the room. Thanks for checking in on me!",
-        "milestones_triggered": [],
         "care_plan": null
       }
     ]
@@ -422,59 +496,69 @@
     "days_processed": 2,
     "steps": [
       {
-        "day": 1,
         "plant_id": "plant-monstera-1",
+        "name": "Monty",
+        "species": "Monstera deliciosa",
+        "dayCount": 1,
         "timestamp": "2026-09-01T10:00:00+00:00",
+        "wateredTimestamp": null,
+        "level": 1,
+        "xpRatio": 0.0,
         "health_status": "possibly_unhealthy",
         "decision": "CARE_ADVICE_REQUIRED",
         "companion_message": "[Template mode \u2014 showing care summary]\nUpdate on Monty:\nOffline mock assessment: Observations noted and care schedule adjusted.\n\nRecommended actions:\n  \u2022 Check soil moisture 2 inches down.\n  \u2022 Adjust watering schedule based on moisture level.",
-        "milestones_triggered": [
-          {
-            "event_type": "first_symptom",
-            "description": "First health symptoms detected: leaf_yellowing.",
-            "timestamp": "2026-09-01T10:00:00+00:00"
-          }
-        ],
         "care_plan": {
+          "id": "cp_ea13a3376441",
+          "status_label": "Plant issue detected",
           "assessment": "Offline mock assessment: Observations noted and care schedule adjusted.",
-          "confidence": 0.9,
           "actions": [
             {
+              "id": "act_ace840b5",
               "priority": 1,
-              "action": "Check soil moisture 2 inches down."
+              "action": "Check soil moisture 2 inches down.",
+              "label": "Inspect plant",
+              "type": "inspect"
             },
             {
+              "id": "act_1e82c1e1",
               "priority": 2,
-              "action": "Adjust watering schedule based on moisture level."
+              "action": "Adjust watering schedule based on moisture level.",
+              "label": "Inspect plant",
+              "type": "inspect"
             }
           ]
         }
       },
       {
-        "day": 2,
         "plant_id": "plant-monstera-1",
+        "name": "Monty",
+        "species": "Monstera deliciosa",
+        "dayCount": 2,
         "timestamp": "2026-09-02T10:00:00+00:00",
+        "wateredTimestamp": null,
+        "level": 1,
+        "xpRatio": 0.0,
         "health_status": "unhealthy",
         "decision": "CARE_ADVICE_REQUIRED",
         "companion_message": "[Template mode \u2014 showing care summary]\nUpdate on Monty:\nOffline mock assessment: Observations noted and care schedule adjusted.\n\nRecommended actions:\n  \u2022 Check soil moisture 2 inches down.\n  \u2022 Adjust watering schedule based on moisture level.",
-        "milestones_triggered": [
-          {
-            "event_type": "health_crisis",
-            "description": "Entered critical unhealthy state at 2026-09-02.",
-            "timestamp": "2026-09-02T10:00:00+00:00"
-          }
-        ],
         "care_plan": {
+          "id": "cp_cf859566726d",
+          "status_label": "Plant issue detected",
           "assessment": "Offline mock assessment: Observations noted and care schedule adjusted.",
-          "confidence": 0.9,
           "actions": [
             {
+              "id": "act_83400619",
               "priority": 1,
-              "action": "Check soil moisture 2 inches down."
+              "action": "Check soil moisture 2 inches down.",
+              "label": "Inspect plant",
+              "type": "inspect"
             },
             {
+              "id": "act_749fe5ea",
               "priority": 2,
-              "action": "Adjust watering schedule based on moisture level."
+              "action": "Adjust watering schedule based on moisture level.",
+              "label": "Inspect plant",
+              "type": "inspect"
             }
           ]
         }

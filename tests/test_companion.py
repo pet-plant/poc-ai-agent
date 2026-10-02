@@ -1,7 +1,7 @@
 import pytest
 from plant_poc.agents.companion import CompanionAgent, validate_fact_preservation
-from plant_poc.llm import MockLLMClient, LLMResponse
 from plant_poc.schemas import CarePlan, CareAction, PlantProfile
+from tests.conftest import MockChatModel
 
 
 def test_companion_template_preserves_all_actions():
@@ -63,14 +63,12 @@ def test_companion_llm_mode_with_validation_fallback():
         ],
     )
 
-    # Mock client returns text that omits the action -> should fall back to template
-    mock_client = MockLLMClient(
-        canned_responses=[
-            LLMResponse(content="Hello! Your plant looks okay, don't worry about anything!"),
-        ]
+    # Mock model returns text that omits the action -> should fall back to template
+    mock_model = MockChatModel(
+        responses=["Hello! Your plant looks okay, don't worry about anything!"]
     )
 
-    companion = CompanionAgent(llm_client=mock_client, use_llm=True)
+    companion = CompanionAgent(llm=mock_model, use_llm=True)
     text = companion.generate_message(plan)
 
     # Fallback template must contain the action
@@ -120,12 +118,15 @@ def test_companion_two_tier_memory_injection():
 
     captured_prompts = []
 
-    class CapturingMockLLM(MockLLMClient):
-        def chat(self, messages, temperature=0.7, tools=None):
+    class CapturingMockLLM(MockChatModel):
+        def _generate(self, messages, stop=None, run_manager=None, **kwargs):
             captured_prompts.append(messages)
-            return LLMResponse(content="I'm Monty! Hold watering for 3 days please!")
+            return super()._generate(messages, stop=stop, run_manager=run_manager, **kwargs)
 
-    companion = CompanionAgent(llm_client=CapturingMockLLM(), use_llm=True)
+    companion = CompanionAgent(
+        llm=CapturingMockLLM(responses=["I'm Monty! Hold watering for 3 days please!"]),
+        use_llm=True,
+    )
     msg = companion.generate_message(
         care_plan=plan,
         plant_profile=profile,
@@ -136,7 +137,7 @@ def test_companion_two_tier_memory_injection():
 
     assert "Hold watering for 3 days" in msg
     assert len(captured_prompts) == 1
-    user_content = captured_prompts[0][1]["content"]
+    user_content = captured_prompts[0][1].content
     assert "Recent 7-day health history:" in user_content
     assert "2026-09-01" in user_content
     assert "Major past life events" in user_content

@@ -69,20 +69,21 @@ orchestration/pipeline.py   ← wires event engine, milestone detector, care adv
     │              │
     ▼              ▼
 registry/      event_engine/
-(SQLite)       ├── rules.py         ← deterministic trigger decisions (zero LLM)
+(SQLite/PG)    ├── rules.py         ← deterministic trigger decisions (zero LLM)
                │   ├── NO_ACTION (steady/healthy)
-               │   └── CARE_ADVICE_REQUIRED (health drop/new symptom)
+               │   ├── CARE_ADVICE_REQUIRED (health drop/new symptom)
+               │   └── REQUEST_MORE_INFORMATION (low confidence/consensus edge guard)
                └── milestones.py    ← detects life events (crisis, 3-day severe episode, recovery)
                          │
                ┌─────────┴──────────┐
                ▼                    ▼
      knowledge/ (RAG)      agents/care_advisor/
-     embeddings +          reasons over 5-day history
-     cosine search         & botanical knowledge → CarePlan
-                                    │
+     LangChain             LangChain create_agent + @tool
+     VectorStoreRetriever  reasons over 5-day history & RAG → CarePlan
+     (InMemory / PGVector)          │
                                     ▼
                           agents/companion/
-                          plant speaks as itself (first-person voice)
+                          LangChain LCEL chain speaks as the plant
                           ├── Short-term: 7-day rolling observation context
                           └── Long-term:  episodic milestones (surfaced conditionally)
 ```
@@ -176,22 +177,46 @@ cp .env.example .env
 
 | Variable                 | Default                     | Description                                |
 | ------------------------ | --------------------------- | ------------------------------------------ |
-| `OLLAMA_HOST`          | `http://localhost:11434`  | Ollama server URL                          |
-| `OLLAMA_MODEL`         | `qwen2.5:latest`          | LLM used by Care Advisor + Companion       |
-| `OLLAMA_EMBED_MODEL`   | `nomic-embed-text:latest` | Embedding model for Knowledge RAG          |
-| `CONFIDENCE_THRESHOLD` | `0.5`                     | Below this confidence → request more info |
-| `DEFAULT_SPECIES`      | `Monstera deliciosa`      | Fallback species when not in observation   |
-| `SQLITE_DB_PATH`       | `:memory:`                | DB path (`:memory:` resets each run)     |
+| `LLM_PROVIDER`           | `ollama`                    | Provider: `ollama`, `openai`, `anthropic`, `gemini`, `mock` |
+| `LLM_MODEL`              | (provider default)          | Model name (e.g. `gpt-4o-mini`, `claude-3-5-sonnet-20241022`, `gemini-2.0-flash`) |
+| `VECTOR_STORE_MODE`      | `memory`                    | Vector store mode: `memory` (dev) or `pgvector` (prod) |
+| `POSTGRES_URL`           | `postgresql+psycopg://...`  | Postgres connection URL for pgvector mode  |
+| `OLLAMA_HOST`            | `http://localhost:11434`    | Ollama server URL                          |
+| `OLLAMA_MODEL`           | `qwen2.5:latest`            | Local model for Care Advisor + Companion   |
+| `OLLAMA_EMBED_MODEL`     | `nomic-embed-text:latest`   | Embedding model for Knowledge RAG          |
+| `CONFIDENCE_THRESHOLD`   | `0.5`                       | Below this threshold → request retake      |
+| `DEFAULT_SPECIES`        | `Monstera deliciosa`        | Fallback species when not in observation   |
+| `SQLITE_DB_PATH`         | `:memory:`                  | SQLite DB path (`:memory:` resets each run)|
 
-### Ollama setup (required for live LLM mode)
+### LLM Provider Setup
 
+#### Local Ollama (Default)
 ```bash
 ollama serve                          # start Ollama if not running
 ollama pull qwen2.5:latest            # LLM for Care Advisor + Companion
 ollama pull nomic-embed-text:latest   # embedding model for Knowledge RAG
 ```
 
-> **Without Ollama running**, the pipeline can still be run fully offline using the `--mock` flag or offline test suite.
+#### Cloud LLM Providers
+Switch providers without code changes via environment variables:
+```bash
+# OpenAI
+export LLM_PROVIDER=openai
+export OPENAI_API_KEY="sk-..."
+export LLM_MODEL=gpt-4o-mini
+
+# Anthropic
+export LLM_PROVIDER=anthropic
+export ANTHROPIC_API_KEY="sk-ant-..."
+export LLM_MODEL=claude-3-5-sonnet-20241022
+
+# Google Gemini
+export LLM_PROVIDER=gemini
+export GEMINI_API_KEY="..."
+export LLM_MODEL=gemini-2.0-flash
+```
+
+> **Without any external LLM service running**, the pipeline can always be run fully offline using `--mock` flag (`LLM_PROVIDER=mock`).
 
 ---
 

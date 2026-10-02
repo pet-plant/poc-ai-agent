@@ -1,15 +1,15 @@
 import json
 import pytest
 from plant_poc.orchestration import PlantPipeline
-from plant_poc.llm import MockLLMClient, LLMResponse
 from plant_poc.schemas import TriggerDecision, VLMObservation
 from plant_poc.config import SCENARIOS_DIR
+from tests.conftest import MockChatModel
 
 
 def test_pipeline_runs_no_change_scenario_without_calling_llm():
     # In no_change, LLM should never be called
-    mock_client = MockLLMClient(canned_responses=[])
-    pipeline = PlantPipeline.create_default(llm_client=mock_client)
+    mock_model = MockChatModel(responses=[])
+    pipeline = PlantPipeline.create_default(llm=mock_model)
 
     with open(SCENARIOS_DIR / "no_change.json") as f:
         data = json.load(f)
@@ -24,27 +24,25 @@ def test_pipeline_runs_no_change_scenario_without_calling_llm():
     assert results[1].care_plan is None
 
     # Verify zero LLM calls
-    assert len(mock_client.call_history) == 0
+    assert len(mock_model.call_history) == 0
 
 
 def test_pipeline_runs_new_symptom_scenario():
     # Day 1: NO_ACTION (healthy baseline)
     # Day 2: CARE_ADVICE_REQUIRED -> triggers Care Advisor & Companion
-    mock_client = MockLLMClient(
-        canned_responses=[
-            LLMResponse(
-                content="""{
-                    "plant_id": "plant-monstera-1",
-                    "assessment": "Early leaf yellowing due to overwatering.",
-                    "confidence": 0.90,
-                    "actions": [
-                        {"action": "Check soil moisture before watering.", "priority": 1}
-                    ]
-                }"""
-            )
+    mock_model = MockChatModel(
+        responses=[
+            """{
+                "plant_id": "plant-monstera-1",
+                "assessment": "Early leaf yellowing due to overwatering.",
+                "confidence": 0.90,
+                "actions": [
+                    {"action": "Check soil moisture before watering.", "priority": 1}
+                ]
+            }"""
         ]
     )
-    pipeline = PlantPipeline.create_default(llm_client=mock_client)
+    pipeline = PlantPipeline.create_default(llm=mock_model)
 
     with open(SCENARIOS_DIR / "new_symptom.json") as f:
         data = json.load(f)
@@ -63,25 +61,23 @@ def test_pipeline_runs_new_symptom_scenario():
     assert results[1].care_plan.assessment == "Early leaf yellowing due to overwatering."
     assert results[1].companion_message is not None
     assert "Check soil moisture before watering." in results[1].companion_message
-    assert len(mock_client.call_history) == 1
+    assert len(mock_model.call_history) == 1
 
 
 def test_pipeline_process_vlm_probe_result():
-    mock_client = MockLLMClient(
-        canned_responses=[
-            LLMResponse(
-                content="""{
-                    "plant_id": "plant-monstera-probe",
-                    "assessment": "Underwatering causing leaf drooping and brown tips.",
-                    "confidence": 0.95,
-                    "actions": [
-                        {"action": "Deep soak watering immediately.", "priority": 1}
-                    ]
-                }"""
-            )
+    mock_model = MockChatModel(
+        responses=[
+            """{
+                "plant_id": "plant-monstera-probe",
+                "assessment": "Underwatering causing leaf drooping and brown tips.",
+                "confidence": 0.95,
+                "actions": [
+                    {"action": "Deep soak watering immediately.", "priority": 1}
+                ]
+            }"""
         ]
     )
-    pipeline = PlantPipeline.create_default(llm_client=mock_client)
+    pipeline = PlantPipeline.create_default(llm=mock_model)
 
     probe_payload = {
         "timestamp": "2026-09-21T14:00:00",
@@ -121,8 +117,8 @@ def test_pipeline_process_vlm_probe_result():
 
 def test_pipeline_low_confidence_does_not_pollute_registry_and_sets_retake():
     """Verify that low-confidence scans trigger retake, never pollute the DB, and use 0 LLM calls."""
-    mock_client = MockLLMClient(canned_responses=[])
-    pipeline = PlantPipeline.create_default(llm_client=mock_client)
+    mock_model = MockChatModel(responses=[])
+    pipeline = PlantPipeline.create_default(llm=mock_model)
 
     with open(SCENARIOS_DIR / "low_confidence.json") as f:
         data = json.load(f)
@@ -149,7 +145,7 @@ def test_pipeline_low_confidence_does_not_pollute_registry_and_sets_retake():
     assert current_stored_obs.health_status.value == "healthy"
 
     # Verify zero LLM calls were made
-    assert len(mock_client.call_history) == 0
+    assert len(mock_model.call_history) == 0
 
 
 def test_pipeline_milestone_lifecycle_and_two_tier_memory():
@@ -163,15 +159,10 @@ def test_pipeline_milestone_lifecycle_and_two_tier_memory():
             {"action": "Isolate from nearby plants.", "priority": 2}
         ]
     }"""
-    mock_client = MockLLMClient(
-        canned_responses=[
-            LLMResponse(content=canned_careplan),
-            LLMResponse(content=canned_careplan),
-            LLMResponse(content=canned_careplan),
-            LLMResponse(content=canned_careplan),
-        ]
+    mock_model = MockChatModel(
+        responses=[canned_careplan, canned_careplan, canned_careplan, canned_careplan]
     )
-    pipeline = PlantPipeline.create_default(llm_client=mock_client)
+    pipeline = PlantPipeline.create_default(llm=mock_model)
 
     with open(SCENARIOS_DIR / "milestone_lifecycle.json") as f:
         data = json.load(f)

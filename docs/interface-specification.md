@@ -188,10 +188,11 @@ To ensure seamless integration with the Event Engine, the VLM model should assig
 
 ### 3.1 Purpose & Delivery Modes
 
-The post-VLM pipeline processes the observation and produces a serialized response via `PipelineStepResult.to_frontend_dict()`. The mobile client uses this payload to update the UI across two delivery modes:
+The post-VLM pipeline processes the observation and produces a serialized response via `PipelineStepResult.to_frontend_dict()`. The mobile client uses this payload to update the UI across three delivery modes:
 
 1. **Steady / Healthy (`NO_ACTION`)**: Silent timeline update. Green indicator in UI, cheerful companion check-in card, zero push notification alert.
 2. **Action Needed (`CARE_ADVICE_REQUIRED`)**: High-priority push notification, red/amber indicator, interactive care card with prioritized action checklist, and 1st-person plant voice.
+3. **Fallback Photo Retake (`REQUEST_MORE_INFORMATION`)**: Friendly photo retake prompt in UI when image quality or consensus falls below threshold (`< 0.50`), with `care_plan: null`.
 
 ### 3.2 Frontend Payload Schema (Data Dictionary)
 
@@ -201,10 +202,10 @@ The post-VLM pipeline processes the observation and produces a serialized respon
 | `plant_id`             | `string`             | **Mandatory** | String identifier                                             | Target plant ID to route to the correct UI screen.                   |
 | `timestamp`            | `string`             | **Mandatory** | ISO-8601 UTC string                                           | Timestamp of the processed scan.                                     |
 | `health_status`        | `string`             | **Mandatory** | `"healthy"` \| `"possibly_unhealthy"` \| `"unhealthy"`  | Status badge color (Green / Yellow / Red).                           |
-| `decision`             | `string`             | **Mandatory** | `"NO_ACTION"` \| `"CARE_ADVICE_REQUIRED"`                 | Controls whether to render care card or silent timeline.             |
+| `decision`             | `string`             | **Mandatory** | `"NO_ACTION"` \| `"CARE_ADVICE_REQUIRED"` \| `"REQUEST_MORE_INFORMATION"` | Controls whether to render care card, silent timeline, or photo retake prompt. |
 | `companion_message`    | `string`             | **Mandatory** | Non-empty string                                              | **1st-person speech bubble** spoken by the plant.              |
 | `milestones_triggered` | `list[object]`       | **Mandatory** | List (empty`[]` if none)                                    | Milestone badges to celebrate or log in plant history (See §3.2.1). |
-| `care_plan`            | `object` \| `null` | **Optional** | `null` on `NO_ACTION`, Object on `CARE_ADVICE_REQUIRED` | Detailed botanical action plan (See §3.2.2).                        |
+| `care_plan`            | `object` \| `null` | **Optional** | `null` on `NO_ACTION` / `REQUEST_MORE_INFORMATION`, Object on `CARE_ADVICE_REQUIRED` | Detailed botanical action plan (See §3.2.2).                        |
 
 #### 3.2.1 `milestones_triggered[]` Object Schema
 
@@ -327,6 +328,21 @@ The Event Engine ranks health statuses: `healthy (1) < possibly_unhealthy (2) < 
       }
     ]
   }
+}
+```
+
+#### Example 2D: `REQUEST_MORE_INFORMATION` Payload (Photo Retake Card)
+
+```json
+{
+  "day": 2,
+  "plant_id": "plant-monstera-1",
+  "timestamp": "2026-09-22T08:30:00Z",
+  "health_status": "unhealthy",
+  "decision": "REQUEST_MORE_INFORMATION",
+  "companion_message": "Hmm, I couldn't get a clear look at my leaves in that photo — it might be a bit too blurry or dark. Could you snap another clear photo for me?",
+  "milestones_triggered": [],
+  "care_plan": null
 }
 ```
 

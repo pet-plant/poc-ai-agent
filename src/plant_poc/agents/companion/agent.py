@@ -1,19 +1,56 @@
-"""Companion Layer — plant personality projector (speaks AS the plant in first-person)."""
+"""Companion Layer — plant personality projector using LangChain LCEL chain."""
 
-from typing import Optional
+from __future__ import annotations
+
+from typing import Any, Optional, Union
+
+from langchain_core.language_models import BaseChatModel
+from langchain_core.messages import AIMessage, BaseMessage
+from langchain_core.output_parsers import StrOutputParser
+from langchain_core.outputs import ChatGeneration, ChatResult
+from langchain_core.prompts import ChatPromptTemplate
+
 from plant_poc.agents.companion.prompts import (
-    get_companion_system_prompt,
     format_companion_user_prompt,
+    get_companion_system_prompt,
 )
 from plant_poc.agents.companion.validator import validate_fact_preservation
-from plant_poc.llm import LLMClient
 from plant_poc.schemas import (
     CarePlan,
-    PlantProfile,
     HealthStatus,
-    VLMObservation,
     PlantMilestone,
+    PlantProfile,
+    VLMObservation,
 )
+
+
+class _LegacyLLMAdapter(BaseChatModel):
+    """Adapter allowing legacy LLMClient implementations to be used as BaseChatModel."""
+
+    client: Any
+
+    def _generate(
+        self,
+        messages: list[BaseMessage],
+        stop: Optional[list[str]] = None,
+        run_manager: Any = None,
+        **kwargs: Any,
+    ) -> ChatResult:
+        msg_dicts = []
+        for m in messages:
+            role = "user" if m.type == "human" else ("assistant" if m.type == "ai" else m.type)
+            msg_dicts.append({"role": role, "content": m.content})
+
+        resp = self.client.chat(msg_dicts, temperature=kwargs.get("temperature", 0.7))
+        ai_msg = AIMessage(content=getattr(resp, "content", "") or "")
+        return ChatResult(generations=[ChatGeneration(message=ai_msg)])
+
+    def bind_tools(self, tools: Any, **kwargs: Any) -> Any:
+        return self
+
+    @property
+    def _llm_type(self) -> str:
+        return "legacy_client_adapter"
 
 
 class CompanionAgent:
@@ -21,11 +58,28 @@ class CompanionAgent:
 
     def __init__(
         self,
-        llm_client: Optional[LLMClient] = None,
+        llm: Optional[Union[BaseChatModel, Any]] = None,
         use_llm: bool = True,
+        llm_client: Optional[Any] = None,  # Backward compatibility
     ):
-        self.llm_client = llm_client
+        model = llm if llm is not None else llm_client
+        if model is not None and not isinstance(model, BaseChatModel):
+            self.llm: Optional[BaseChatModel] = _LegacyLLMAdapter(client=model)
+        else:
+            self.llm = model
+
         self.use_llm = use_llm
+
+        if self.llm:
+            prompt = ChatPromptTemplate.from_messages(
+                [
+                    ("system", "{system_prompt}"),
+                    ("human", "{user_prompt}"),
+                ]
+            )
+            self.chain = prompt | self.llm | StrOutputParser()
+        else:
+            self.chain = None
 
     def generate_message(
         self,
@@ -39,8 +93,8 @@ class CompanionAgent:
         nickname = plant_profile.nickname if plant_profile else "your plant"
         status_str = health_status.value if health_status else "healthy"
 
-        # Primary: LLM speaks AS the plant in first-person
-        if self.use_llm and self.llm_client:
+        # Primary: LCEL chain speaks AS the plant in first-person
+        if self.use_llm and self.chain:
             action_texts = [a.action for a in care_plan.actions]
             system_prompt = get_companion_system_prompt(status_str)
             user_prompt = format_companion_user_prompt(
@@ -52,15 +106,11 @@ class CompanionAgent:
                 milestones=milestones,
             )
             try:
-                res = self.llm_client.chat(
-                    [
-                        {"role": "system", "content": system_prompt},
-                        {"role": "user", "content": user_prompt},
-                    ],
-                    temperature=0.7,
-                )
-                llm_text = (res.content or "").strip()
-                is_valid, missing = validate_fact_preservation(care_plan, llm_text)
+                llm_text = self.chain.invoke(
+                    {"system_prompt": system_prompt, "user_prompt": user_prompt}
+                ).strip()
+
+                is_valid, _ = validate_fact_preservation(care_plan, llm_text)
                 if is_valid:
                     return llm_text
                 # Fallback if LLM output dropped required care actions
@@ -115,7 +165,6 @@ class CompanionAgent:
         Per production architecture Step 8b: Always uses fast static templates (0 tokens, < 1ms)
         to eliminate LLM latency and cost on healthy/steady checks.
         """
-        # Check if improving from a worse state
         is_improving = (
             previous_obs is not None
             and previous_obs.health_status in (HealthStatus.UNHEALTHY, HealthStatus.POSSIBLY_UNHEALTHY)

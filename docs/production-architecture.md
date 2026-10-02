@@ -31,6 +31,7 @@ flowchart TD
 
         S5 --> BRANCH{"Event Engine Evaluation"}
 
+        BRANCH -- "REQUEST_MORE_INFORMATION<br/>(Low Agreement / Degradation)" --> A_TEMPLATE["Step 8a: Static Retake Prompt<br/>(0 LLM Tokens, DB Protected)"]
         BRANCH -- "NO_ACTION<br/>(Steady / Healthy)" --> B_WRITE["Write Clean Observation"]
         B_WRITE --> B_TEMPLATE["Step 8b: Static Cheerful Template<br/>(0 LLM Tokens, sub-millisecond)"]
 
@@ -51,10 +52,12 @@ flowchart TD
         C_COMPANION --> C_SAVE["Save companion_message<br/>to observations table"]
     end
 
+    A_TEMPLATE --> DELIV_A["Step 9a: In-App Photo Retake Prompt"]
     B_TEMPLATE --> DELIV_B["Step 9b: Silent Green Timeline Update"]
     C_SAVE --> DELIV_C["Step 11c: High-Priority Push Alert<br/>& Interactive Care Card"]
 
     subgraph DELIVERY["3. Mobile Frontend Delivery Layer (Flutter)"]
+        DELIV_A
         DELIV_B
         DELIV_C
     end
@@ -126,63 +129,39 @@ flowchart TD
               │               near_death | full_recovery                     │
               └──────────────────────────────────────────────────────────────┘
                                       │
-                   ┌──────────────────┴──────────────────┐
-                   │                                     │
-                   ▼                                     ▼
-             [ NO_ACTION ]                     [ CARE_ADVICE_REQUIRED ]
-         (healthy / unchanged)               (health drop / new symptom)
-                   │                                     │
-                   │ [ Step 7b: WRITE ]                  │ [ Step 7c: WRITE ]
-                   │   clean obs to                      │   observations table
-                   │   observations table                │   + care_plans table
-                   │                                     │   + plant_milestones
-                   │                                     │   (if milestone triggered)
-                   │                                     │
-                   │                                     ▼
-                   │                      [ Step 8c: Care Advisor Agent ]
-                   │                      (Analytical Reasoning LLM)
-                   │                      ├── Reads observations (5-day trend)
-                   │                      ├── Reads plants (species / profile)
-                   │                      └── Queries Knowledge RAG (VDB)
-                   │                                     │
-                   │                                     ▼
-                   │                           [ Validated CarePlan ]
-                   │                           (assessment, actions)
-                   │                                     │
-                   │                                     ▼
-                   │                        [ Step 9c: Companion Agent ]
-                   │                        (Persona LLM / Voice Engine)
-                   │                        ├── Preserves CarePlan actions
-                   │                        ├── Speaks in 1st-person voice
-                   │                        ├── TWO-TIER MEMORY RETRIEVAL:
-                   │                        │   • Short-term: observations (last 7 days)
-                   │                        │   • Long-term: plant_milestones (all time,
-                   │                        │     referenced only if relevant to symptom)
-                   │                        └── Output saved to
-                   │                            observations.companion_message
-                   │                                     │
-                   ▼                                     ▼
-       [ Step 8b: STATIC TEMPLATE ]               [ Step 10c: LLM VOICE ]
-       (0 tokens, < 1ms)                          (Tokens used only here)
-       "I'm feeling great!                        "My leaves are drooping like
-        Leaves are happy today."                   back in March, could you check
-                                                   my soil moisture? 🌿"
-                   │                                     │
-                   └──────────────────┬──────────────────┘
+                   ┌──────────────────┼──────────────────┐
+                   │                  │                  │
+                   ▼                  ▼                  ▼
+      [ REQUEST_MORE_INFO ]     [ NO_ACTION ]     [ CARE_ADVICE_REQ ]
+      (low agreement fallback)  (healthy/steady)   (health drop/symptom)
+                   │                  │                  │
+                   │ [ Step 7a ]      │ [ Step 7b: WRITE]│ [ Step 7c: WRITE ]
+                   │   Do NOT write   │   clean obs to   │   observations table
+                   │   polluted obs   │   observations   │   + care_plans table
+                   │   to database    │   table          │   + plant_milestones
+                   │                  │                  │
+                   ▼                  ▼                  ▼
+       [ Step 8a: RETAKE PROMPT ] [ Step 8b: STATIC ] [ Step 8c: CARE ADVISOR ]
+       (0 tokens, < 1ms)          (0 tokens, < 1ms)   (LangChain Agent + RAG)
+       "Couldn't get a clear      "I'm feeling great!    │
+        look, snap another?"       Leaves happy today."  ▼
+                   │                  │               [ Step 9c: COMPANION ]
+                   │                  │               (LCEL 1st-person voice)
+                   │                  │                  │
+                   └──────────────────┼──────────────────┘
                                       │
                                       ▼
 ══════════════════════════════ 3. USER DELIVERY LAYER ════════════════════════════════
 
                                       │
-              ┌───────────────────────┴───────────────────────┐
-              │                                               │
-              ▼                                               ▼
- [ Step 9b: App Status Update ]             [ Step 11c: Push Alert
-   (Steady / Healthy)                         & Care Card Delivery ]
- - Green status in timeline               - High-priority push notification
- - Peaceful check-in message              - Interactive action care cards
- - Zero notification spam                 - Plant speaks in 1st-person voice
-                                            incorporating memory context
+              ┌───────────────────────┼───────────────────────┐
+              │                       │                       │
+              ▼                       ▼                       ▼
+ [ Step 9a: Retake Request ] [ Step 9b: App Status ] [ Step 11c: Push Alert
+   (Fallback Photo Retake)     (Steady / Healthy)      & Care Card Delivery ]
+ - Friendly re-snap prompt   - Green status card     - High-priority push
+ - Unpolluted database       - Zero notification     - Interactive actions
+ - 0 LLM cost incurred         spam                  - 2-tier memory context
 ```
 
 ---
@@ -202,7 +181,12 @@ flowchart TD
 - **Step 6:** Event Engine queries the **Plant Registry DB** for the plant's baseline from the `observations` table, and the plant's static profile from the `plants` table.
 - **Deterministic Pipeline Routing:**
   Image quality and consensus are fully guaranteed upstream by the perception gate. The Event Engine evaluates the differential between the new observation and baseline to route directly to one of two operational pathways:
-  - **Path B (`NO_ACTION`) — Steady / Healthy:**
+  - **Path A (`REQUEST_MORE_INFORMATION`) — Defense-in-Depth Edge Guard:**
+    - If edge hardware retries are exhausted or an ambiguous/low-consensus scan (`consensus.agreement < 0.50`) reaches the pipeline, the Event Engine intercepts it immediately.
+    - **Step 7a:** Does **not** write corrupted/unverified data into `observations`, protecting baseline history.
+    - **Step 8a:** Emits a fast, static plant-voice retake request (0 LLM tokens).
+    - **Step 9a:** Prompts the user to retake the photo without running downstream LLM agents.
+  - **Path B (`NO_ACTION`) — Steady / Healthy:
     - **Step 7b:** Saves the clean observation to the `observations` table.
     - **Step 8b:** Instantly pulls a static cheerful template (0 tokens, sub-millisecond).
     - **Step 9b:** Updates plant status to green in the app timeline without notifications.
@@ -314,4 +298,4 @@ This document represents **v2.0 (Latest)**. The table below records all previous
 | **5-Table Schema with Separate `diagnoses`**<br>(Initial draft in `plant-poc-prd.md`) | **4-Table Unified Schema**<br>(`plants`, `observations`, `care_plans`, `plant_milestones`) | `diagnoses` merged into `care_plans`, `companion_message` stored directly on `observations`, and `plant_milestones` dedicated to long-term memory. |
 | **Interactive Bi-Directional Chatbot**<br>(Assumed real-time chat sessions) | **Single-Shot 1st-Person Push/Card**<br>(Step 9b / 11c) | Daily autonomous care cards eliminate chat session overhead and better match daily plant growth rates. |
 | **Unbounded Raw History for Companion**<br>(Passing entire observation log to LLM) | **Two-Tier Memory System**<br>(7-day rolling window + relevant episodic milestones) | Prevents context window explosion and prevents unprompted recitation of ancient, resolved crises. |
-| **LangChain / LangGraph Dependencies** | **Pure Python + Pydantic + SQLite/Postgres** | Minimizes dependency bloat, guarantees sub-second execution, and provides complete deterministic control. |
+| **Heavy LangGraph / Full Framework Overhead** | **LangChain Core Primitives (Approach B)** | Standardizes LLM provider switching (Ollama, OpenAI, Claude, Gemini, Mock), LangChain VectorStore (InMemoryVectorStore / PGVector), @tool agent loop, and LCEL companion chain while keeping EventEngine, Registry, and schemas decoupled and deterministic. |

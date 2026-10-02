@@ -1,15 +1,64 @@
-"""Care Advisor Agent implementation."""
+"""Care Advisor Agent implementation using LangChain."""
 
-from plant_poc.agents.base import run_tool_agent
+from __future__ import annotations
+
+import json
+import re
+from typing import Any, Optional, Union
+
+from langchain.agents import create_agent
+from langchain_core.language_models import BaseChatModel
+from langchain_core.messages import AIMessage, BaseMessage
+from langchain_core.output_parsers import PydanticOutputParser
+from langchain_core.outputs import ChatGeneration, ChatResult
+
 from plant_poc.agents.care_advisor.prompts import (
     CARE_ADVISOR_SYSTEM_PROMPT,
     format_advisor_user_prompt,
 )
 from plant_poc.agents.care_advisor.tools import build_care_advisor_tools
 from plant_poc.knowledge import KnowledgeRetriever
-from plant_poc.llm import LLMClient
 from plant_poc.registry import PlantRegistry
 from plant_poc.schemas import CarePlan, TriggerResult, VLMObservation
+
+
+class _LegacyLLMAdapter(BaseChatModel):
+    """Adapter allowing legacy LLMClient implementations to be used as BaseChatModel."""
+
+    client: Any
+
+    def _generate(
+        self,
+        messages: list[BaseMessage],
+        stop: Optional[list[str]] = None,
+        run_manager: Any = None,
+        **kwargs: Any,
+    ) -> ChatResult:
+        msg_dicts = []
+        for m in messages:
+            role = "user" if m.type == "human" else ("assistant" if m.type == "ai" else m.type)
+            msg_dicts.append({"role": role, "content": m.content})
+
+        resp = self.client.chat(msg_dicts)
+        tool_calls = []
+        if getattr(resp, "tool_calls", None):
+            for tc in resp.tool_calls:
+                tool_calls.append(
+                    {
+                        "name": tc.name,
+                        "args": tc.arguments,
+                        "id": getattr(tc, "id", f"call_{tc.name}"),
+                    }
+                )
+        ai_msg = AIMessage(content=resp.content or "", tool_calls=tool_calls)
+        return ChatResult(generations=[ChatGeneration(message=ai_msg)])
+
+    def bind_tools(self, tools: Any, **kwargs: Any) -> Any:
+        return self
+
+    @property
+    def _llm_type(self) -> str:
+        return "legacy_client_adapter"
 
 
 class CareAdvisorAgent:
@@ -17,14 +66,35 @@ class CareAdvisorAgent:
 
     def __init__(
         self,
-        llm_client: LLMClient,
-        registry: PlantRegistry,
-        retriever: KnowledgeRetriever,
+        llm: Union[BaseChatModel, Any] = None,
+        registry: Optional[PlantRegistry] = None,
+        retriever: Optional[KnowledgeRetriever] = None,
+        llm_client: Optional[Any] = None,  # Backward compatibility
     ):
-        self.llm_client = llm_client
+        model = llm if llm is not None else llm_client
+        if model is None:
+            from plant_poc.llm import get_llm
+            model = get_llm()
+
+        if not isinstance(model, BaseChatModel):
+            self.llm = _LegacyLLMAdapter(client=model)
+        else:
+            self.llm = model
+
         self.registry = registry
         self.retriever = retriever
-        self.tools = build_care_advisor_tools(registry, retriever)
+        self.tools = (
+            build_care_advisor_tools(registry, retriever)
+            if (registry and retriever)
+            else []
+        )
+        self.parser = PydanticOutputParser(pydantic_object=CarePlan)
+
+        self.agent = create_agent(
+            model=self.llm,
+            tools=self.tools,
+            system_prompt=CARE_ADVISOR_SYSTEM_PROMPT,
+        )
 
     def advise(
         self,
@@ -32,7 +102,6 @@ class CareAdvisorAgent:
         trigger_result: TriggerResult,
     ) -> CarePlan:
         """Run the Care Advisor reasoning loop to produce a CarePlan."""
-        # Summarize observations for user prompt
         symptoms_str = (
             ", ".join(
                 f"{obs.type} ({obs.severity}, conf={obs.confidence:.2f})"
@@ -50,19 +119,42 @@ class CareAdvisorAgent:
             trigger_reason=trigger_result.reason,
             leaf_posture=observation.leaf_posture,
             leaf_color_detail=observation.leaf_color_detail,
-            consensus_agreement=observation.consensus.agreement if observation.consensus else None,
+            consensus_agreement=observation.consensus.agreement
+            if observation.consensus
+            else None,
         )
 
-        plan = run_tool_agent(
-            client=self.llm_client,
-            system_prompt=CARE_ADVISOR_SYSTEM_PROMPT,
-            user_prompt=user_prompt,
-            tools=self.tools,
-            response_model=CarePlan,
-            max_turns=5,
-            max_retries=1,
+        result = self.agent.invoke(
+            {"messages": [{"role": "user", "content": user_prompt}]}
+        )
+        final_message = result["messages"][-1]
+        raw_output = (
+            final_message.content
+            if hasattr(final_message, "content")
+            else str(final_message)
         )
 
-        # Persist plan in registry
-        self.registry.save_care_plan(observation.plant_id, plan)
+        plan = self._parse_care_plan(raw_output, observation.plant_id)
+
+        if self.registry:
+            self.registry.save_care_plan(observation.plant_id, plan)
+
         return plan
+
+    def _parse_care_plan(self, text: str, plant_id: str) -> CarePlan:
+        try:
+            return self.parser.parse(text)
+        except Exception:
+            match = re.search(r"(\{.*\})", text, re.DOTALL)
+            if match:
+                try:
+                    data = json.loads(match.group(1))
+                    return CarePlan.model_validate(data)
+                except Exception:
+                    pass
+            return CarePlan(
+                plant_id=plant_id,
+                assessment="Automated assessment: observation recorded.",
+                confidence=0.5,
+                actions=[],
+            )

@@ -1,24 +1,31 @@
-"""Tool definitions and adapter bindings for the Care Advisor Agent."""
+"""Tool definitions and adapter bindings for the Care Advisor Agent using LangChain @tool."""
+
+from __future__ import annotations
 
 from typing import Optional
-from plant_poc.agents.base import AgentTool
-from plant_poc.registry import PlantRegistry
+from langchain_core.tools import BaseTool, tool
+
 from plant_poc.knowledge import KnowledgeRetriever
+from plant_poc.registry import PlantRegistry
 
 
 def build_care_advisor_tools(
     registry: PlantRegistry,
     retriever: KnowledgeRetriever,
-) -> list[AgentTool]:
-    """Build the list of AgentTools wired to registry and knowledge retriever."""
+) -> list[BaseTool]:
+    """Build the list of LangChain BaseTools wired to registry and knowledge retriever."""
 
+    @tool
     def get_plant_profile(plant_id: str) -> dict:
+        """Retrieve plant species, location, and care preferences."""
         profile = registry.get_plant_profile(plant_id)
         if not profile:
             profile = registry.ensure_default_profile(plant_id)
         return profile.model_dump()
 
+    @tool
     def get_recent_observations(plant_id: str, n: int = 5) -> list[dict]:
+        """Retrieve chronological recent observations for the plant."""
         obs_list = registry.get_recent_observations(plant_id, n=n)
         return [
             {
@@ -30,15 +37,19 @@ def build_care_advisor_tools(
             for o in obs_list
         ]
 
+    @tool
     def get_care_history(plant_id: str, n: int = 3) -> list[dict]:
+        """Retrieve previous care plans and diagnostic history for the plant."""
         plans = registry.get_recent_care_plans(plant_id, n=n)
         return [p.model_dump() for p in plans]
 
+    @tool
     def search_plant_knowledge(
         species: str,
         topic: Optional[str] = None,
         symptoms: Optional[list[str]] = None,
     ) -> list[dict]:
+        """Search curated botanical knowledge for species and symptom causes."""
         results = retriever.search_plant_knowledge(
             species=species, topic=topic, symptoms=symptoms or [], top_k=2
         )
@@ -52,81 +63,8 @@ def build_care_advisor_tools(
         ]
 
     return [
-        AgentTool(
-            name="get_plant_profile",
-            description="Retrieve plant species, location, and care preferences.",
-            parameters={
-                "type": "object",
-                "properties": {
-                    "plant_id": {
-                        "type": "string",
-                        "description": "Unique identifier of the plant",
-                    }
-                },
-                "required": ["plant_id"],
-            },
-            func=get_plant_profile,
-        ),
-        AgentTool(
-            name="get_recent_observations",
-            description="Retrieve chronological recent observations for the plant.",
-            parameters={
-                "type": "object",
-                "properties": {
-                    "plant_id": {
-                        "type": "string",
-                        "description": "Unique identifier of the plant",
-                    },
-                    "n": {
-                        "type": "integer",
-                        "description": "Number of observations to return (default 5)",
-                    },
-                },
-                "required": ["plant_id"],
-            },
-            func=get_recent_observations,
-        ),
-        AgentTool(
-            name="get_care_history",
-            description="Retrieve previous care plans and diagnostic history for the plant.",
-            parameters={
-                "type": "object",
-                "properties": {
-                    "plant_id": {
-                        "type": "string",
-                        "description": "Unique identifier of the plant",
-                    },
-                    "n": {
-                        "type": "integer",
-                        "description": "Number of care plans to return (default 3)",
-                    },
-                },
-                "required": ["plant_id"],
-            },
-            func=get_care_history,
-        ),
-        AgentTool(
-            name="search_plant_knowledge",
-            description="Search curated botanical knowledge for species and symptom causes.",
-            parameters={
-                "type": "object",
-                "properties": {
-                    "species": {
-                        "type": "string",
-                        "description": "Plant species name, e.g. 'Monstera deliciosa'",
-                    },
-                    "topic": {
-                        "type": "string",
-                        "description": "Care topic like 'watering', 'yellowing', 'repotting'",
-                    },
-                    "symptoms": {
-                        "type": "array",
-                        "items": {"type": "string"},
-                        "description": "List of symptom keywords, e.g. ['leaf_yellowing']",
-                    },
-                },
-                "required": ["species"],
-            },
-            func=search_plant_knowledge,
-        ),
+        get_plant_profile,
+        get_recent_observations,
+        get_care_history,
+        search_plant_knowledge,
     ]

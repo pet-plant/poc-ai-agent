@@ -211,11 +211,13 @@ class PlantRegistry:
         with self.conn:
             self.conn.execute(
                 """
-                INSERT INTO care_plans (plant_id, assessment, confidence, actions_json)
-                VALUES (?, ?, ?, ?)
+                INSERT INTO care_plans (care_plan_id, plant_id, status_label, assessment, confidence, actions_json)
+                VALUES (?, ?, ?, ?, ?, ?)
                 """,
                 (
+                    plan.id,
                     plant_id,
+                    plan.status_label,
                     plan.assessment,
                     plan.confidence,
                     json.dumps(actions_dicts),
@@ -227,7 +229,7 @@ class PlantRegistry:
         cursor = self.conn.cursor()
         cursor.execute(
             """
-            SELECT plant_id, assessment, confidence, actions_json
+            SELECT id, care_plan_id, plant_id, status_label, assessment, confidence, actions_json
             FROM care_plans
             WHERE plant_id = ?
             ORDER BY id DESC
@@ -240,15 +242,59 @@ class PlantRegistry:
         for r in rows:
             actions_raw = json.loads(r["actions_json"])
             actions = [CareAction.model_validate(a) for a in actions_raw]
+            row_keys = r.keys()
+            plan_id = r["care_plan_id"] if "care_plan_id" in row_keys and r["care_plan_id"] else f"cp_{r['id']}"
+            status_label = r["status_label"] if "status_label" in row_keys and r["status_label"] else "Plant issue detected"
             plans.append(
                 CarePlan(
+                    id=plan_id,
                     plant_id=r["plant_id"],
+                    status_label=status_label,
                     assessment=r["assessment"],
                     confidence=r["confidence"],
                     actions=actions,
                 )
             )
         return plans
+
+    def record_care_event(
+        self,
+        plant_id: str,
+        event_type: str,
+        notes: Optional[str] = None,
+        timestamp: Optional[datetime] = None,
+    ) -> None:
+        """Record a care interaction event (e.g. water, prune, repot)."""
+        ts = timestamp.isoformat() if timestamp else datetime.utcnow().isoformat()
+        with self.conn:
+            self.conn.execute(
+                """
+                INSERT INTO care_events (plant_id, event_type, notes, created_at)
+                VALUES (?, ?, ?, ?)
+                """,
+                (plant_id, event_type, notes, ts),
+            )
+
+    def get_last_watered_timestamp(self, plant_id: str) -> Optional[datetime]:
+        """Fetch the timestamp of the most recent watering event for this plant."""
+        cursor = self.conn.cursor()
+        cursor.execute(
+            """
+            SELECT created_at
+            FROM care_events
+            WHERE plant_id = ? AND event_type = 'water'
+            ORDER BY id DESC
+            LIMIT 1
+            """,
+            (plant_id,),
+        )
+        row = cursor.fetchone()
+        if not row or not row["created_at"]:
+            return None
+        try:
+            return datetime.fromisoformat(row["created_at"])
+        except ValueError:
+            return None
 
     def _row_to_vlm_observation(self, row: sqlite3.Row) -> VLMObservation:
         obs_raw = json.loads(row["observations_json"])

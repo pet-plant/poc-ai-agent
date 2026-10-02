@@ -33,36 +33,67 @@ class PipelineStepResult:
     care_plan: Optional[CarePlan] = None
     companion_message: Optional[str] = None
     milestones_triggered: list[PlantMilestone] = field(default_factory=list)
+    plant_profile: Optional[PlantProfile] = None
+    watered_timestamp: Optional[Any] = None
 
     def to_frontend_dict(self) -> dict:
         """Structured response payload ready to be sent directly to the frontend/client."""
+        nickname = (
+            self.plant_profile.nickname
+            if self.plant_profile and self.plant_profile.nickname
+            else self.observation.plant_id
+        )
+        species = (
+            self.plant_profile.species
+            if self.plant_profile and self.plant_profile.species
+            else (self.observation.species or "Unknown species")
+        )
+        watered_ts = (
+            self.watered_timestamp.isoformat()
+            if self.watered_timestamp
+            else None
+        )
+
         return {
-            "day": self.day_index,
             "plant_id": self.observation.plant_id,
+            "name": nickname,
+            "species": species,
+            "dayCount": self.day_index,
             "timestamp": self.observation.timestamp.isoformat(),
+            "wateredTimestamp": watered_ts,
+            "level": 1,
+            "xpRatio": 0.0,
             "health_status": self.observation.health_status.value,
             "decision": self.trigger_result.decision.value,
             "companion_message": self.companion_message,
-            "milestones_triggered": [
-                {
-                    "event_type": m.event_type.value,
-                    "description": m.description,
-                    "timestamp": m.timestamp.isoformat(),
-                }
-                for m in self.milestones_triggered
-            ],
             "care_plan": (
                 {
+                    "id": self.care_plan.id,
+                    "status_label": self.care_plan.status_label,
                     "assessment": self.care_plan.assessment,
-                    "confidence": self.care_plan.confidence,
                     "actions": [
-                        {"priority": a.priority, "action": a.action}
+                        {
+                            "id": a.id,
+                            "priority": a.priority,
+                            "action": a.action,
+                            "label": a.label,
+                            "type": a.type,
+                        }
                         for a in sorted(self.care_plan.actions, key=lambda x: x.priority)
                     ],
                 }
                 if self.care_plan
                 else None
             ),
+        }
+
+    def to_response_envelope(self, message: Optional[str] = None) -> dict:
+        """Standard BaseResponse envelope wrapping to_frontend_dict() in data."""
+        return {
+            "success": True,
+            "data": self.to_frontend_dict(),
+            "message": message,
+            "error": None,
         }
 
 
@@ -176,6 +207,8 @@ class PlantPipeline:
                 companion_message=companion_msg,
             )
 
+        last_watered = self.registry.get_last_watered_timestamp(obs.plant_id)
+
         return PipelineStepResult(
             day_index=day_index,
             observation=obs,
@@ -183,6 +216,8 @@ class PlantPipeline:
             care_plan=care_plan,
             companion_message=companion_msg,
             milestones_triggered=new_milestones,
+            plant_profile=profile,
+            watered_timestamp=last_watered,
         )
 
     def process_vlm_probe_result(

@@ -207,10 +207,11 @@ def test_pipeline_milestone_lifecycle_and_two_tier_memory():
     assert "severe_episode" in stored_types
     assert "full_recovery" in stored_types
 
-    # Verify frontend payload includes milestones_triggered
+    # Verify milestones are tracked internally (not in frontend payload per MVCS contract)
     payload_day5 = results[4].to_frontend_dict()
-    assert len(payload_day5["milestones_triggered"]) > 0
-    assert payload_day5["milestones_triggered"][0]["event_type"] == "severe_episode"
+    assert "milestones_triggered" not in payload_day5, "milestones should not be in frontend dict"
+    assert len(results[4].milestones_triggered) > 0
+    assert results[4].milestones_triggered[0].event_type.value == "severe_episode"
 
     # Verify companion_message was saved into observations table for each day
     recent_obs = pipeline.registry.get_recent_observations("plant-monstera-lifecycle", n=7)

@@ -104,8 +104,8 @@ flowchart TD
              - If retake needed: loops back to Step 1 automatically ─────────────────┘
              - Emits PROBE RESULT (only on success — quality guaranteed):
                • health_status: "healthy" | "possibly_unhealthy" | "unhealthy"
-               • symptoms: [{"type": "...", "severity": "...", "confidence": ...}]
-               • leaf_posture & leaf_color_detail
+               • symptoms: [{"type": "...", "severity": "...", "description": "..."}]
+               • consensus: agreement score, runs, model_stated_average
                • agreement score (0.0 - 1.0) — guaranteed > threshold here
                                       │
                                       ▼

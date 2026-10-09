@@ -96,14 +96,12 @@ def test_companion_two_tier_memory_injection():
             plant_id="plant-1",
             timestamp=datetime(2026, 9, 1),
             health_status=HealthStatus.HEALTHY,
-            confidence=0.95,
         ),
         VLMObservation(
             plant_id="plant-1",
             timestamp=datetime(2026, 9, 2),
             health_status=HealthStatus.POSSIBLY_UNHEALTHY,
-            confidence=0.9,
-            observations=[Observation(type="leaf_yellowing", severity="mild", confidence=0.9)],
+            observations=[Observation(type="leaf_yellowing", severity="mild", description="mild yellowing")],
         ),
     ]
 

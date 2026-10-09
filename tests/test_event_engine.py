@@ -91,7 +91,6 @@ def test_consensus_agreement_below_threshold():
         plant_id="plant-1",
         timestamp=datetime.now(),
         health_status=HealthStatus.HEALTHY,
-        confidence=0.95,
         consensus=VLMConsensus(agreement=0.6, runs=5, model_stated_average=0.95),
     )
 
@@ -108,7 +107,6 @@ def test_consensus_agreement_above_threshold_healthy():
         plant_id="plant-1",
         timestamp=datetime.now(),
         health_status=HealthStatus.HEALTHY,
-        confidence=0.95,
         consensus=VLMConsensus(agreement=1.0, runs=5, model_stated_average=0.95),
     )
 
@@ -124,7 +122,6 @@ def test_missing_consensus_with_require_consensus():
         plant_id="plant-1",
         timestamp=datetime.now(),
         health_status=HealthStatus.HEALTHY,
-        confidence=0.95,
         consensus=None,
     )
 

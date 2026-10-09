@@ -8,7 +8,7 @@ import re
 from typing import Any, Optional, Union
 
 from langchain_core.language_models import BaseChatModel
-from langchain_core.messages import AIMessage, BaseMessage, HumanMessage, SystemMessage
+from langchain_core.messages import AIMessage, BaseMessage, HumanMessage, SystemMessage, ToolMessage
 from langchain_core.output_parsers import PydanticOutputParser
 from langchain_core.outputs import ChatGeneration, ChatResult
 
@@ -31,11 +31,19 @@ from plant_poc.schemas import CarePlan, TriggerResult, VLMObservation
 
 
 class _SimpleAgentWrapper:
-    """Minimal agent wrapper for when AgentExecutor is unavailable or no tools are needed."""
+    """Agent wrapper that handles system prompt, message forwarding, and multi-turn tool loops."""
 
-    def __init__(self, llm: BaseChatModel, system_prompt: str):
+    def __init__(
+        self,
+        llm: BaseChatModel,
+        system_prompt: str,
+        tools: Optional[list] = None,
+        max_turns: int = 5,
+    ):
         self.llm = llm
         self.system_prompt = system_prompt
+        self.tools_by_name = {t.name: t for t in (tools or []) if hasattr(t, "name")}
+        self.max_turns = max_turns
 
     def invoke(self, input_dict: dict) -> dict:
         messages_raw = input_dict.get("messages", [])
@@ -45,23 +53,51 @@ class _SimpleAgentWrapper:
                 messages.append(m)
             elif isinstance(m, dict):
                 messages.append(HumanMessage(content=m.get("content", "")))
-        result = self.llm.invoke(messages)
-        return {"messages": messages + [result]}
+
+        for _ in range(self.max_turns):
+            result = self.llm.invoke(messages)
+            messages.append(result)
+
+            tool_calls = getattr(result, "tool_calls", None)
+            if not tool_calls:
+                break
+
+            for tc in tool_calls:
+                tool_name = tc.get("name")
+                tool_args = tc.get("args", {})
+                tool_id = tc.get("id", f"call_{tool_name}")
+                tool = self.tools_by_name.get(tool_name)
+                if tool:
+                    try:
+                        observation = tool.invoke(tool_args)
+                        content = (
+                            json.dumps(observation)
+                            if not isinstance(observation, str)
+                            else observation
+                        )
+                    except Exception as exc:
+                        content = f"Error executing tool {tool_name}: {exc}"
+                else:
+                    content = f"Tool '{tool_name}' not found."
+
+                messages.append(ToolMessage(content=content, tool_call_id=tool_id))
+
+        return {"messages": messages}
 
 
 def _build_agent(llm: BaseChatModel, tools: list, system_prompt: str) -> Any:
     """Build an agent wrapper that passes the system prompt and user messages to the LLM.
 
-    Uses _SimpleAgentWrapper for all cases because the system prompt contains
-    raw JSON examples with braces that break ChatPromptTemplate variable parsing.
-    The LLM is expected to have tools bound via bind_tools if needed.
+    Uses _SimpleAgentWrapper which supports tool-calling iterations while handling
+    raw JSON examples in the system prompt. The LLM is bound with tools if supported.
     """
+    bound_llm = llm
     if tools and hasattr(llm, "bind_tools"):
         try:
-            llm = llm.bind_tools(tools)
+            bound_llm = llm.bind_tools(tools)
         except (NotImplementedError, AttributeError):
-            pass
-    return _SimpleAgentWrapper(llm=llm, system_prompt=system_prompt)
+            bound_llm = llm
+    return _SimpleAgentWrapper(llm=bound_llm, system_prompt=system_prompt, tools=tools)
 
 
 class _LegacyLLMAdapter(BaseChatModel):
@@ -155,7 +191,7 @@ class CareAdvisorAgent:
         """Run the Care Advisor reasoning loop to produce a CarePlan."""
         symptoms_str = (
             ", ".join(
-                f"{obs.type} ({obs.severity}, conf={obs.confidence:.2f})"
+                f"{obs.type} ({obs.severity}): {obs.description}"
                 for obs in observation.observations
             )
             if observation.observations
@@ -165,11 +201,8 @@ class CareAdvisorAgent:
         user_prompt = format_advisor_user_prompt(
             plant_id=observation.plant_id,
             health_status=observation.health_status.value,
-            confidence=observation.confidence,
             observations_summary=symptoms_str,
             trigger_reason=trigger_result.reason,
-            leaf_posture=observation.leaf_posture,
-            leaf_color_detail=observation.leaf_color_detail,
             consensus_agreement=observation.consensus.agreement
             if observation.consensus
             else None,
@@ -216,19 +249,27 @@ class CareAdvisorAgent:
         try:
             return self.parser.parse(text)
         except Exception:
-            match = re.search(r"(\{.*\})", text, re.DOTALL)
-            if match:
+            # Check for JSON enclosed in markdown code fences first
+            code_match = re.search(r"```(?:json)?\s*(\{.*?\})\s*```", text, re.DOTALL)
+            candidates = [code_match.group(1)] if code_match else []
+            # Also search for standalone JSON structures
+            raw_match = re.search(r"(\{.*\})", text, re.DOTALL)
+            if raw_match:
+                candidates.append(raw_match.group(1))
+
+            for json_str in candidates:
                 try:
-                    data = json.loads(match.group(1))
-                    if "plant_id" not in data:
-                        data["plant_id"] = plant_id
-                    return CarePlan.model_validate(data)
+                    data = json.loads(json_str)
+                    if isinstance(data, dict):
+                        if "plant_id" not in data:
+                            data["plant_id"] = plant_id
+                        return CarePlan.model_validate(data)
                 except Exception:
-                    pass
+                    continue
+
             return CarePlan(
                 plant_id=plant_id,
                 status_label="Care advice required",
                 assessment="Automated assessment: observation recorded.",
-                confidence=0.5,
                 actions=[],
             )

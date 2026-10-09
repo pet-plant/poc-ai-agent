@@ -7,14 +7,11 @@
       "species": "Monstera deliciosa",
       "timestamp": "2026-09-01T10:00:00Z",
       "health_status": "healthy",
-      "confidence": 0.95,
       "consensus": {
         "agreement": 1.0,
         "runs": 5,
         "model_stated_average": 0.95
       },
-      "leaf_posture": "upright",
-      "leaf_color_detail": "vibrant green",
       "observations": []
     },
     {
@@ -22,19 +19,16 @@
       "species": "Monstera deliciosa",
       "timestamp": "2026-09-02T10:00:00Z",
       "health_status": "possibly_unhealthy",
-      "confidence": 0.92,
       "consensus": {
         "agreement": 1.0,
         "runs": 5,
         "model_stated_average": 0.92
       },
-      "leaf_posture": "minor droop",
-      "leaf_color_detail": "pale green with yellow tips",
       "observations": [
         {
           "type": "leaf_yellowing",
           "severity": "mild",
-          "confidence": 0.90
+          "description": "pale green with yellow tips"
         }
       ]
     },
@@ -43,19 +37,16 @@
       "species": "Monstera deliciosa",
       "timestamp": "2026-09-03T10:00:00Z",
       "health_status": "unhealthy",
-      "confidence": 0.94,
       "consensus": {
         "agreement": 1.0,
         "runs": 5,
         "model_stated_average": 0.94
       },
-      "leaf_posture": "severe drooping",
-      "leaf_color_detail": "dark brown patches",
       "observations": [
         {
           "type": "brown_spots",
           "severity": "severe",
-          "confidence": 0.94
+          "description": "dark brown patches"
         }
       ]
     },
@@ -64,19 +55,16 @@
       "species": "Monstera deliciosa",
       "timestamp": "2026-09-04T10:00:00Z",
       "health_status": "unhealthy",
-      "confidence": 0.93,
       "consensus": {
         "agreement": 1.0,
         "runs": 5,
         "model_stated_average": 0.93
       },
-      "leaf_posture": "severe drooping",
-      "leaf_color_detail": "dark brown patches expanding",
       "observations": [
         {
           "type": "brown_spots",
           "severity": "severe",
-          "confidence": 0.93
+          "description": "dark brown patches expanding"
         }
       ]
     },
@@ -85,19 +73,16 @@
       "species": "Monstera deliciosa",
       "timestamp": "2026-09-05T10:00:00Z",
       "health_status": "unhealthy",
-      "confidence": 0.92,
       "consensus": {
         "agreement": 1.0,
         "runs": 5,
         "model_stated_average": 0.92
       },
-      "leaf_posture": "severe drooping and wilting",
-      "leaf_color_detail": "dark brown patches across lower foliage",
       "observations": [
         {
           "type": "brown_spots",
           "severity": "severe",
-          "confidence": 0.92
+          "description": "dark brown patches across lower foliage"
         }
       ]
     },
@@ -106,14 +91,11 @@
       "species": "Monstera deliciosa",
       "timestamp": "2026-09-06T10:00:00Z",
       "health_status": "healthy",
-      "confidence": 0.96,
       "consensus": {
         "agreement": 1.0,
         "runs": 5,
         "model_stated_average": 0.96
       },
-      "leaf_posture": "upright and firm",
-      "leaf_color_detail": "healthy fresh green growth",
       "observations": []
     }
   ]

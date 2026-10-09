@@ -10,7 +10,6 @@
 
   [Day 1] Timestamp: 2026-09-01 10:00:00Z
   • Observation: status=healthy (conf=0.95, consensus=1.00 (5 runs)) | no symptoms
-  • VLM Visual:  posture="upright and firm" | color="vibrant deep green"
   • Trigger:     [NO_ACTION] — Baseline observation recorded as healthy with no symptoms.
 
   • Companion Output (Plant Voice):
@@ -34,22 +33,17 @@
 
   [Day 2] Timestamp: 2026-09-02 10:00:00Z
   • Observation: status=possibly_unhealthy (conf=0.89, consensus=1.00 (5 runs)) | no symptoms
-  • VLM Visual:  posture="slightly drooping stems" | color="dulling green with slight discoloration"
   • Trigger:     [CARE_ADVICE_REQUIRED] — Health status worsened from healthy to possibly_unhealthy.
 
   • Companion Output (Plant Voice):
-    [Template mode — showing care summary]
-    Update on Monty:
-    Offline mock assessment: Observations noted and care schedule adjusted.
-    
-    Recommended actions:
-      • Check soil moisture 2 inches down.
-      • Adjust watering schedule based on moisture level.
+    Dear owner, I've been feeling a bit off lately, like I might be getting a bit tired. I think it's because I'm not sure if the soil moisture is just right or if the light in the living room window is still giving me the bright indirect light I need. Could you please check on me? I'd really appreciate it if you could make sure the soil isn't too wet or too dry, and that I'm getting the light I need to stay healthy. Also, I might need a bit more time between waterings to dry out a little. And if you could keep an eye on me for any yellowing leaves or wilting, that would be great too. I'm hopeful that with some adjustments, I'll feel better soon. Thank you!
 
-  • Care Plan:   Assessment: "Offline mock assessment: Observations noted and care schedule adjusted." (conf=0.90)
+  • Care Plan:   Assessment: "The plant's health status has worsened, possibly due to changes in light or watering practices. It is recommended to inspect the soil moisture and light conditions." (conf=0.90)
     Actions:
-      [1] Check soil moisture 2 inches down.
-      [2] Adjust watering schedule based on moisture level.
+      [1] Check the soil moisture level to determine if it is too wet or too dry.
+      [2] Observe the light conditions in the living room window to ensure it is still providing adequate bright indirect light.
+      [3] Adjust the watering schedule to ensure the soil is allowed to dry out slightly between waterings.
+      [4] Keep an eye on the plant for any further symptoms such as yellowing leaves or wilting.
 
   • Frontend JSON Response:
 {
@@ -63,24 +57,38 @@
     "xpRatio": 0.0,
     "health_status": "possibly_unhealthy",
     "decision": "CARE_ADVICE_REQUIRED",
-    "companion_message": "[Template mode \u2014 showing care summary]\nUpdate on Monty:\nOffline mock assessment: Observations noted and care schedule adjusted.\n\nRecommended actions:\n  \u2022 Check soil moisture 2 inches down.\n  \u2022 Adjust watering schedule based on moisture level.",
+    "companion_message": "Dear owner, I've been feeling a bit off lately, like I might be getting a bit tired. I think it's because I'm not sure if the soil moisture is just right or if the light in the living room window is still giving me the bright indirect light I need. Could you please check on me? I'd really appreciate it if you could make sure the soil isn't too wet or too dry, and that I'm getting the light I need to stay healthy. Also, I might need a bit more time between waterings to dry out a little. And if you could keep an eye on me for any yellowing leaves or wilting, that would be great too. I'm hopeful that with some adjustments, I'll feel better soon. Thank you!",
     "care_plan": {
-        "id": "cp_7b510fa386c4",
-        "status_label": "Plant issue detected",
-        "assessment": "Offline mock assessment: Observations noted and care schedule adjusted.",
+        "id": "cp_2dbd979542db",
+        "status_label": "Check moisture and light",
+        "assessment": "The plant's health status has worsened, possibly due to changes in light or watering practices. It is recommended to inspect the soil moisture and light conditions.",
         "actions": [
             {
-                "id": "act_be2586ff",
+                "id": "act_33603bee",
                 "priority": 1,
-                "action": "Check soil moisture 2 inches down.",
-                "label": "Inspect plant",
+                "action": "Check the soil moisture level to determine if it is too wet or too dry.",
+                "label": "Assess soil",
                 "type": "inspect"
             },
             {
-                "id": "act_e8230f37",
+                "id": "act_3897b66d",
                 "priority": 2,
-                "action": "Adjust watering schedule based on moisture level.",
-                "label": "Inspect plant",
+                "action": "Observe the light conditions in the living room window to ensure it is still providing adequate bright indirect light.",
+                "label": "Check light",
+                "type": "inspect"
+            },
+            {
+                "id": "act_7441c34c",
+                "priority": 3,
+                "action": "Adjust the watering schedule to ensure the soil is allowed to dry out slightly between waterings.",
+                "label": "Adjust watering",
+                "type": "other"
+            },
+            {
+                "id": "act_3edb9c0a",
+                "priority": 4,
+                "action": "Keep an eye on the plant for any further symptoms such as yellowing leaves or wilting.",
+                "label": "Monitor",
                 "type": "inspect"
             }
         ]
@@ -97,23 +105,17 @@
 ================================================================================
 
   [Day 1] Timestamp: 2026-09-01 10:00:00Z
-  • Observation: status=unhealthy (conf=0.92, consensus=1.00 (5 runs)) | leaf_yellowing:severe
-  • VLM Visual:  posture="heavily drooping" | color="chlorotic yellowing on lower leaves"
+  • Observation: status=unhealthy (conf=0.92, consensus=1.00 (5 runs)) | leaf_yellowing:severe (chlorotic yellowing on lower leaves)
   • Trigger:     [CARE_ADVICE_REQUIRED] — Initial observation detected symptoms or non-healthy status.
 
   • Companion Output (Plant Voice):
-    [Template mode — showing care summary]
-    Update on Monty:
-    Offline mock assessment: Observations noted and care schedule adjusted.
-    
-    Recommended actions:
-      • Check soil moisture 2 inches down.
-      • Adjust watering schedule based on moisture level.
+    Oh, dear owner, I'm feeling so tired and weak lately. My leaves are turning yellow, and I think it's because I've been getting too much water. Please check the soil moisture and make sure my pot has good drainage. I need the top 2 inches of soil to dry out before you water me again. I'm also worried about my roots, so please inspect them for any signs of root rot. If they are indeed affected, I'll need to be repotted in fresh, well-draining soil. I promise I'll perk up once I get the care I need.
 
-  • Care Plan:   Assessment: "Offline mock assessment: Observations noted and care schedule adjusted." (conf=0.90)
+  • Care Plan:   Assessment: "Severe leaf yellowing suggests overwatering. Check soil moisture and ensure proper drainage." (conf=0.90)
     Actions:
-      [1] Check soil moisture 2 inches down.
-      [2] Adjust watering schedule based on moisture level.
+      [1] Check the soil moisture and ensure the pot has proper drainage. Allow the top 2 inches of soil to dry out before watering again.
+      [2] Inspect the roots for signs of root rot, which can be a result of overwatering.
+      [3] If root rot is confirmed, repot the plant in fresh, well-draining soil.
 
   • Frontend JSON Response:
 {
@@ -127,33 +129,39 @@
     "xpRatio": 0.0,
     "health_status": "unhealthy",
     "decision": "CARE_ADVICE_REQUIRED",
-    "companion_message": "[Template mode \u2014 showing care summary]\nUpdate on Monty:\nOffline mock assessment: Observations noted and care schedule adjusted.\n\nRecommended actions:\n  \u2022 Check soil moisture 2 inches down.\n  \u2022 Adjust watering schedule based on moisture level.",
+    "companion_message": "Oh, dear owner, I'm feeling so tired and weak lately. My leaves are turning yellow, and I think it's because I've been getting too much water. Please check the soil moisture and make sure my pot has good drainage. I need the top 2 inches of soil to dry out before you water me again. I'm also worried about my roots, so please inspect them for any signs of root rot. If they are indeed affected, I'll need to be repotted in fresh, well-draining soil. I promise I'll perk up once I get the care I need.",
     "care_plan": {
-        "id": "cp_be663a1ca991",
-        "status_label": "Plant issue detected",
-        "assessment": "Offline mock assessment: Observations noted and care schedule adjusted.",
+        "id": "cp_bf0a9274cc86",
+        "status_label": "Overwatering stress",
+        "assessment": "Severe leaf yellowing suggests overwatering. Check soil moisture and ensure proper drainage.",
         "actions": [
             {
-                "id": "act_43a564f2",
+                "id": "act_5e12a52f",
                 "priority": 1,
-                "action": "Check soil moisture 2 inches down.",
-                "label": "Inspect plant",
+                "action": "Check the soil moisture and ensure the pot has proper drainage. Allow the top 2 inches of soil to dry out before watering again.",
+                "label": "Pause water",
+                "type": "water"
+            },
+            {
+                "id": "act_da2f74a7",
+                "priority": 2,
+                "action": "Inspect the roots for signs of root rot, which can be a result of overwatering.",
+                "label": "Inspect roots",
                 "type": "inspect"
             },
             {
-                "id": "act_6d501939",
-                "priority": 2,
-                "action": "Adjust watering schedule based on moisture level.",
-                "label": "Inspect plant",
-                "type": "inspect"
+                "id": "act_fafda868",
+                "priority": 3,
+                "action": "If root rot is confirmed, repot the plant in fresh, well-draining soil.",
+                "label": "Repot plant",
+                "type": "other"
             }
         ]
     }
 }
 
   [Day 2] Timestamp: 2026-09-02 10:00:00Z
-  • Observation: status=possibly_unhealthy (conf=0.91, consensus=0.95 (5 runs)) | leaf_yellowing:mild
-  • VLM Visual:  posture="rebounding upwards with mild tip droop" | color="greening returning, mild yellowing remaining"
+  • Observation: status=possibly_unhealthy (conf=0.91, consensus=0.95 (5 runs)) | leaf_yellowing:mild (greening returning, mild yellowing remaining)
   • Trigger:     [NO_ACTION] — Health status improved from unhealthy to possibly_unhealthy.
 
   • Companion Output (Plant Voice):
@@ -186,7 +194,6 @@
 
   [Day 1] Timestamp: 2026-09-01 10:00:00Z
   • Observation: status=healthy (conf=0.90, consensus=1.00 (5 runs)) | no symptoms
-  • VLM Visual:  posture="upright and firm" | color="deep green"
   • Trigger:     [NO_ACTION] — Baseline observation recorded as healthy with no symptoms.
 
   • Companion Output (Plant Voice):
@@ -209,8 +216,7 @@
 }
 
   [Day 2] Timestamp: 2026-09-02 10:00:00Z
-  • Observation: status=unhealthy (conf=0.35, consensus=0.40 (5 runs)) | leaf_yellowing:severe
-  • VLM Visual:  posture="irregular positioning and blurry features" | color="ambiguous color with heavy shadows"
+  • Observation: status=unhealthy (conf=0.45, consensus=0.40 (5 runs)) | leaf_yellowing:severe (ambiguous color with heavy shadows)
   • Trigger:     [REQUEST_MORE_INFORMATION] — VLM agreement 0.40 is below threshold 0.50.
 
   • Companion Output (Plant Voice):
@@ -243,7 +249,6 @@
 
   [Day 1] Timestamp: 2026-09-01 10:00:00Z
   • Observation: status=healthy (conf=0.95, consensus=1.00 (5 runs)) | no symptoms
-  • VLM Visual:  posture="upright" | color="vibrant green"
   • Trigger:     [NO_ACTION] — Baseline observation recorded as healthy with no symptoms.
 
   • Companion Output (Plant Voice):
@@ -266,23 +271,18 @@
 }
 
   [Day 2] Timestamp: 2026-09-02 10:00:00Z
-  • Observation: status=possibly_unhealthy (conf=0.92, consensus=1.00 (5 runs)) | leaf_yellowing:mild
-  • VLM Visual:  posture="minor droop" | color="pale green with yellow tips"
+  • Observation: status=possibly_unhealthy (conf=0.92, consensus=1.00 (5 runs)) | leaf_yellowing:mild (pale green with yellow tips)
   • Trigger:     [CARE_ADVICE_REQUIRED] — Health status worsened from healthy to possibly_unhealthy.
 
   • Companion Output (Plant Voice):
-    [Template mode — showing care summary]
-    Update on Monty:
-    Offline mock assessment: Observations noted and care schedule adjusted.
-    
-    Recommended actions:
-      • Check soil moisture 2 inches down.
-      • Adjust watering schedule based on moisture level.
+    Dear owner, I've been feeling a bit off lately, and I think it might be due to a nutrient deficiency and possibly overwatering. Could you please check the soil moisture? If it's still moist, I might need a break from watering for a while. Also, applying a balanced, water-soluble fertilizer would help me get the nutrients I need. And while you're checking, could you inspect my roots for any signs of root rot? If there's any, repotting me in fresh, well-draining soil would be great. Lastly, I might need to move to a spot with more bright indirect light. Thank you for taking care of me!
 
-  • Care Plan:   Assessment: "Offline mock assessment: Observations noted and care schedule adjusted." (conf=0.90)
+  • Care Plan:   Assessment: "Mild leaf yellowing with pale green tips suggests nutrient deficiency and possibly overwatering." (conf=0.90)
     Actions:
-      [1] Check soil moisture 2 inches down.
-      [2] Adjust watering schedule based on moisture level.
+      [1] Check the soil moisture and ensure it is not overly wet. If the soil is still moist, it may be overwatered, and you should reduce watering frequency.
+      [2] Apply a balanced, water-soluble fertilizer to provide necessary nutrients.
+      [3] Inspect the roots for signs of root rot. If present, repot the plant in fresh, well-draining soil.
+      [4] Ensure the plant is receiving appropriate light. Move it to a location with bright indirect light.
 
   • Frontend JSON Response:
 {
@@ -296,48 +296,57 @@
     "xpRatio": 0.0,
     "health_status": "possibly_unhealthy",
     "decision": "CARE_ADVICE_REQUIRED",
-    "companion_message": "[Template mode \u2014 showing care summary]\nUpdate on Monty:\nOffline mock assessment: Observations noted and care schedule adjusted.\n\nRecommended actions:\n  \u2022 Check soil moisture 2 inches down.\n  \u2022 Adjust watering schedule based on moisture level.",
+    "companion_message": "Dear owner, I've been feeling a bit off lately, and I think it might be due to a nutrient deficiency and possibly overwatering. Could you please check the soil moisture? If it's still moist, I might need a break from watering for a while. Also, applying a balanced, water-soluble fertilizer would help me get the nutrients I need. And while you're checking, could you inspect my roots for any signs of root rot? If there's any, repotting me in fresh, well-draining soil would be great. Lastly, I might need to move to a spot with more bright indirect light. Thank you for taking care of me!",
     "care_plan": {
-        "id": "cp_3f7b7088edbd",
-        "status_label": "Plant issue detected",
-        "assessment": "Offline mock assessment: Observations noted and care schedule adjusted.",
+        "id": "cp_a09927bf6bd9",
+        "status_label": "Nutrient deficiency & Overwatering",
+        "assessment": "Mild leaf yellowing with pale green tips suggests nutrient deficiency and possibly overwatering.",
         "actions": [
             {
-                "id": "act_4b98e312",
+                "id": "act_10fbcb71",
                 "priority": 1,
-                "action": "Check soil moisture 2 inches down.",
-                "label": "Inspect plant",
-                "type": "inspect"
+                "action": "Check the soil moisture and ensure it is not overly wet. If the soil is still moist, it may be overwatered, and you should reduce watering frequency.",
+                "label": "Pause water",
+                "type": "water"
             },
             {
-                "id": "act_c2fb100b",
+                "id": "act_13e8ca74",
                 "priority": 2,
-                "action": "Adjust watering schedule based on moisture level.",
-                "label": "Inspect plant",
-                "type": "inspect"
+                "action": "Apply a balanced, water-soluble fertilizer to provide necessary nutrients.",
+                "label": "Fertilize",
+                "type": "other"
+            },
+            {
+                "id": "act_abcdba85",
+                "priority": 3,
+                "action": "Inspect the roots for signs of root rot. If present, repot the plant in fresh, well-draining soil.",
+                "label": "Repot",
+                "type": "move"
+            },
+            {
+                "id": "act_d53e7806",
+                "priority": 4,
+                "action": "Ensure the plant is receiving appropriate light. Move it to a location with bright indirect light.",
+                "label": "Move plant",
+                "type": "move"
             }
         ]
     }
 }
 
   [Day 3] Timestamp: 2026-09-03 10:00:00Z
-  • Observation: status=unhealthy (conf=0.94, consensus=1.00 (5 runs)) | brown_spots:severe
-  • VLM Visual:  posture="severe drooping" | color="dark brown patches"
+  • Observation: status=unhealthy (conf=0.94, consensus=1.00 (5 runs)) | brown_spots:severe (dark brown patches)
   • Trigger:     [CARE_ADVICE_REQUIRED] — Health status worsened from possibly_unhealthy to unhealthy.
 
   • Companion Output (Plant Voice):
-    [Template mode — showing care summary]
-    Update on Monty:
-    Offline mock assessment: Observations noted and care schedule adjusted.
-    
-    Recommended actions:
-      • Check soil moisture 2 inches down.
-      • Adjust watering schedule based on moisture level.
+    Oh, sweet owner, I'm feeling so tired and weak. I think I've been overwatered again, and my poor roots are struggling. Could you please check the soil? If it's still wet, let's cut back on watering, okay? I also need some nutrients to help me recover, so could you apply that balanced fertilizer? And if you see any signs of root rot, we might need to repot me in some fresh, well-draining soil. Lastly, I need more light—could you move me to a spot with bright, indirect light? I promise I'll perk up if I get the care I need.
 
-  • Care Plan:   Assessment: "Offline mock assessment: Observations noted and care schedule adjusted." (conf=0.90)
+  • Care Plan:   Assessment: "Severe brown spots are indicative of overwatering and poor drainage. The plant has shown signs of nutrient deficiency and overwatering in the past, and the recent health status change from possibly_unhealthy to unhealthy suggests a worsening condition." (conf=0.90)
     Actions:
-      [1] Check soil moisture 2 inches down.
-      [2] Adjust watering schedule based on moisture level.
+      [1] Check the soil moisture and ensure it is not overly wet. If the soil is still moist, it may be overwatered, and you should reduce watering frequency.
+      [2] Apply a balanced, water-soluble fertilizer to provide necessary nutrients.
+      [3] Inspect the roots for signs of root rot. If present, repot the plant in fresh, well-draining soil.
+      [4] Ensure the plant is receiving appropriate light. Move it to a location with bright indirect light.
 
   • Frontend JSON Response:
 {
@@ -351,33 +360,46 @@
     "xpRatio": 0.0,
     "health_status": "unhealthy",
     "decision": "CARE_ADVICE_REQUIRED",
-    "companion_message": "[Template mode \u2014 showing care summary]\nUpdate on Monty:\nOffline mock assessment: Observations noted and care schedule adjusted.\n\nRecommended actions:\n  \u2022 Check soil moisture 2 inches down.\n  \u2022 Adjust watering schedule based on moisture level.",
+    "companion_message": "Oh, sweet owner, I'm feeling so tired and weak. I think I've been overwatered again, and my poor roots are struggling. Could you please check the soil? If it's still wet, let's cut back on watering, okay? I also need some nutrients to help me recover, so could you apply that balanced fertilizer? And if you see any signs of root rot, we might need to repot me in some fresh, well-draining soil. Lastly, I need more light\u2014could you move me to a spot with bright, indirect light? I promise I'll perk up if I get the care I need.",
     "care_plan": {
-        "id": "cp_344068280232",
-        "status_label": "Plant issue detected",
-        "assessment": "Offline mock assessment: Observations noted and care schedule adjusted.",
+        "id": "cp_565d4db7efe7",
+        "status_label": "Overwatering stress",
+        "assessment": "Severe brown spots are indicative of overwatering and poor drainage. The plant has shown signs of nutrient deficiency and overwatering in the past, and the recent health status change from possibly_unhealthy to unhealthy suggests a worsening condition.",
         "actions": [
             {
-                "id": "act_ef9dd31b",
+                "id": "act_aae297dd",
                 "priority": 1,
-                "action": "Check soil moisture 2 inches down.",
-                "label": "Inspect plant",
-                "type": "inspect"
+                "action": "Check the soil moisture and ensure it is not overly wet. If the soil is still moist, it may be overwatered, and you should reduce watering frequency.",
+                "label": "Pause water",
+                "type": "water"
             },
             {
-                "id": "act_8e5045a0",
+                "id": "act_e9d67907",
                 "priority": 2,
-                "action": "Adjust watering schedule based on moisture level.",
-                "label": "Inspect plant",
-                "type": "inspect"
+                "action": "Apply a balanced, water-soluble fertilizer to provide necessary nutrients.",
+                "label": "Fertilize",
+                "type": "other"
+            },
+            {
+                "id": "act_5d1e2043",
+                "priority": 3,
+                "action": "Inspect the roots for signs of root rot. If present, repot the plant in fresh, well-draining soil.",
+                "label": "Repot",
+                "type": "move"
+            },
+            {
+                "id": "act_1d90571d",
+                "priority": 4,
+                "action": "Ensure the plant is receiving appropriate light. Move it to a location with bright indirect light.",
+                "label": "Move plant",
+                "type": "move"
             }
         ]
     }
 }
 
   [Day 4] Timestamp: 2026-09-04 10:00:00Z
-  • Observation: status=unhealthy (conf=0.93, consensus=1.00 (5 runs)) | brown_spots:severe
-  • VLM Visual:  posture="severe drooping" | color="dark brown patches expanding"
+  • Observation: status=unhealthy (conf=0.93, consensus=1.00 (5 runs)) | brown_spots:severe (dark brown patches expanding)
   • Trigger:     [NO_ACTION] — No new symptoms, no severity increase, and health status is stable.
 
   • Companion Output (Plant Voice):
@@ -400,8 +422,7 @@
 }
 
   [Day 5] Timestamp: 2026-09-05 10:00:00Z
-  • Observation: status=unhealthy (conf=0.92, consensus=1.00 (5 runs)) | brown_spots:severe
-  • VLM Visual:  posture="severe drooping and wilting" | color="dark brown patches across lower foliage"
+  • Observation: status=unhealthy (conf=0.92, consensus=1.00 (5 runs)) | brown_spots:severe (dark brown patches across lower foliage)
   • Trigger:     [NO_ACTION] — No new symptoms, no severity increase, and health status is stable.
 
   • Companion Output (Plant Voice):
@@ -425,7 +446,6 @@
 
   [Day 6] Timestamp: 2026-09-06 10:00:00Z
   • Observation: status=healthy (conf=0.96, consensus=1.00 (5 runs)) | no symptoms
-  • VLM Visual:  posture="upright and firm" | color="healthy fresh green growth"
   • Trigger:     [NO_ACTION] — Health status improved from unhealthy to healthy.
 
   • Companion Output (Plant Voice):
@@ -458,7 +478,6 @@
 
   [Day 1] Timestamp: 2026-09-01 10:00:00Z
   • Observation: status=healthy (conf=0.95, consensus=1.00 (5 runs)) | no symptoms
-  • VLM Visual:  posture="upright and firm" | color="vibrant deep green"
   • Trigger:     [NO_ACTION] — Baseline observation recorded as healthy with no symptoms.
 
   • Companion Output (Plant Voice):
@@ -481,23 +500,17 @@
 }
 
   [Day 2] Timestamp: 2026-09-02 10:00:00Z
-  • Observation: status=possibly_unhealthy (conf=0.90, consensus=1.00 (5 runs)) | leaf_yellowing:mild
-  • VLM Visual:  posture="mild drooping stems" | color="pale green with early yellowing on tips"
+  • Observation: status=possibly_unhealthy (conf=0.90, consensus=1.00 (5 runs)) | leaf_yellowing:mild (pale green with early yellowing on tips)
   • Trigger:     [CARE_ADVICE_REQUIRED] — Health status worsened from healthy to possibly_unhealthy.
 
   • Companion Output (Plant Voice):
-    [Template mode — showing care summary]
-    Update on Monty:
-    Offline mock assessment: Observations noted and care schedule adjusted.
-    
-    Recommended actions:
-      • Check soil moisture 2 inches down.
-      • Adjust watering schedule based on moisture level.
+    Hello there! I've been feeling a bit off lately, and I think it might be due to a magnesium deficiency. I'm hoping you can help me out by applying a balanced, water-soluble fertilizer to the soil, following the package instructions. It would mean a lot to me if you could check the soil moisture level and water me when the top 2 inches are dry. Also, I need to make sure I'm getting enough bright indirect light, so if the light isn't sufficient, could you move me to a brighter spot? I really appreciate your care and attention!
 
-  • Care Plan:   Assessment: "Offline mock assessment: Observations noted and care schedule adjusted." (conf=0.90)
+  • Care Plan:   Assessment: "The leaf yellowing is likely due to a magnesium deficiency. Ensure proper watering, light, and nutrient application." (conf=0.90)
     Actions:
-      [1] Check soil moisture 2 inches down.
-      [2] Adjust watering schedule based on moisture level.
+      [1] Apply a balanced, water-soluble fertilizer to the soil, following the package instructions for the appropriate dosage.
+      [2] Check the soil moisture level and ensure it is neither too dry nor too wet. Water the plant when the top 2 inches of soil are dry.
+      [3] Verify that the plant is receiving bright indirect light. If the light is insufficient, consider moving the plant to a brighter location.
 
   • Frontend JSON Response:
 {
@@ -511,48 +524,51 @@
     "xpRatio": 0.0,
     "health_status": "possibly_unhealthy",
     "decision": "CARE_ADVICE_REQUIRED",
-    "companion_message": "[Template mode \u2014 showing care summary]\nUpdate on Monty:\nOffline mock assessment: Observations noted and care schedule adjusted.\n\nRecommended actions:\n  \u2022 Check soil moisture 2 inches down.\n  \u2022 Adjust watering schedule based on moisture level.",
+    "companion_message": "Hello there! I've been feeling a bit off lately, and I think it might be due to a magnesium deficiency. I'm hoping you can help me out by applying a balanced, water-soluble fertilizer to the soil, following the package instructions. It would mean a lot to me if you could check the soil moisture level and water me when the top 2 inches are dry. Also, I need to make sure I'm getting enough bright indirect light, so if the light isn't sufficient, could you move me to a brighter spot? I really appreciate your care and attention!",
     "care_plan": {
-        "id": "cp_37b638cd980f",
-        "status_label": "Plant issue detected",
-        "assessment": "Offline mock assessment: Observations noted and care schedule adjusted.",
+        "id": "cp_5286d6d94b8f",
+        "status_label": "Magnesium deficiency",
+        "assessment": "The leaf yellowing is likely due to a magnesium deficiency. Ensure proper watering, light, and nutrient application.",
         "actions": [
             {
-                "id": "act_cb6c3977",
+                "id": "act_b3bfeaf2",
                 "priority": 1,
-                "action": "Check soil moisture 2 inches down.",
-                "label": "Inspect plant",
-                "type": "inspect"
+                "action": "Apply a balanced, water-soluble fertilizer to the soil, following the package instructions for the appropriate dosage.",
+                "label": "Fertilize plant",
+                "type": "other"
             },
             {
-                "id": "act_abcde7c7",
+                "id": "act_10b7d731",
                 "priority": 2,
-                "action": "Adjust watering schedule based on moisture level.",
-                "label": "Inspect plant",
-                "type": "inspect"
+                "action": "Check the soil moisture level and ensure it is neither too dry nor too wet. Water the plant when the top 2 inches of soil are dry.",
+                "label": "Check moisture",
+                "type": "water"
+            },
+            {
+                "id": "act_0418ea07",
+                "priority": 3,
+                "action": "Verify that the plant is receiving bright indirect light. If the light is insufficient, consider moving the plant to a brighter location.",
+                "label": "Move plant",
+                "type": "move"
             }
         ]
     }
 }
 
   [Day 3] Timestamp: 2026-09-03 10:00:00Z
-  • Observation: status=unhealthy (conf=0.92, consensus=1.00 (5 runs)) | leaf_yellowing:severe
-  • VLM Visual:  posture="heavily drooping and bent towards the floor" | color="severe chlorosis and brown necrotic margins"
+  • Observation: status=unhealthy (conf=0.92, consensus=1.00 (5 runs)) | leaf_yellowing:severe (severe chlorosis and brown necrotic margins)
   • Trigger:     [CARE_ADVICE_REQUIRED] — Health status worsened from possibly_unhealthy to unhealthy.
 
   • Companion Output (Plant Voice):
-    [Template mode — showing care summary]
-    Update on Monty:
-    Offline mock assessment: Observations noted and care schedule adjusted.
+    Oh, my dear owner, I'm feeling so tired lately, and my leaves are turning yellow. I think it's because I'm lacking some magnesium. Could you please give me a balanced, water-soluble fertilizer? Follow the package instructions for the right amount, and I'll feel much better.
     
-    Recommended actions:
-      • Check soil moisture 2 inches down.
-      • Adjust watering schedule based on moisture level.
+    Also, I need you to check the soil moisture. It should be neither too dry nor too wet. Water me when the top 2 inches of soil are dry, okay? And make sure I'm getting bright, indirect light. If the light isn't enough, could you move me to a brighter spot? I promise I'll perk up if you help me out!
 
-  • Care Plan:   Assessment: "Offline mock assessment: Observations noted and care schedule adjusted." (conf=0.90)
+  • Care Plan:   Assessment: "The leaf yellowing is likely due to a magnesium deficiency. Ensure proper watering, light, and nutrient application." (conf=0.90)
     Actions:
-      [1] Check soil moisture 2 inches down.
-      [2] Adjust watering schedule based on moisture level.
+      [1] Apply a balanced, water-soluble fertilizer to the soil, following the package instructions for the appropriate dosage.
+      [2] Check the soil moisture level and ensure it is neither too dry nor too wet. Water the plant when the top 2 inches of soil are dry.
+      [3] Verify that the plant is receiving bright indirect light. If the light is insufficient, consider moving the plant to a brighter location.
 
   • Frontend JSON Response:
 {
@@ -566,33 +582,39 @@
     "xpRatio": 0.0,
     "health_status": "unhealthy",
     "decision": "CARE_ADVICE_REQUIRED",
-    "companion_message": "[Template mode \u2014 showing care summary]\nUpdate on Monty:\nOffline mock assessment: Observations noted and care schedule adjusted.\n\nRecommended actions:\n  \u2022 Check soil moisture 2 inches down.\n  \u2022 Adjust watering schedule based on moisture level.",
+    "companion_message": "Oh, my dear owner, I'm feeling so tired lately, and my leaves are turning yellow. I think it's because I'm lacking some magnesium. Could you please give me a balanced, water-soluble fertilizer? Follow the package instructions for the right amount, and I'll feel much better.\n\nAlso, I need you to check the soil moisture. It should be neither too dry nor too wet. Water me when the top 2 inches of soil are dry, okay? And make sure I'm getting bright, indirect light. If the light isn't enough, could you move me to a brighter spot? I promise I'll perk up if you help me out!",
     "care_plan": {
-        "id": "cp_6d74bace634f",
-        "status_label": "Plant issue detected",
-        "assessment": "Offline mock assessment: Observations noted and care schedule adjusted.",
+        "id": "cp_5488c30488f2",
+        "status_label": "Magnesium deficiency",
+        "assessment": "The leaf yellowing is likely due to a magnesium deficiency. Ensure proper watering, light, and nutrient application.",
         "actions": [
             {
-                "id": "act_c58d1c75",
+                "id": "act_7cf3824a",
                 "priority": 1,
-                "action": "Check soil moisture 2 inches down.",
-                "label": "Inspect plant",
-                "type": "inspect"
+                "action": "Apply a balanced, water-soluble fertilizer to the soil, following the package instructions for the appropriate dosage.",
+                "label": "Fertilize plant",
+                "type": "other"
             },
             {
-                "id": "act_2c7eeb50",
+                "id": "act_41036cee",
                 "priority": 2,
-                "action": "Adjust watering schedule based on moisture level.",
-                "label": "Inspect plant",
-                "type": "inspect"
+                "action": "Check the soil moisture level and ensure it is neither too dry nor too wet. Water the plant when the top 2 inches of soil are dry.",
+                "label": "Check moisture",
+                "type": "water"
+            },
+            {
+                "id": "act_ca3ab847",
+                "priority": 3,
+                "action": "Verify that the plant is receiving bright indirect light. If the light is insufficient, consider moving the plant to a brighter location.",
+                "label": "Move plant",
+                "type": "move"
             }
         ]
     }
 }
 
   [Day 4] Timestamp: 2026-09-04 10:00:00Z
-  • Observation: status=possibly_unhealthy (conf=0.89, consensus=0.95 (5 runs)) | leaf_yellowing:mild
-  • VLM Visual:  posture="rebounding upwards with mild tip droop" | color="greening returning, mild yellowing remaining"
+  • Observation: status=possibly_unhealthy (conf=0.89, consensus=0.95 (5 runs)) | leaf_yellowing:mild (greening returning, mild yellowing remaining)
   • Trigger:     [NO_ACTION] — Health status improved from unhealthy to possibly_unhealthy.
 
   • Companion Output (Plant Voice):
@@ -615,8 +637,7 @@
 }
 
   [Day 5] Timestamp: 2026-09-05 10:00:00Z
-  • Observation: status=possibly_unhealthy (conf=0.40, consensus=0.40 (5 runs)) | leaf_yellowing:mild
-  • VLM Visual:  posture="indistinct leaf posture due to bad lighting" | color="unclear color tones and heavy contrast"
+  • Observation: status=possibly_unhealthy (conf=0.40, consensus=0.40 (5 runs)) | leaf_yellowing:mild (indistinct leaf posture due to bad lighting)
   • Trigger:     [REQUEST_MORE_INFORMATION] — VLM agreement 0.40 is below threshold 0.50.
 
   • Companion Output (Plant Voice):
@@ -649,7 +670,6 @@
 
   [Day 1] Timestamp: 2026-09-01 10:00:00Z
   • Observation: status=healthy (conf=0.92, consensus=1.00 (5 runs)) | no symptoms
-  • VLM Visual:  posture="upright and rigid" | color="lush green"
   • Trigger:     [NO_ACTION] — Baseline observation recorded as healthy with no symptoms.
 
   • Companion Output (Plant Voice):
@@ -672,23 +692,18 @@
 }
 
   [Day 2] Timestamp: 2026-09-02 10:00:00Z
-  • Observation: status=possibly_unhealthy (conf=0.90, consensus=0.95 (5 runs)) | leaf_yellowing:mild
-  • VLM Visual:  posture="minor drooping at leaf margins" | color="pale green with early yellowing on tips"
+  • Observation: status=possibly_unhealthy (conf=0.90, consensus=0.95 (5 runs)) | leaf_yellowing:mild (pale green with early yellowing on tips)
   • Trigger:     [CARE_ADVICE_REQUIRED] — Health status worsened from healthy to possibly_unhealthy.
 
   • Companion Output (Plant Voice):
-    [Template mode — showing care summary]
-    Update on Monty:
-    Offline mock assessment: Observations noted and care schedule adjusted.
-    
-    Recommended actions:
-      • Check soil moisture 2 inches down.
-      • Adjust watering schedule based on moisture level.
+    Dear owner, I've been feeling a bit off lately, and I think it might be because I've been getting too much water. My leaves are turning pale and yellow at the tips, and I'm worried that might lead to root rot. I really need you to reduce the watering frequency and make sure there's proper drainage. Could you please check the soil and drainage holes to ensure everything is working well? Also, make sure the pot has adequate drainage and isn't sitting in water. I just need you to monitor the soil moisture levels more closely, and I'll be back to my vibrant self in no time. Thank you!
 
-  • Care Plan:   Assessment: "Offline mock assessment: Observations noted and care schedule adjusted." (conf=0.90)
+  • Care Plan:   Assessment: "The plant is experiencing overwatering stress, which is causing the leaves to turn pale green and yellow at the tips. Overwatering can lead to root rot, which in turn affects the plant's ability to absorb nutrients, leading to yellowing leaves." (conf=0.90)
     Actions:
-      [1] Check soil moisture 2 inches down.
-      [2] Adjust watering schedule based on moisture level.
+      [1] Reduce watering frequency and ensure proper drainage.
+      [2] Check the soil and drainage holes.
+      [3] Ensure the pot has adequate drainage and is not sitting in water.
+      [4] Monitor the plant's soil moisture levels more closely.
 
   • Frontend JSON Response:
 {
@@ -702,24 +717,38 @@
     "xpRatio": 0.0,
     "health_status": "possibly_unhealthy",
     "decision": "CARE_ADVICE_REQUIRED",
-    "companion_message": "[Template mode \u2014 showing care summary]\nUpdate on Monty:\nOffline mock assessment: Observations noted and care schedule adjusted.\n\nRecommended actions:\n  \u2022 Check soil moisture 2 inches down.\n  \u2022 Adjust watering schedule based on moisture level.",
+    "companion_message": "Dear owner, I've been feeling a bit off lately, and I think it might be because I've been getting too much water. My leaves are turning pale and yellow at the tips, and I'm worried that might lead to root rot. I really need you to reduce the watering frequency and make sure there's proper drainage. Could you please check the soil and drainage holes to ensure everything is working well? Also, make sure the pot has adequate drainage and isn't sitting in water. I just need you to monitor the soil moisture levels more closely, and I'll be back to my vibrant self in no time. Thank you!",
     "care_plan": {
-        "id": "cp_298936fdb4fd",
-        "status_label": "Plant issue detected",
-        "assessment": "Offline mock assessment: Observations noted and care schedule adjusted.",
+        "id": "cp_087a70d1a880",
+        "status_label": "Overwatering stress",
+        "assessment": "The plant is experiencing overwatering stress, which is causing the leaves to turn pale green and yellow at the tips. Overwatering can lead to root rot, which in turn affects the plant's ability to absorb nutrients, leading to yellowing leaves.",
         "actions": [
             {
-                "id": "act_72dd7715",
+                "id": "act_818d2826",
                 "priority": 1,
-                "action": "Check soil moisture 2 inches down.",
-                "label": "Inspect plant",
+                "action": "Reduce watering frequency and ensure proper drainage.",
+                "label": "Pause water",
+                "type": "water"
+            },
+            {
+                "id": "act_45440b30",
+                "priority": 2,
+                "action": "Check the soil and drainage holes.",
+                "label": "Inspect roots",
                 "type": "inspect"
             },
             {
-                "id": "act_8ef103b6",
-                "priority": 2,
-                "action": "Adjust watering schedule based on moisture level.",
-                "label": "Inspect plant",
+                "id": "act_168f2682",
+                "priority": 3,
+                "action": "Ensure the pot has adequate drainage and is not sitting in water.",
+                "label": "Drain tray",
+                "type": "other"
+            },
+            {
+                "id": "act_a6768495",
+                "priority": 4,
+                "action": "Monitor the plant's soil moisture levels more closely.",
+                "label": "Check soil",
                 "type": "inspect"
             }
         ]
@@ -737,7 +766,6 @@
 
   [Day 1] Timestamp: 2026-09-01 10:00:00Z
   • Observation: status=healthy (conf=0.95, consensus=1.00 (5 runs)) | no symptoms
-  • VLM Visual:  posture="upright and firm" | color="vibrant deep green"
   • Trigger:     [NO_ACTION] — Baseline observation recorded as healthy with no symptoms.
 
   • Companion Output (Plant Voice):
@@ -761,7 +789,6 @@
 
   [Day 2] Timestamp: 2026-09-02 10:00:00Z
   • Observation: status=healthy (conf=0.94, consensus=1.00 (5 runs)) | no symptoms
-  • VLM Visual:  posture="upright and firm" | color="vibrant deep green"
   • Trigger:     [NO_ACTION] — No new symptoms, no severity increase, and health status is stable.
 
   • Companion Output (Plant Voice):
@@ -793,23 +820,18 @@
 ================================================================================
 
   [Day 1] Timestamp: 2026-09-01 10:00:00Z
-  • Observation: status=possibly_unhealthy (conf=0.88, consensus=0.90 (5 runs)) | leaf_yellowing:mild
-  • VLM Visual:  posture="mild drooping" | color="dark green with slight yellow tips"
+  • Observation: status=possibly_unhealthy (conf=0.88, consensus=0.90 (5 runs)) | leaf_yellowing:mild (dark green with slight yellow tips)
   • Trigger:     [CARE_ADVICE_REQUIRED] — Initial observation detected symptoms or non-healthy status.
 
   • Companion Output (Plant Voice):
-    [Template mode — showing care summary]
-    Update on Monty:
-    Offline mock assessment: Observations noted and care schedule adjusted.
-    
-    Recommended actions:
-      • Check soil moisture 2 inches down.
-      • Adjust watering schedule based on moisture level.
+    Oh, dear owner, I'm feeling a bit off lately. My leaves are showing some yellow tips, and I think it might be because I've been getting too much water. Please check the soil to make sure it's not still wet—especially if it's still sitting in the saucer. If it is, could you take me out of it and let me dry out properly? Also, I need to be moved to a spot with more bright, indirect light. My roots might need a check-up too, so if you see any signs of rot, please trim them and repot me in fresh, well-draining soil. I'll be much happier with these adjustments. Thanks for taking care of me!
 
-  • Care Plan:   Assessment: "Offline mock assessment: Observations noted and care schedule adjusted." (conf=0.90)
+  • Care Plan:   Assessment: "Leaf yellowing with dark green leaves and slight yellow tips is likely due to overwatering. The plant should be checked for excess moisture and moved to a location with bright indirect light." (conf=0.90)
     Actions:
-      [1] Check soil moisture 2 inches down.
-      [2] Adjust watering schedule based on moisture level.
+      [1] Check the soil moisture and ensure the plant is not sitting in excess water. If the soil is still wet, remove the plant from the saucer and allow it to drain thoroughly.
+      [2] Inspect the roots for any signs of rot. If root rot is present, trim the affected roots and repot the plant in fresh, well-draining soil.
+      [3] Ensure the plant is receiving the correct amount of light. Move the plant to a location with bright indirect light to promote healthy growth.
+      [4] Monitor the plant's soil moisture more closely in the future to avoid overwatering.
 
   • Frontend JSON Response:
 {
@@ -823,48 +845,57 @@
     "xpRatio": 0.0,
     "health_status": "possibly_unhealthy",
     "decision": "CARE_ADVICE_REQUIRED",
-    "companion_message": "[Template mode \u2014 showing care summary]\nUpdate on Monty:\nOffline mock assessment: Observations noted and care schedule adjusted.\n\nRecommended actions:\n  \u2022 Check soil moisture 2 inches down.\n  \u2022 Adjust watering schedule based on moisture level.",
+    "companion_message": "Oh, dear owner, I'm feeling a bit off lately. My leaves are showing some yellow tips, and I think it might be because I've been getting too much water. Please check the soil to make sure it's not still wet\u2014especially if it's still sitting in the saucer. If it is, could you take me out of it and let me dry out properly? Also, I need to be moved to a spot with more bright, indirect light. My roots might need a check-up too, so if you see any signs of rot, please trim them and repot me in fresh, well-draining soil. I'll be much happier with these adjustments. Thanks for taking care of me!",
     "care_plan": {
-        "id": "cp_ea13a3376441",
-        "status_label": "Plant issue detected",
-        "assessment": "Offline mock assessment: Observations noted and care schedule adjusted.",
+        "id": "cp_b4e10a34ecdd",
+        "status_label": "Overwatering stress",
+        "assessment": "Leaf yellowing with dark green leaves and slight yellow tips is likely due to overwatering. The plant should be checked for excess moisture and moved to a location with bright indirect light.",
         "actions": [
             {
-                "id": "act_ace840b5",
+                "id": "act_6e2ec091",
                 "priority": 1,
-                "action": "Check soil moisture 2 inches down.",
-                "label": "Inspect plant",
+                "action": "Check the soil moisture and ensure the plant is not sitting in excess water. If the soil is still wet, remove the plant from the saucer and allow it to drain thoroughly.",
+                "label": "Pause water",
+                "type": "water"
+            },
+            {
+                "id": "act_dc9d6d3d",
+                "priority": 2,
+                "action": "Inspect the roots for any signs of rot. If root rot is present, trim the affected roots and repot the plant in fresh, well-draining soil.",
+                "label": "Inspect roots",
                 "type": "inspect"
             },
             {
-                "id": "act_1e82c1e1",
-                "priority": 2,
-                "action": "Adjust watering schedule based on moisture level.",
-                "label": "Inspect plant",
-                "type": "inspect"
+                "id": "act_7f925e07",
+                "priority": 3,
+                "action": "Ensure the plant is receiving the correct amount of light. Move the plant to a location with bright indirect light to promote healthy growth.",
+                "label": "Move plant",
+                "type": "move"
+            },
+            {
+                "id": "act_991b6c08",
+                "priority": 4,
+                "action": "Monitor the plant's soil moisture more closely in the future to avoid overwatering.",
+                "label": "Adjust watering",
+                "type": "other"
             }
         ]
     }
 }
 
   [Day 2] Timestamp: 2026-09-02 10:00:00Z
-  • Observation: status=unhealthy (conf=0.91, consensus=1.00 (5 runs)) | leaf_yellowing:severe
-  • VLM Visual:  posture="heavily drooping and bent towards the floor" | color="severe chlorosis and brown necrotic margins"
+  • Observation: status=unhealthy (conf=0.91, consensus=1.00 (5 runs)) | leaf_yellowing:severe (severe chlorosis and brown necrotic margins)
   • Trigger:     [CARE_ADVICE_REQUIRED] — Health status worsened from possibly_unhealthy to unhealthy.
 
   • Companion Output (Plant Voice):
-    [Template mode — showing care summary]
-    Update on Monty:
-    Offline mock assessment: Observations noted and care schedule adjusted.
-    
-    Recommended actions:
-      • Check soil moisture 2 inches down.
-      • Adjust watering schedule based on moisture level.
+    Oh, sweet owner, I'm feeling so tired and weak. My leaves are turning yellow and some are even getting brown edges. I think it's because I've been getting too much water. Please check if the soil is still wet and remove me from the saucer if it is. I need to dry out properly. Also, could you take a look at my roots? If they look mushy, please trim the affected parts and give me fresh, well-draining soil. I need bright, indirect light to feel better, so could you move me to a spot where I can get it? And please, keep an eye on my soil moisture from now on to make sure I don't get too much water again. I promise I'll perk up if you help me!
 
-  • Care Plan:   Assessment: "Offline mock assessment: Observations noted and care schedule adjusted." (conf=0.90)
+  • Care Plan:   Assessment: "Severe chlorosis and brown necrotic margins are likely due to overwatering. The plant should be checked for excess moisture and moved to a location with bright indirect light." (conf=0.90)
     Actions:
-      [1] Check soil moisture 2 inches down.
-      [2] Adjust watering schedule based on moisture level.
+      [1] Check the soil moisture and ensure the plant is not sitting in excess water. If the soil is still wet, remove the plant from the saucer and allow it to drain thoroughly.
+      [2] Inspect the roots for any signs of rot. If root rot is present, trim the affected roots and repot the plant in fresh, well-draining soil.
+      [3] Ensure the plant is receiving the correct amount of light. Move the plant to a location with bright indirect light to promote healthy growth.
+      [4] Monitor the plant's soil moisture more closely in the future to avoid overwatering.
 
   • Frontend JSON Response:
 {
@@ -878,25 +909,39 @@
     "xpRatio": 0.0,
     "health_status": "unhealthy",
     "decision": "CARE_ADVICE_REQUIRED",
-    "companion_message": "[Template mode \u2014 showing care summary]\nUpdate on Monty:\nOffline mock assessment: Observations noted and care schedule adjusted.\n\nRecommended actions:\n  \u2022 Check soil moisture 2 inches down.\n  \u2022 Adjust watering schedule based on moisture level.",
+    "companion_message": "Oh, sweet owner, I'm feeling so tired and weak. My leaves are turning yellow and some are even getting brown edges. I think it's because I've been getting too much water. Please check if the soil is still wet and remove me from the saucer if it is. I need to dry out properly. Also, could you take a look at my roots? If they look mushy, please trim the affected parts and give me fresh, well-draining soil. I need bright, indirect light to feel better, so could you move me to a spot where I can get it? And please, keep an eye on my soil moisture from now on to make sure I don't get too much water again. I promise I'll perk up if you help me!",
     "care_plan": {
-        "id": "cp_cf859566726d",
-        "status_label": "Plant issue detected",
-        "assessment": "Offline mock assessment: Observations noted and care schedule adjusted.",
+        "id": "cp_836d2bf6e00a",
+        "status_label": "Overwatering stress",
+        "assessment": "Severe chlorosis and brown necrotic margins are likely due to overwatering. The plant should be checked for excess moisture and moved to a location with bright indirect light.",
         "actions": [
             {
-                "id": "act_83400619",
+                "id": "act_6dfd9f4f",
                 "priority": 1,
-                "action": "Check soil moisture 2 inches down.",
-                "label": "Inspect plant",
+                "action": "Check the soil moisture and ensure the plant is not sitting in excess water. If the soil is still wet, remove the plant from the saucer and allow it to drain thoroughly.",
+                "label": "Pause water",
+                "type": "water"
+            },
+            {
+                "id": "act_7a470539",
+                "priority": 2,
+                "action": "Inspect the roots for any signs of rot. If root rot is present, trim the affected roots and repot the plant in fresh, well-draining soil.",
+                "label": "Inspect roots",
                 "type": "inspect"
             },
             {
-                "id": "act_749fe5ea",
-                "priority": 2,
-                "action": "Adjust watering schedule based on moisture level.",
-                "label": "Inspect plant",
-                "type": "inspect"
+                "id": "act_fbbf92a2",
+                "priority": 3,
+                "action": "Ensure the plant is receiving the correct amount of light. Move the plant to a location with bright indirect light to promote healthy growth.",
+                "label": "Move plant",
+                "type": "move"
+            },
+            {
+                "id": "act_8766b4f0",
+                "priority": 4,
+                "action": "Monitor the plant's soil moisture more closely in the future to avoid overwatering.",
+                "label": "Adjust watering",
+                "type": "other"
             }
         ]
     }

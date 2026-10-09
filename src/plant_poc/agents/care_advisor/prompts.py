@@ -41,23 +41,16 @@ from typing import Optional
 def format_advisor_user_prompt(
     plant_id: str,
     health_status: str,
-    confidence: float,
     observations_summary: str,
     trigger_reason: str,
-    leaf_posture: Optional[str] = None,
-    leaf_color_detail: Optional[str] = None,
     consensus_agreement: Optional[float] = None,
 ) -> str:
     lines = [
         f"Plant ID: {plant_id}",
-        f"Latest Health Status: {health_status} (Confidence: {confidence:.2f})",
+        f"Latest Health Status: {health_status}",
     ]
     if consensus_agreement is not None:
         lines.append(f"VLM Consensus Agreement: {consensus_agreement:.2f}")
-    if leaf_posture:
-        lines.append(f"Leaf Posture: {leaf_posture}")
-    if leaf_color_detail:
-        lines.append(f"Leaf Color Details: {leaf_color_detail}")
     lines.extend([
         f"Observed Symptoms: {observations_summary}",
         f"Trigger Reason: {trigger_reason}",

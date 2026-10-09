@@ -270,8 +270,8 @@ plant-poc run-batch
 
 The SQLite database implements the unified 4-table model aligned with production PostgreSQL:
 
-1. **`plants`**: Static plant profile (`plant_id`, `species`, `nickname`, `location`, `care_preferences_json`).
-2. **`observations`**: Daily time-series health snapshots (`timestamp`, `health_status`, `confidence`, `observations_json`, `leaf_posture`, `leaf_color_detail`, `image_refs_json`, `companion_message`). Stored indefinitely.
+1. **`plants`**: Static plant profile and gamification state (`plant_id`, `species`, `nickname`, `location`, `care_preferences_json`, `level`, `xp_ratio`).
+2. **`observations`**: Daily time-series health snapshots (`timestamp`, `health_status`, `confidence`, `observations_json`, `consensus_json`, `image_refs_json`, `description`, `companion_message`). Stored indefinitely.
 3. **`care_plans`**: Prescribed care actions from the Care Advisor (`assessment`, `confidence`, `actions_json`).
 4. **`plant_milestones`**: Major episodic life events (`first_symptom`, `health_crisis`, `severe_episode`, `near_death`, `full_recovery`) with timestamps and resolution state.
 

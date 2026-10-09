@@ -17,15 +17,20 @@ def test_vlm_observation_validation():
         plant_id="plant-1",
         timestamp=datetime.now(timezone.utc),
         health_status=HealthStatus.HEALTHY,
-        confidence=0.95,
         observations=[
-            Observation(type="leaf_yellowing", severity="mild", confidence=0.88)
+            Observation(
+                type="leaf_yellowing",
+                severity="mild",
+                description="slight yellowing on tip",
+            )
         ],
     )
     assert obs.plant_id == "plant-1"
     assert obs.health_status == HealthStatus.HEALTHY
     assert len(obs.observations) == 1
     assert obs.observations[0].severity == "mild"
+    assert obs.observations[0].description == "slight yellowing on tip"
+    assert obs.effective_confidence == 0.9
 
 
 def test_care_plan_validation():

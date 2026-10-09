@@ -1,5 +1,3 @@
-													
-
 # Interface Specification: Upstream VLM Output & Downstream Frontend Response
 
 **Project:** `pet-plant` / Post-VLM Agentic Care Pipeline
@@ -62,34 +60,31 @@ The VLM Pipeline runs once per day per registered plant. It captures a photo, ru
 
 The agent pipeline accepts either the unified probe format or the raw observation dictionary via `plant_poc.vlm_adapter.parse_vlm_probe_result()`.
 
-| Field                 | Type             |     Requirement     | Allowed Values / Format                                      | Description                                             |
-| :-------------------- | :--------------- | :-----------------: | :----------------------------------------------------------- | :------------------------------------------------------ |
-| `plant_id`          | `string`       | **Mandatory** | e.g.`"plant-monstera-1"`                                   | Unique identifier of the plant in the registry.         |
-| `species`           | `string`       | **Optional** | Botanical name (e.g.`"Monstera deliciosa"`)                | Fallback species used if not already bound in database. |
-| `timestamp`         | `string`       | **Mandatory** | ISO-8601 UTC (e.g.`"2026-09-22T08:00:00Z"`)                | Time of camera capture.                                 |
-| `health_status`     | `string`       | **Mandatory** | `"healthy"` \| `"possibly_unhealthy"` \| `"unhealthy"` | Overall perceived plant health category.                |
-| `confidence`        | `float`        | **Mandatory** | `0.0` to `1.0`                                           | Overall confidence score of the diagnosis.              |
-| `consensus`         | `object`       | **Mandatory** | See §2.2.1                                                  | Agreement metrics across the 5 vision passes.           |
-| `leaf_posture`      | `string`       | **Optional** | e.g.`"mild drooping"`, `"erect"`, `"curling upward"`   | Free-text posture description from visual inspection.   |
-| `leaf_color_detail` | `string`       | **Optional** | e.g.`"dark green with yellow tips"`                        | Color analysis notes.                                   |
-| `observations`      | `list[object]` | **Mandatory** | List of typed symptoms (can be empty`[]`)                  | Structured symptoms extracted by the vision model.      |
-| `image_refs`        | `list[string]` | **Mandatory** | List of MinIO / S3 / local URI strings                       | Image asset references for the day's scan.              |
+| Field             | Type             |     Requirement     | Allowed Values / Format                                      | Description                                             |
+| :---------------- | :--------------- | :-----------------: | :----------------------------------------------------------- | :------------------------------------------------------ |
+| `plant_id`      | `string`       | **Mandatory** | e.g. `"plant-monstera-1"`                                   | Unique identifier of the plant in the registry.         |
+| `species`       | `string`       | **Optional**  | Botanical name (e.g. `"Monstera deliciosa"`)                | Fallback species used if not already bound in database. |
+| `timestamp`     | `string`       | **Mandatory** | ISO-8601 UTC (e.g. `"2026-09-22T08:00:00Z"`)                | Time of camera capture.                                 |
+| `health_status` | `string`       | **Mandatory** | `"healthy"` \| `"possibly_unhealthy"` \| `"unhealthy"` | Overall perceived plant health category.                |
+| `consensus`     | `object`       | **Mandatory** | See §2.2.1                                                  | Agreement metrics across the 5 vision passes.           |
+| `observations`  | `list[object]` | **Mandatory** | List of typed symptoms (can be empty `[]`)                  | Structured symptoms extracted by the vision model.      |
+| `image_refs`    | `list[string]` | **Mandatory** | List of MinIO / S3 / local URI strings                       | Image asset references for the day's scan.              |
 
 #### 2.2.1 `consensus` Object Schema
 
 | Field                    | Type        |     Requirement     | Range                                        | Description                                       |
 | :----------------------- | :---------- | :-----------------: | :------------------------------------------- | :------------------------------------------------ |
 | `agreement`            | `float`   | **Mandatory** | `0.0` to `1.0` (Production $\ge 0.70$) | Fraction of passes that agreed on the diagnosis.  |
-| `runs`                 | `integer` | **Mandatory** | Typically`5`                               | Total number of parallel vision passes executed.  |
+| `runs`                 | `integer` | **Mandatory** | Typically `5`                               | Total number of parallel vision passes executed.  |
 | `model_stated_average` | `float`   | **Mandatory** | `0.0` to `1.0`                           | Mean model self-confidence score across all runs. |
 
 #### 2.2.2 `observations[]` (Symptom) Object Schema
 
-| Field          | Type       |     Requirement     | Allowed Values                                                                                                                       | Description                                    |
-| :------------- | :--------- | :-----------------: | :----------------------------------------------------------------------------------------------------------------------------------- | :--------------------------------------------- |
-| `type`       | `string` | **Mandatory** | `"leaf_yellowing"` \| `"brown_edges"` \| `"dry_tips"` \| `"drooping"` \| `"wilting"` \| `"brown_spots"` \| `"curling"` | Standardized symptom identifier key.           |
-| `severity`   | `string` | **Mandatory** | `"mild"` \| `"moderate"` \| `"severe"`                                                                                         | Categorical severity rating.                   |
-| `confidence` | `float`  | **Mandatory** | `0.0` to `1.0`                                                                                                                   | Confidence specific to this symptom detection. |
+| Field           | Type       |     Requirement     | Allowed Values                                                                                                                       | Description                                            |
+| :-------------- | :--------- | :-----------------: | :----------------------------------------------------------------------------------------------------------------------------------- | :----------------------------------------------------- |
+| `type`        | `string` | **Mandatory** | `"leaf_yellowing"` \| `"brown_edges"` \| `"dry_tips"` \| `"drooping"` \| `"wilting"` \| `"brown_spots"` \| `"curling"` | Standardized symptom identifier key.                   |
+| `severity`    | `string` | **Mandatory** | `"mild"` \| `"moderate"` \| `"severe"`                                                                                         | Categorical severity rating.                           |
+| `description` | `string` | **Mandatory** | Free-text description string                                                                                                         | Detailed visual symptom description from vision model. |
 
 ---
 
@@ -103,24 +98,21 @@ The agent pipeline accepts either the unified probe format or the raw observatio
   "species": "Monstera deliciosa",
   "timestamp": "2026-09-22T08:30:00Z",
   "health_status": "unhealthy",
-  "confidence": 0.91,
   "consensus": {
     "agreement": 1.0,
     "runs": 5,
     "model_stated_average": 0.91
   },
-  "leaf_posture": "heavily drooping and bent towards the floor",
-  "leaf_color_detail": "severe chlorosis and brown necrotic margins",
   "observations": [
     {
       "type": "leaf_yellowing",
       "severity": "severe",
-      "confidence": 0.90
+      "description": "severe chlorosis across multiple leaves"
     },
     {
       "type": "brown_edges",
       "severity": "moderate",
-      "confidence": 0.88
+      "description": "brown necrotic margins on lower foliage"
     }
   ],
   "image_refs": [
@@ -138,14 +130,11 @@ The agent pipeline accepts either the unified probe format or the raw observatio
   "species": "Epipremnum aureum",
   "timestamp": "2026-09-22T09:00:00Z",
   "health_status": "healthy",
-  "confidence": 0.97,
   "consensus": {
     "agreement": 1.0,
     "runs": 5,
     "model_stated_average": 0.97
   },
-  "leaf_posture": "perky and upright",
-  "leaf_color_detail": "vibrant green with yellow variegation",
   "observations": [],
   "image_refs": [
     "s3://plant-photos/pothos-2/2026-09-22_raw.jpg"
@@ -161,19 +150,16 @@ The agent pipeline accepts either the unified probe format or the raw observatio
   "species": "Monstera deliciosa",
   "timestamp": "2026-09-22T08:30:00Z",
   "health_status": "possibly_unhealthy",
-  "confidence": 0.88,
   "consensus": {
     "agreement": 0.90,
     "runs": 5,
     "model_stated_average": 0.88
   },
-  "leaf_posture": "mild drooping on lowest petioles",
-  "leaf_color_detail": "deep green with slight yellow tips on bottom leaf",
   "observations": [
     {
       "type": "leaf_yellowing",
       "severity": "mild",
-      "confidence": 0.85
+      "description": "slight yellow tips on lowest leaf"
     }
   ],
   "image_refs": [
@@ -219,14 +205,14 @@ All responses emitted by the backend server for client endpoints follow a unifie
 
 #### Envelope Field Specification
 
-| Field | Type | Requirement | Description |
-| :--- | :--- | :---: | :--- |
-| `success` | `boolean` | **Mandatory** | `true` for successful operations (`2xx`), `false` on failures (`4xx`/`5xx`). |
-| `data` | `object` \| `null` | **Nullable** | The payload object on success; `null` when an error occurs. |
-| `message` | `string` \| `null` | **Optional (Nullable)** | Human-readable explanation or diagnostic message; `null` if none. |
-| `error` | `object` \| `null` | **Optional (Nullable)** | Structured error details when `success: false`; `null` on success. |
-| `error.code` | `string` | **Mandatory on error** | Machine-readable error code (e.g. `LLM_UNAVAILABLE`, `INTERNAL_SERVER_ERROR`). |
-| `error.details` | `object` \| `null` | **Optional (Nullable)** | Additional contextual data or diagnostic details. |
+| Field             | Type                   |          Requirement          | Description                                                                            |
+| :---------------- | :--------------------- | :---------------------------: | :------------------------------------------------------------------------------------- |
+| `success`       | `boolean`            |      **Mandatory**      | `true` for successful operations (`2xx`), `false` on failures (`4xx`/`5xx`). |
+| `data`          | `object` \| `null` |      **Nullable**      | The payload object on success;`null` when an error occurs.                           |
+| `message`       | `string` \| `null` | **Optional (Nullable)** | Human-readable explanation or diagnostic message;`null` if none.                     |
+| `error`         | `object` \| `null` | **Optional (Nullable)** | Structured error details when`success: false`; `null` on success.                  |
+| `error.code`    | `string`             | **Mandatory on error** | Machine-readable error code (e.g.`LLM_UNAVAILABLE`, `INTERNAL_SERVER_ERROR`).      |
+| `error.details` | `object` \| `null` | **Optional (Nullable)** | Additional contextual data or diagnostic details.                                      |
 
 ---
 
@@ -234,20 +220,20 @@ All responses emitted by the backend server for client endpoints follow a unifie
 
 When `success` is `true`, the `data` object contains the following fields:
 
-| Field                 | Type                   |     Requirement     | Allowed Values                                                                               | Description & Frontend UI Mapping                                              |
-| :-------------------- | :--------------------- | :-----------------: | :------------------------------------------------------------------------------------------- | :----------------------------------------------------------------------------- |
-| `plant_id`          | `string`             | **Mandatory** | String identifier                                                                            | Target plant ID to route to the correct UI screen.                             |
-| `name`              | `string`             | **Mandatory** | Non-empty string (e.g.`"Monty"`)                                                           | Plant nickname displayed at the top of the screen.                             |
-| `species`           | `string`             | **Mandatory** | Botanical name (e.g.`"Monstera deliciosa"`)                                                | Botanical species reference.                                                   |
-| `dayCount`          | `integer`            | **Mandatory** | $\ge 1$                                                                                    | 1-indexed sequential observation counter for this plant.                       |
-| `timestamp`         | `string`             | **Mandatory** | ISO-8601 UTC string                                                                          | Timestamp of the processed scan.                                               |
-| `wateredTimestamp`  | `string` \| `null` | **Optional (Nullable)** | ISO-8601 UTC string or`null`                                                               | Timestamp of last watering event recorded in`care_events`; `null` if unwatered.|
-| `level`             | `integer`            | **Mandatory** | $\ge 1$ (default `1`)                                                                    | Gamification character level.                                                  |
-| `xpRatio`           | `float`              | **Mandatory** | `0.0` to `1.0` (default `0.0`)                                                         | Progress ratio towards next level for UI progress bar.                         |
-| `health_status`     | `string`             | **Mandatory** | `"healthy"` \| `"possibly_unhealthy"` \| `"unhealthy"`                                 | Status badge color (Green / Amber / Red).                                      |
-| `decision`          | `string`             | **Mandatory** | `"NO_ACTION"` \| `"CARE_ADVICE_REQUIRED"` \| `"REQUEST_MORE_INFORMATION"`              | Controls whether to render care card, silent timeline, or photo retake prompt. |
-| `companion_message` | `string`             | **Mandatory** | Non-empty string                                                                             | **1st-person speech bubble** spoken by the plant.                        |
-| `care_plan`         | `object` \| `null` | **Optional (Nullable)** | `null` on `NO_ACTION` / `REQUEST_MORE_INFORMATION`, Object on `CARE_ADVICE_REQUIRED` | Detailed botanical action plan (See §3.3.1); `null` when healthy/retake.        |
+| Field                 | Type                   |          Requirement          | Allowed Values                                                                               | Description & Frontend UI Mapping                                                   |
+| :-------------------- | :--------------------- | :---------------------------: | :------------------------------------------------------------------------------------------- | :---------------------------------------------------------------------------------- |
+| `plant_id`          | `string`             |      **Mandatory**      | String identifier                                                                            | Target plant ID to route to the correct UI screen.                                  |
+| `name`              | `string`             |      **Mandatory**      | Non-empty string (e.g.`"Monty"`)                                                           | Plant nickname displayed at the top of the screen.                                  |
+| `species`           | `string`             |      **Mandatory**      | Botanical name (e.g.`"Monstera deliciosa"`)                                                | Botanical species reference.                                                        |
+| `dayCount`          | `integer`            |      **Mandatory**      | $\ge 1$                                                                                    | 1-indexed sequential observation counter for this plant.                            |
+| `timestamp`         | `string`             |      **Mandatory**      | ISO-8601 UTC string                                                                          | Timestamp of the processed scan.                                                    |
+| `wateredTimestamp`  | `string` \| `null` | **Optional (Nullable)** | ISO-8601 UTC string or`null`                                                               | Timestamp of last watering event recorded in`care_events`; `null` if unwatered. |
+| `level`             | `integer`            |      **Mandatory**      | $\ge 1$ (default `1`)                                                                    | Gamification character level.                                                       |
+| `xpRatio`           | `float`              |      **Mandatory**      | `0.0` to `1.0` (default `0.0`)                                                         | Progress ratio towards next level for UI progress bar.                              |
+| `health_status`     | `string`             |      **Mandatory**      | `"healthy"` \| `"possibly_unhealthy"` \| `"unhealthy"`                                 | Status badge color (Green / Amber / Red).                                           |
+| `decision`          | `string`             |      **Mandatory**      | `"NO_ACTION"` \| `"CARE_ADVICE_REQUIRED"` \| `"REQUEST_MORE_INFORMATION"`              | Controls whether to render care card, silent timeline, or photo retake prompt.      |
+| `companion_message` | `string`             |      **Mandatory**      | Non-empty string                                                                             | **1st-person speech bubble** spoken by the plant.                             |
+| `care_plan`         | `object` \| `null` | **Optional (Nullable)** | `null` on `NO_ACTION` / `REQUEST_MORE_INFORMATION`, Object on `CARE_ADVICE_REQUIRED` | Detailed botanical action plan (See §3.3.1);`null` when healthy/retake.          |
 
 > [!NOTE]
 > **Milestones in Companion Voice:** Raw `milestones_triggered` arrays are omitted from the client response. The Companion Agent automatically weaves relevant episodic milestones (e.g., past overwatering or recoveries) directly into the 1st-person `companion_message` speech bubble.
@@ -266,13 +252,13 @@ When `success` is `true`, the `data` object contains the following fields:
 
 #### 3.3.2 `care_plan.actions[]` Object Schema
 
-| Field        | Type        |     Requirement     | Allowed Values                                            | Description                                                         |
-| :----------- | :---------- | :-----------------: | :-------------------------------------------------------- | :------------------------------------------------------------------ |
-| `id`       | `string`  | **Mandatory** | e.g.`"act_8e4b1a2c"`                                    | Unique action identifier for tracking user completions.             |
-| `priority` | `integer` | **Mandatory** | $\ge 1$ (1 is highest priority)                         | Relative priority of the action item.                               |
-| `action`   | `string`  | **Mandatory** | Full botanical instruction string                         | Detailed explanation shown in action card or modal.                 |
-| `label`    | `string`  | **Mandatory** | 2–3 words (max 30 chars)                                 | **Short button text** for Web UI (e.g. `"Pause water"`).            |
-| `type`     | `string`  | **Mandatory** | `"water"` \| `"move"` \| `"inspect"` \| `"other"` | Categorical action type for UI iconography and navigation.          |
+| Field        | Type        |     Requirement     | Allowed Values                                            | Description                                                      |
+| :----------- | :---------- | :-----------------: | :-------------------------------------------------------- | :--------------------------------------------------------------- |
+| `id`       | `string`  | **Mandatory** | e.g.`"act_8e4b1a2c"`                                    | Unique action identifier for tracking user completions.          |
+| `priority` | `integer` | **Mandatory** | $\ge 1$ (1 is highest priority)                         | Relative priority of the action item.                            |
+| `action`   | `string`  | **Mandatory** | Full botanical instruction string                         | Detailed explanation shown in action card or modal.              |
+| `label`    | `string`  | **Mandatory** | 2–3 words (max 30 chars)                                 | **Short button text** for Web UI (e.g. `"Pause water"`). |
+| `type`     | `string`  | **Mandatory** | `"water"` \| `"move"` \| `"inspect"` \| `"other"` | Categorical action type for UI iconography and navigation.       |
 
 ---
 

@@ -51,9 +51,8 @@ def test_care_advisor_generates_watering_action():
         plant_id="plant-monstera-1",
         timestamp=datetime.now(timezone.utc),
         health_status=HealthStatus.POSSIBLY_UNHEALTHY,
-        confidence=0.90,
         observations=[
-            Observation(type="leaf_yellowing", severity="mild", confidence=0.88)
+            Observation(type="leaf_yellowing", severity="mild", description="mild leaf yellowing on tips")
         ],
     )
 
@@ -110,9 +109,8 @@ def test_care_advisor_throws_error_when_llm_unavailable():
         plant_id="plant-monstera-1",
         timestamp=datetime.now(timezone.utc),
         health_status=HealthStatus.UNHEALTHY,
-        confidence=0.90,
         observations=[
-            Observation(type="leaf_yellowing", severity="severe", confidence=0.95)
+            Observation(type="leaf_yellowing", severity="severe", description="severe chlorosis across leaves")
         ],
     )
     trigger_res = TriggerResult(

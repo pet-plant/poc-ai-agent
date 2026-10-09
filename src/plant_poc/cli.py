@@ -93,24 +93,19 @@ def print_step_result(res: PipelineStepResult, tee: "_Tee") -> None:
     """Pretty print pipeline result for a single day (to terminal + optional log)."""
     obs = res.observation
     symptoms_summary = (
-        ", ".join(f"{s.type}:{s.severity}" for s in obs.observations)
+        ", ".join(
+            f"{s.type}:{s.severity}" + (f" ({s.description})" if s.description else "")
+            for s in obs.observations
+        )
         if obs.observations
         else "no symptoms"
     )
 
     tee.print(f"\n  [Day {res.day_index}] Timestamp: {obs.timestamp.strftime('%Y-%m-%d %H:%M:%SZ')}")
-    conf_detail = f"conf={obs.confidence:.2f}"
+    conf_detail = f"conf={obs.effective_confidence:.2f}"
     if obs.consensus:
         conf_detail += f", consensus={obs.consensus.agreement:.2f} ({obs.consensus.runs} runs)"
     tee.print(f"  • Observation: status={obs.health_status.value} ({conf_detail}) | {symptoms_summary}")
-
-    if obs.leaf_posture or obs.leaf_color_detail:
-        visual_parts = []
-        if obs.leaf_posture:
-            visual_parts.append(f'posture="{obs.leaf_posture}"')
-        if obs.leaf_color_detail:
-            visual_parts.append(f'color="{obs.leaf_color_detail}"')
-        tee.print(f"  • VLM Visual:  {' | '.join(visual_parts)}")
 
     tee.print(f"  • Trigger:     [{res.trigger_result.decision.value}] — {res.trigger_result.reason}")
 

@@ -31,7 +31,6 @@ def build_care_advisor_tools(
             {
                 "timestamp": o.timestamp.isoformat(),
                 "health_status": o.health_status.value,
-                "confidence": o.confidence,
                 "observations": [item.model_dump() for item in o.observations],
             }
             for o in obs_list

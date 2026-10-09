@@ -35,4 +35,4 @@ def test_scenario_validates_against_vlm_schema(scenario_name):
     for raw_obs in data["observations"]:
         obs = VLMObservation.model_validate(raw_obs)
         assert obs.plant_id
-        assert obs.confidence >= 0.0
+        assert obs.effective_confidence >= 0.0

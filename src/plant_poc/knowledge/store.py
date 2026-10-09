@@ -41,7 +41,11 @@ except ImportError:
             vectors = self._embedding.embed_documents(text_list)
             result_ids: list[str] = []
             for i, text in enumerate(text_list):
-                doc_id = (ids[i] if ids and i < len(ids) else hashlib.md5(text.encode()).hexdigest())
+                doc_id = (
+                    ids[i]
+                    if ids and i < len(ids)
+                    else hashlib.md5(text.encode(), usedforsecurity=False).hexdigest()
+                )
                 meta = metadatas[i] if metadatas and i < len(metadatas) else {}
                 self.store[doc_id] = {"text": text, "metadata": meta, "vector": vectors[i]}
                 result_ids.append(doc_id)
@@ -112,7 +116,10 @@ def compute_deterministic_embedding(text: str, dim: int = EMBED_DIM) -> list[flo
 
     for word in words:
         for salt in (0, 1, 2):
-            h = int(hashlib.md5(f"{word}_{salt}".encode()).hexdigest(), 16)
+            h = int(
+                hashlib.md5(f"{word}_{salt}".encode(), usedforsecurity=False).hexdigest(),
+                16,
+            )
             idx = h % dim
             sign = 1.0 if (h // dim) % 2 == 0 else -1.0
             vec[idx] += sign

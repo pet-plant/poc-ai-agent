@@ -14,7 +14,7 @@ class HealthStatus(str, Enum):
 class Observation(BaseModel):
     type: str  # e.g. "leaf_yellowing", "dry_tips", "drooping"
     severity: str  # "mild", "moderate", "severe"
-    confidence: float = Field(ge=0.0, le=1.0)
+    description: str  # Free-text description of the symptom from VLM
 
 
 class VLMConsensus(BaseModel):
@@ -44,28 +44,34 @@ class VLMObservation(BaseModel):
     )
     timestamp: datetime
     health_status: HealthStatus
-    confidence: float = Field(ge=0.0, le=1.0)
     observations: list[Observation] = Field(default_factory=list)
     consensus: VLMConsensus | None = Field(
         default=None,
-        description="Multi-run consensus data from VLM probe. Preferred over confidence for Event Engine decisions.",
-    )
-    leaf_posture: str | None = Field(
-        default=None,
-        description="VLM-detected leaf posture, e.g. 'upright', 'drooping', 'curled'",
-    )
-    leaf_color_detail: str | None = Field(
-        default=None,
-        description="VLM-detected color description, e.g. 'dark green with glossy texture'",
+        description="Multi-run consensus data from VLM probe. Used by Event Engine for reliability gating.",
     )
     image_refs: list[str] = Field(
         default_factory=list,
         description="URIs/paths of images analyzed by VLM (for audit trail)",
     )
+    description: str | None = Field(
+        default=None,
+        description="Summary visual description of symptoms observed",
+    )
     companion_message: str | None = Field(
         default=None,
         description="Companion plant dialogue message generated for this observation",
     )
+
+    @property
+    def effective_confidence(self) -> float:
+        """Derive confidence from consensus.model_stated_average for DB telemetry.
+
+        Returns consensus.model_stated_average if consensus exists,
+        otherwise a sensible default of 0.9.
+        """
+        if self.consensus is not None:
+            return self.consensus.model_stated_average
+        return 0.9
 
 
 class PlantProfile(BaseModel):
@@ -74,3 +80,7 @@ class PlantProfile(BaseModel):
     nickname: str
     location: str
     care_preferences: dict[str, str] = Field(default_factory=dict)
+    level: int = Field(default=1, ge=1, description="Gamification character level")
+    xp_ratio: float = Field(
+        default=0.0, ge=0.0, le=1.0, description="Progress ratio towards next level (0.0 to 1.0)"
+    )

@@ -30,6 +30,8 @@ class PlantRegistry:
         species: str = "Monstera deliciosa",
         nickname: str = "Monty",
         location: str = "Living Room Window",
+        level: int = 1,
+        xp_ratio: float = 0.0,
     ) -> PlantProfile:
         """Seed a default profile for plant_id if not present."""
         profile = self.get_plant_profile(plant_id)
@@ -39,8 +41,8 @@ class PlantRegistry:
         with self.conn:
             self.conn.execute(
                 """
-                INSERT OR IGNORE INTO plants (plant_id, species, nickname, location, care_preferences_json)
-                VALUES (?, ?, ?, ?, ?)
+                INSERT OR IGNORE INTO plants (plant_id, species, nickname, location, care_preferences_json, level, xp_ratio)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
                 """,
                 (
                     plant_id,
@@ -48,6 +50,8 @@ class PlantRegistry:
                     nickname,
                     location,
                     json.dumps({"watering": "When top 2 inches dry", "light": "Bright indirect"}),
+                    level,
+                    xp_ratio,
                 ),
             )
         return self.get_plant_profile(plant_id)  # type: ignore
@@ -56,7 +60,7 @@ class PlantRegistry:
         """Fetch plant profile by ID."""
         cursor = self.conn.cursor()
         cursor.execute(
-            "SELECT plant_id, species, nickname, location, care_preferences_json FROM plants WHERE plant_id = ?",
+            "SELECT plant_id, species, nickname, location, care_preferences_json, level, xp_ratio FROM plants WHERE plant_id = ?",
             (plant_id,),
         )
         row = cursor.fetchone()
@@ -64,13 +68,34 @@ class PlantRegistry:
             return None
 
         prefs = json.loads(row["care_preferences_json"]) if row["care_preferences_json"] else {}
+        level = row["level"] if "level" in row.keys() else 1
+        xp_ratio = row["xp_ratio"] if "xp_ratio" in row.keys() else 0.0
         return PlantProfile(
             plant_id=row["plant_id"],
             species=row["species"],
             nickname=row["nickname"],
             location=row["location"],
             care_preferences=prefs,
+            level=level,
+            xp_ratio=xp_ratio,
         )
+
+    def update_plant_progress(
+        self,
+        plant_id: str,
+        level: int,
+        xp_ratio: float,
+    ) -> None:
+        """Update gamification level and XP progress ratio for a plant."""
+        with self.conn:
+            self.conn.execute(
+                """
+                UPDATE plants
+                SET level = ?, xp_ratio = ?
+                WHERE plant_id = ?
+                """,
+                (level, xp_ratio, plant_id),
+            )
 
     def save_observation(self, obs: VLMObservation) -> None:
         """Save a new VLM observation."""
@@ -81,24 +106,31 @@ class PlantRegistry:
         obs_dicts = [o.model_dump() for o in obs.observations]
         consensus_json = obs.consensus.model_dump_json() if obs.consensus else None
         image_refs_json = json.dumps(obs.image_refs) if obs.image_refs else None
+
+        desc = obs.description
+        if not desc and obs.observations:
+            desc = " | ".join(
+                f"{o.type}: {o.description}" if o.description else o.type
+                for o in obs.observations
+            )
+
         with self.conn:
             self.conn.execute(
                 """
                 INSERT INTO observations
                 (plant_id, timestamp, health_status, confidence, observations_json,
-                 consensus_json, leaf_posture, leaf_color_detail, image_refs_json, companion_message)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                 consensus_json, image_refs_json, description, companion_message)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """,
                 (
                     obs.plant_id,
                     obs.timestamp.isoformat(),
                     obs.health_status.value,
-                    obs.confidence,
+                    obs.effective_confidence,
                     json.dumps(obs_dicts),
                     consensus_json,
-                    obs.leaf_posture,
-                    obs.leaf_color_detail,
                     image_refs_json,
+                    desc,
                     obs.companion_message,
                 ),
             )
@@ -126,7 +158,7 @@ class PlantRegistry:
         cursor.execute(
             """
             SELECT plant_id, timestamp, health_status, confidence, observations_json,
-                   consensus_json, leaf_posture, leaf_color_detail, image_refs_json, companion_message
+                   consensus_json, image_refs_json, description, companion_message
             FROM observations
             WHERE plant_id = ?
             ORDER BY id DESC
@@ -145,7 +177,7 @@ class PlantRegistry:
         cursor.execute(
             """
             SELECT plant_id, timestamp, health_status, confidence, observations_json,
-                   consensus_json, leaf_posture, leaf_color_detail, image_refs_json, companion_message
+                   consensus_json, image_refs_json, description, companion_message
             FROM observations
             WHERE plant_id = ?
             ORDER BY id DESC
@@ -304,24 +336,20 @@ class PlantRegistry:
         if "consensus_json" in row.keys() and row["consensus_json"]:
             consensus = VLMConsensus.model_validate_json(row["consensus_json"])
 
-        leaf_posture = row["leaf_posture"] if "leaf_posture" in row.keys() else None
-        leaf_color_detail = row["leaf_color_detail"] if "leaf_color_detail" in row.keys() else None
-
         image_refs: list[str] = []
         if "image_refs_json" in row.keys() and row["image_refs_json"]:
             image_refs = json.loads(row["image_refs_json"])
 
+        description = row["description"] if "description" in row.keys() else None
         companion_message = row["companion_message"] if "companion_message" in row.keys() else None
 
         return VLMObservation(
             plant_id=row["plant_id"],
             timestamp=datetime.fromisoformat(row["timestamp"]),
             health_status=HealthStatus(row["health_status"]),
-            confidence=row["confidence"],
             observations=observations,
             consensus=consensus,
-            leaf_posture=leaf_posture,
-            leaf_color_detail=leaf_color_detail,
             image_refs=image_refs,
+            description=description,
             companion_message=companion_message,
         )

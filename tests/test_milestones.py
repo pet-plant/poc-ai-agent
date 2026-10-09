@@ -20,12 +20,11 @@ def make_obs(
     plant_id: str = "plant-1",
 ) -> VLMObservation:
     ts = datetime(2026, 9, 1) + timedelta(days=day)
-    obs_list = [Observation(type=s, severity="moderate", confidence=0.9) for s in (symptoms or [])]
+    obs_list = [Observation(type=s, severity="moderate", description=f"{s} observed") for s in (symptoms or [])]
     return VLMObservation(
         plant_id=plant_id,
         timestamp=ts,
         health_status=health,
-        confidence=0.95,
         observations=obs_list,
     )
 

@@ -81,19 +81,24 @@ def test_pipeline_process_vlm_probe_result():
 
     probe_payload = {
         "timestamp": "2026-09-21T14:00:00",
-        "confidence": {
+        "health_status": "unhealthy",
+        "consensus": {
             "agreement": 1.0,
             "runs": 5,
             "model_stated_average": 0.95,
         },
-        "severity": 2,
-        "verdict": "worse",
-        "observation": {
-            "leaf_posture": "drooping downwards",
-            "leaf_color": "dark green with crisp margins",
-            "visible_damage": "dry tips and brown edges on foliage",
-            "visible_stress_level": "moderate",
-        },
+        "observations": [
+            {
+                "type": "dry_tips",
+                "severity": "moderate",
+                "description": "dry tips and brown edges on foliage",
+            },
+            {
+                "type": "drooping",
+                "severity": "moderate",
+                "description": "drooping downwards",
+            },
+        ],
     }
 
     result = pipeline.process_vlm_probe_result(
@@ -112,7 +117,7 @@ def test_pipeline_process_vlm_probe_result():
     assert prev_obs is not None
     assert prev_obs.consensus is not None
     assert prev_obs.consensus.agreement == 1.0
-    assert prev_obs.leaf_posture == "drooping downwards"
+    assert len(prev_obs.observations) == 2
 
 
 def test_pipeline_low_confidence_does_not_pollute_registry_and_sets_retake():
@@ -131,7 +136,7 @@ def test_pipeline_low_confidence_does_not_pollute_registry_and_sets_retake():
     assert results[0].trigger_result.decision == TriggerDecision.NO_ACTION
     obs_day1 = pipeline.registry.get_previous_observation("plant-monstera-1")
     assert obs_day1 is not None
-    assert obs_day1.confidence == 0.90
+    assert obs_day1.effective_confidence == 0.90
 
     # Day 2: Low-confidence scan (< 0.5)
     assert results[1].trigger_result.decision == TriggerDecision.REQUEST_MORE_INFORMATION
@@ -141,7 +146,7 @@ def test_pipeline_low_confidence_does_not_pollute_registry_and_sets_retake():
 
     # CRITICAL: Verify DB still holds Day 1's clean observation, NOT Day 2's blurry scan!
     current_stored_obs = pipeline.registry.get_previous_observation("plant-monstera-1")
-    assert current_stored_obs.confidence == 0.90  # Still Day 1 baseline
+    assert current_stored_obs.effective_confidence == 0.90  # Still Day 1 baseline
     assert current_stored_obs.health_status.value == "healthy"
 
     # Verify zero LLM calls were made

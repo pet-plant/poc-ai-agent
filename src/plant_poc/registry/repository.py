@@ -238,7 +238,7 @@ class PlantRegistry:
         return milestones
 
     def save_care_plan(self, plant_id: str, plan: CarePlan) -> None:
-        """Save an approved or generated care plan."""
+        """Save an approved or generated care plan and its normalized actions."""
         actions_dicts = [a.model_dump() for a in plan.actions]
         with self.conn:
             self.conn.execute(
@@ -255,6 +255,46 @@ class PlantRegistry:
                     json.dumps(actions_dicts),
                 ),
             )
+            for a in plan.actions:
+                action_type_val = a.type.value if hasattr(a.type, "value") else str(a.type)
+                self.conn.execute(
+                    """
+                    INSERT INTO care_actions (care_plan_id, action_id, priority, action, label, action_type)
+                    VALUES (?, ?, ?, ?, ?, ?)
+                    """,
+                    (
+                        plan.id,
+                        a.id,
+                        a.priority,
+                        a.action,
+                        a.label,
+                        action_type_val,
+                    ),
+                )
+
+    def get_care_actions(self, care_plan_id: str) -> list[CareAction]:
+        """Fetch normalized care actions for a care plan."""
+        cursor = self.conn.cursor()
+        cursor.execute(
+            """
+            SELECT action_id, priority, action, label, action_type
+            FROM care_actions
+            WHERE care_plan_id = ?
+            ORDER BY priority ASC
+            """,
+            (care_plan_id,),
+        )
+        rows = cursor.fetchall()
+        return [
+            CareAction(
+                id=r["action_id"],
+                priority=r["priority"],
+                action=r["action"],
+                label=r["label"],
+                type=r["action_type"],
+            )
+            for r in rows
+        ]
 
     def get_recent_care_plans(self, plant_id: str, n: int = 3) -> list[CarePlan]:
         """Fetch recent care plans for plant."""
@@ -272,11 +312,16 @@ class PlantRegistry:
         rows = cursor.fetchall()
         plans = []
         for r in rows:
-            actions_raw = json.loads(r["actions_json"])
-            actions = [CareAction.model_validate(a) for a in actions_raw]
             row_keys = r.keys()
             plan_id = r["care_plan_id"] if "care_plan_id" in row_keys and r["care_plan_id"] else f"cp_{r['id']}"
             status_label = r["status_label"] if "status_label" in row_keys and r["status_label"] else "Plant issue detected"
+
+            # Query normalized care_actions table first
+            actions = self.get_care_actions(plan_id)
+            if not actions and r["actions_json"]:
+                actions_raw = json.loads(r["actions_json"])
+                actions = [CareAction.model_validate(a) for a in actions_raw]
+
             plans.append(
                 CarePlan(
                     id=plan_id,

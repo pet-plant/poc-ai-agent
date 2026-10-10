@@ -1,0 +1,7 @@
+{
+  "scenario": "retake_photo",
+  "decision": "REQUEST_MORE_INFORMATION",
+  "message": "Hmm, I couldn't get a clear look at my leaves in that photo — it might be a bit too blurry or dark. Could you snap another clear photo for me?",
+  "source": "template",
+  "notes": "Static template — 0 tokens. Used when consensus/confidence below threshold. No observation saved to DB."
+}

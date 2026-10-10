@@ -176,3 +176,37 @@ def test_registry_companion_message_update_and_retrieval():
     recent = reg.get_recent_observations("plant-monstera-1", n=7)
     assert len(recent) == 1
     assert recent[0].companion_message == "I'm feeling wonderful today!"
+
+
+def test_registry_care_actions_normalized_table():
+    conn = init_db(":memory:")
+    reg = PlantRegistry(conn)
+
+    plan = CarePlan(
+        id="cp_test_norm",
+        plant_id="plant-norm",
+        assessment="Overwatered leaves.",
+        confidence=0.85,
+        actions=[
+            CareAction(id="act_1", action="Drain the tray", label="Drain", priority=1),
+            CareAction(id="act_2", action="Place in warm window", label="Move", priority=2),
+        ],
+    )
+    reg.save_care_plan("plant-norm", plan)
+
+    # Check direct SQL in care_actions table
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM care_actions WHERE care_plan_id = ? ORDER BY priority ASC", ("cp_test_norm",))
+    rows = cursor.fetchall()
+    assert len(rows) == 2
+    assert rows[0]["action_id"] == "act_1"
+    assert rows[0]["action"] == "Drain the tray"
+    assert rows[0]["priority"] == 1
+    assert rows[1]["action_id"] == "act_2"
+    assert rows[1]["priority"] == 2
+
+    # Check helper method
+    actions = reg.get_care_actions("cp_test_norm")
+    assert len(actions) == 2
+    assert actions[0].action == "Drain the tray"
+    assert actions[1].action == "Place in warm window"

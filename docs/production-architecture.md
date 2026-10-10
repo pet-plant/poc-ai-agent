@@ -50,7 +50,7 @@ flowchart TD
         DB -- "Tier 2: Episodic Milestones<br/>(Injected only if symptom-relevant)" --> C_COMPANION
 
         C_COMPANION --> C_SAVE["Save companion_message<br/>to observations table"]
-        PLAN --> CP_SAVE["Save CarePlan (UUID, status_label,<br/>actions_json with label & type)<br/>to care_plans table"]
+        PLAN --> CP_SAVE["Save CarePlan to care_plans table<br/>& normalize individual actions<br/>to care_actions table (3NF)"]
     end
 
     subgraph BACKEND["3. Backend Server (MVCS REST API)"]
@@ -123,7 +123,9 @@ flowchart TD
               ├──────────────────────────────────────────────────────────────┤
               │ observations      (daily log: health, symptoms, message)     │
               ├──────────────────────────────────────────────────────────────┤
-              │ care_plans        (care_plan_id, status_label, actions_json) │
+              │ care_plans        (care_plan_id, status_label, assessment)   │
+              ├──────────────────────────────────────────────────────────────┤
+              │ care_actions      (3NF: action_id, priority, action, label)  │
               ├──────────────────────────────────────────────────────────────┤
               │ plant_milestones  (major life events across all time)        │
               ├──────────────────────────────────────────────────────────────┤
@@ -199,15 +201,16 @@ flowchart TD
 
 ---
 
-## 3. Plant Registry DB: Five Tables
+## 3. Plant Registry DB: Core Tables
 
 | Table                | Purpose                                                                                                                                                                                     | Retention                                |
 | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------- |
 | `plants`           | Static plant profile: species, nickname, location, care preferences                                                                                                                         | Forever (updated only on profile change) |
 | `observations`     | Daily health snapshots: symptoms, VLM data,`companion_message`                                                                                                                            | Forever — all records kept              |
-| `care_plans`       | Prescribed care actions per`CARE_ADVICE_REQUIRED` event: `care_plan_id`, `status_label`, `assessment`, internal `confidence`, `actions_json` (with `id`, `label`, `type`) | Forever — all records kept              |
+| `care_plans`       | Prescribed botanical care diagnosis per`CARE_ADVICE_REQUIRED` event: `care_plan_id`, `status_label`, `assessment`, internal `confidence`                                                   | Forever — all records kept              |
+| `care_actions`     | 3NF normalized care actions: `care_plan_id`, `action_id`, `priority`, `action`, `label`, `action_type`                                                                                        | Forever — all records kept              |
 | `plant_milestones` | Major life events:`first_symptom`, `health_crisis`, `severe_episode`, `near_death`, `full_recovery`                                                                               | Forever — never deleted                 |
-| `care_events`      | User care interactions (watering, pruning, repotting) queried for`wateredTimestamp`                                                                                                       | Forever — all records kept              |
+| `care_events`      | User care interactions (watering, button clicks) linking to `action_id` and `care_plan_id`                                                                                                  | Forever — all records kept              |
 
 ---
 

@@ -1,5 +1,6 @@
 """SQLite database connection and schema management for Plant Registry."""
 
+import json
 import sqlite3
 from typing import Optional
 
@@ -48,6 +49,17 @@ def init_db(db_path: str = ":memory:") -> sqlite3.Connection:
                 FOREIGN KEY (plant_id) REFERENCES plants(plant_id)
             );
 
+            CREATE TABLE IF NOT EXISTS care_actions (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                care_plan_id TEXT NOT NULL,
+                action_id TEXT NOT NULL,
+                priority INTEGER NOT NULL DEFAULT 1,
+                action TEXT NOT NULL,
+                label TEXT NOT NULL,
+                action_type TEXT NOT NULL DEFAULT 'other',
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
+
             CREATE TABLE IF NOT EXISTS plant_milestones (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 plant_id TEXT NOT NULL,
@@ -84,6 +96,9 @@ def init_db(db_path: str = ":memory:") -> sqlite3.Connection:
             CREATE INDEX IF NOT EXISTS idx_care_plans_plant_id
                 ON care_plans(plant_id, id DESC);
 
+            CREATE INDEX IF NOT EXISTS idx_care_actions_plan_priority
+                ON care_actions(care_plan_id, priority ASC);
+
             CREATE INDEX IF NOT EXISTS idx_milestones_plant_id
                 ON plant_milestones(plant_id, id ASC);
 
@@ -93,6 +108,7 @@ def init_db(db_path: str = ":memory:") -> sqlite3.Connection:
         )
         _migrate_observations_table(conn)
         _migrate_care_plans_table(conn)
+        _migrate_care_actions_table(conn)
         _migrate_plants_table(conn)
     return conn
 
@@ -151,3 +167,52 @@ def _migrate_care_plans_table(conn: sqlite3.Connection) -> None:
         if col_name not in existing_cols:
             conn.execute(f"ALTER TABLE care_plans ADD COLUMN {col_name} {col_type}")
 
+
+def _migrate_care_actions_table(conn: sqlite3.Connection) -> None:
+    """Ensure care_actions table exists and backfill from legacy care_plans.actions_json."""
+    cursor = conn.cursor()
+    cursor.execute(
+        """
+        CREATE TABLE IF NOT EXISTS care_actions (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            care_plan_id TEXT NOT NULL,
+            action_id TEXT NOT NULL,
+            priority INTEGER NOT NULL DEFAULT 1,
+            action TEXT NOT NULL,
+            label TEXT NOT NULL,
+            action_type TEXT NOT NULL DEFAULT 'other',
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
+        """
+    )
+    cursor.execute(
+        """
+        CREATE INDEX IF NOT EXISTS idx_care_actions_plan_priority
+            ON care_actions(care_plan_id, priority ASC);
+        """
+    )
+    # Check if backfill needed
+    cursor.execute("SELECT COUNT(*) as count FROM care_actions")
+    if cursor.fetchone()["count"] == 0:
+        cursor.execute("SELECT care_plan_id, id, actions_json FROM care_plans WHERE actions_json IS NOT NULL")
+        for row in cursor.fetchall():
+            cpid = row["care_plan_id"] or f"cp_{row['id']}"
+            try:
+                actions = json.loads(row["actions_json"])
+                for a in actions:
+                    conn.execute(
+                        """
+                        INSERT INTO care_actions (care_plan_id, action_id, priority, action, label, action_type)
+                        VALUES (?, ?, ?, ?, ?, ?)
+                        """,
+                        (
+                            cpid,
+                            a.get("id", f"act_{cpid}"),
+                            a.get("priority", 1),
+                            a.get("action", ""),
+                            a.get("label", a.get("action", "")[:20]),
+                            a.get("type", "other"),
+                        ),
+                    )
+            except Exception:
+                pass

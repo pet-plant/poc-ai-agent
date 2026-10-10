@@ -1,0 +1,35 @@
+{
+  "scenario": "low_confidence",
+  "description": "VLM consensus drops below threshold — request photo retake, do NOT pollute DB",
+  "expected_decisions": ["NO_ACTION", "REQUEST_MORE_INFORMATION"],
+  "expected_llm_calls": 0,
+  "steps": [
+    {
+      "day": 1,
+      "decision": "NO_ACTION",
+      "care_plan": null,
+      "companion_message_contains": "feeling great",
+      "companion_source": "template",
+      "milestones_triggered": [],
+      "db_observation_saved": true,
+      "notes": "Clean healthy baseline saved."
+    },
+    {
+      "day": 2,
+      "decision": "REQUEST_MORE_INFORMATION",
+      "care_plan": null,
+      "companion_message_contains": "blurry or dark",
+      "companion_source": "template",
+      "milestones_triggered": [],
+      "db_observation_saved": false,
+      "notes": "CRITICAL: Low-confidence observation must NOT be saved to DB. Day 1 baseline preserved. 0 LLM calls. Frontend receives retake message."
+    }
+  ],
+  "critical_assertions": [
+    "Day 2 observation NOT saved to registry (DB pollution prevention)",
+    "Registry still holds Day 1 clean observation after Day 2 processing",
+    "No milestones created from low-confidence scans",
+    "Zero LLM calls across entire scenario",
+    "Frontend payload decision == 'REQUEST_MORE_INFORMATION'"
+  ]
+}
